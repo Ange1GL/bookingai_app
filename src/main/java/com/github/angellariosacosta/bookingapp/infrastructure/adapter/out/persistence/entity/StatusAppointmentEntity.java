@@ -30,7 +30,7 @@ public class StatusAppointmentEntity {
 	private String nombre;
 	
 	
-	@Column(insertable = false, updatable = false)
 	@CreationTimestamp
+	@Column(updatable = false)
 	private Instant createAt;
 }

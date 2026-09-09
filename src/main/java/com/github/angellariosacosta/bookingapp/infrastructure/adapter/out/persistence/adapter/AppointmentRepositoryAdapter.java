@@ -23,7 +23,8 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
 	public Appointment save(Appointment appointment) {
 		AppointmentEntity entity = mapper.toEntity(appointment);
 		AppointmentEntity saved = jpaRepository.save(entity);
-		return mapper.toDomain(saved);
+		appointment.setId(saved.getId());
+		return appointment;
 	}
 
 	@Override

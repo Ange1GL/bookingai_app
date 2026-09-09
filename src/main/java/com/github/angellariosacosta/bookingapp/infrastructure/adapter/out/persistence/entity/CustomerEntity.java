@@ -32,7 +32,7 @@ public class CustomerEntity {
 	@Column
 	private String phone;
 
-	@Column(insertable = false, updatable = false)
 	@CreationTimestamp
+	@Column(updatable = false)
 	private Instant createdAt;
 }

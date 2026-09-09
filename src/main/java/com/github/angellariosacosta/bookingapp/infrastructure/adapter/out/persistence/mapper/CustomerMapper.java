@@ -18,13 +18,13 @@ public class CustomerMapper {
 	
 	
 	public Customer toDomain(CustomerEntity entity) {
-		Customer domain = Customer
+		return Customer
 							.builder()
 							.name(entity.getFullName())
 							.phone(entity.getPhone())
 							.id(entity.getId())
 							.build();
 		
-		return domain;
+
 	}
 }

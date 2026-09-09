@@ -9,7 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +34,7 @@ public class AppointmentEntity {
 	
 
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(
 			name = "customer_id",
 			referencedColumnName = "customer_id",
@@ -45,9 +45,9 @@ public class AppointmentEntity {
 
 	@Column(name = "status_id")
 	private Integer statusId;
-	
-	
-	@OneToOne
+
+
+	@ManyToOne
 	@JoinColumn(
 			name = "status_id",
 			referencedColumnName = "status_id",
@@ -57,8 +57,8 @@ public class AppointmentEntity {
 	private StatusAppointmentEntity status;
 	
 	
-	@Column(name="created_at", updatable = false, insertable = false)
 	@CreationTimestamp
+	@Column(name = "created_at", updatable = false)
 	private Instant createdAt;
 	
 	

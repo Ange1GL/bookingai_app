@@ -16,9 +16,17 @@ spring:
     connection-timeout: 30000
 
   jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
     properties:
       hibernate:
-          dialect: org.hibernate.dialect.PostgreSQLDialect
-          ddl-auto: update
-          format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
     show-sql: false
+
+  sql:
+    init:
+      mode: always
+server:
+  port: 8082
