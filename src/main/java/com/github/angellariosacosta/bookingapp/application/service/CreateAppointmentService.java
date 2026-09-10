@@ -10,7 +10,7 @@ import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverl
 import com.github.angellariosacosta.bookingapp.domain.exception.CustomerNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.domain.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 

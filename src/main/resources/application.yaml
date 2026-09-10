@@ -1,19 +1,21 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   application:
     name: bookingapp
   datasource:
-    url: jdbc:postgresql://localhost:5440/bookingapp_ai?currentSchema=public
+    url: ${DB_URL}
     driver-class-name: org.postgresql.Driver
-    username: admin
-    password: Passw0rd
-
-  hikari:
-    maximum-pool-size: 10
-    minimum-idle: 1
-    idle-timeout: 30000
-    pool-name: bookingAppPoolConnection
-    max-lifetime: 200000
-    connection-timeout: 30000
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 1
+      idle-timeout: 30000
+      pool-name: bookingAppPoolConnection
+      max-lifetime: 200000
+      connection-timeout: 30000
 
   jpa:
     hibernate:
@@ -28,5 +30,13 @@ spring:
   sql:
     init:
       mode: always
+  ai:
+    openai:
+      api-key: ${AZURE_OPENAI_API_KEY}
+      base-url: ${AZURE_OPENAI_ENDPOINT}
+      microsoft-deployment-name: ${AZURE_OPENAI_DEPLOYMENT_NAME}
+
 server:
   port: 8082
+
+

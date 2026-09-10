@@ -119,6 +119,13 @@ private CustomerEntity customer;
 
 ---
 
-## 6. Notas Finales
+
+## Detalles del código
+
+- Prioiza escribir ingles, solamente sera en español los mensajes o comentarios de algun linea en espefico
+- Evita usar a lo maximo var, es tu ultima opción usar la declarion var de Java
+- 
+
+## Notas Finales
 
 Este documento es la referencia de arquitectura y convenciones para cualquier tarea de generación o modificación de código en este repositorio. Ante cualquier ambigüedad no cubierta aquí, el agente debe **priorizar la consistencia con el código ya existente** en el proyecto por encima de preferencias generales.

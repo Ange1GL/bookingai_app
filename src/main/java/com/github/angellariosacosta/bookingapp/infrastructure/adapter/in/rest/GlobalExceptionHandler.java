@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.exception.CustomerNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidStatusAppointmentExcepcion;
@@ -18,6 +19,12 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(CustomerNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public Map<String, Object> handleCustomerNotFound(CustomerNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler(AppointmentNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public Map<String, Object> handleAppointmentNotFound(AppointmentNotFoundException ex) {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 

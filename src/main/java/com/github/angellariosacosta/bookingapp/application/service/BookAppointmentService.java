@@ -9,7 +9,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentR
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.domain.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
 
 import lombok.RequiredArgsConstructor;
 

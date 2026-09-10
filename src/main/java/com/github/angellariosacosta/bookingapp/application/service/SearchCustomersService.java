@@ -1,10 +1,11 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.github.angellariosacosta.bookingapp.application.command.CreateCustomerCommand;
-import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.SearchCustomersUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
 
@@ -12,17 +13,13 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CreateCustomerService implements CreateCustomerUseCase {
+public class SearchCustomersService implements SearchCustomersUseCase {
 
 	private final CustomerRepository customerRepository;
 
 	@Override
-	@Transactional
-	public Customer create(CreateCustomerCommand command) {
-		Customer customer = Customer.builder()
-				.name(command.name())
-				.phone(command.phone())
-				.build();
-		return customerRepository.save(customer);
+	@Transactional(readOnly = true)
+	public List<Customer> search(String name) {
+		return customerRepository.searchByNameContaining(name);
 	}
 }
