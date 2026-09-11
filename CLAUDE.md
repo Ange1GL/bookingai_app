@@ -126,25 +126,22 @@ private CustomerEntity customer;
 - Evita usar a lo maximo var, es tu ultima opción usar la declarion var de Java
 - 
 
-## Configuración AI (Azure AI Foundry / Microsoft Foundry)
+## Configuración AI (DeepSeek)
 
-El módulo de IA usa `spring-ai-starter-model-openai` apuntando al **nuevo endpoint de Azure AI Foundry** (`services.ai.azure.com`). Variables requeridas en `.env`:
+El módulo de IA usa `spring-ai-starter-model-deepseek` (Spring AI 2.0.0-M6). Variable requerida en `.env`:
 
 ```properties
-AZURE_OPENAI_API_KEY=<tu-api-key>
-AZURE_OPENAI_ENDPOINT=https://<tu-resource>.services.ai.azure.com/openai/v1
-AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1
+DEEPSEEK_API_KEY=<tu-api-key>
 ```
 
-**Endpoint crítico:** el portal de Azure muestra dos URLs distintas por deployment:
-- `…/openai/v1/responses` → Responses API (NO usar aquí)
-- `…/openai/v1` → Chat Completions API (**esta es la correcta para Spring AI**)
+Modelo activo: `deepseek-flash` (= DeepSeek-V4.1-Flash, soporta function calling / tools y thinking mode). Base URL: `https://api.deepseek.com`. Configurado en `application.yaml` bajo `spring.ai.deepseek.chat.options`.
 
-Spring AI agrega `/chat/completions` automáticamente al `base-url`. Si el endpoint incluye `/responses`, resulta en `404`.
+**Historial de proveedores:**
+- Azure OpenAI → descartado: filtraba "11 de septiembre" (falso positivo en content safety). Ver `docs/azure-openai-content-filter-september11.md`.
+- Mistral AI → descartado: tier Studio con rate limits muy bajos (HTTP 429 frecuentes).
+- DeepSeek → actual: sin filtros geopolíticos, tier de pago con saldo prepago, modelo `deepseek-flash` (V4.1-Flash).
 
-**No se usa `AZURE_OPENAI_API_VERSION`** con el nuevo endpoint Foundry. La versión está implícita en el path `/v1`. Agregar `microsoft-foundry-service-version` en el yaml causa un `400: API version not supported`.
-
-El patrón de tools usa `@Tool` sobre métodos en `BookingTools` y se registra vía `ChatClient.defaultTools()` en `AiConfig` — patrón correcto para Spring AI 2.x.
+El patrón de tools usa `@Tool` sobre métodos en `BookingTools` y se registra vía `ChatClient.defaultTools()` en `AiConfig` — patrón correcto para Spring AI 2.x y provider-agnostic.
 
 ---
 

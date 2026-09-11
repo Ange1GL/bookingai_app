@@ -22,7 +22,7 @@ public class Appointment {
 			LocalDateTime endTime,
 			Customer customer
 			) {
-		return new Appointment(startTime, endTime, customer, StatusAppointment.IN_PROGRESS);
+		return new Appointment(startTime, endTime, customer, StatusAppointment.PENDING);
 	}
 	
 	

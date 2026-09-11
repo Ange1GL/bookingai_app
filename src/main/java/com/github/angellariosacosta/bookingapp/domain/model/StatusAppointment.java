@@ -6,9 +6,19 @@ import lombok.Getter;
 
 @Getter
 public enum StatusAppointment {
+
+    // PENDING -> La cita ha si creada pero no ha pasado
 	PENDING(1, "PENDING"),
+
+    // CANCELLED -> La cita ha sido cancelada
 	CANCELLED(2, "CANCELLED"),
-	IN_PROGRESS(3, "IN_PROGRESS");
+
+    // IN_PROGRESS -> La cita esta en curso
+	IN_PROGRESS(3, "IN_PROGRESS"),
+
+    // FINAZALIDED -> La cita ha finalizado
+    FINAZALIDED(4, "FINAZALIDED");
+
 
     private final Integer id;
     private final String name;
