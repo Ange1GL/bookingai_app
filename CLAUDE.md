@@ -126,6 +126,28 @@ private CustomerEntity customer;
 - Evita usar a lo maximo var, es tu ultima opción usar la declarion var de Java
 - 
 
+## Configuración AI (Azure AI Foundry / Microsoft Foundry)
+
+El módulo de IA usa `spring-ai-starter-model-openai` apuntando al **nuevo endpoint de Azure AI Foundry** (`services.ai.azure.com`). Variables requeridas en `.env`:
+
+```properties
+AZURE_OPENAI_API_KEY=<tu-api-key>
+AZURE_OPENAI_ENDPOINT=https://<tu-resource>.services.ai.azure.com/openai/v1
+AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4.1
+```
+
+**Endpoint crítico:** el portal de Azure muestra dos URLs distintas por deployment:
+- `…/openai/v1/responses` → Responses API (NO usar aquí)
+- `…/openai/v1` → Chat Completions API (**esta es la correcta para Spring AI**)
+
+Spring AI agrega `/chat/completions` automáticamente al `base-url`. Si el endpoint incluye `/responses`, resulta en `404`.
+
+**No se usa `AZURE_OPENAI_API_VERSION`** con el nuevo endpoint Foundry. La versión está implícita en el path `/v1`. Agregar `microsoft-foundry-service-version` en el yaml causa un `400: API version not supported`.
+
+El patrón de tools usa `@Tool` sobre métodos en `BookingTools` y se registra vía `ChatClient.defaultTools()` en `AiConfig` — patrón correcto para Spring AI 2.x.
+
+---
+
 ## Notas Finales
 
 Este documento es la referencia de arquitectura y convenciones para cualquier tarea de generación o modificación de código en este repositorio. Ante cualquier ambigüedad no cubierta aquí, el agente debe **priorizar la consistencia con el código ya existente** en el proyecto por encima de preferencias generales.

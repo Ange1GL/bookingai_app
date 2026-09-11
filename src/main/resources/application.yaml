@@ -34,7 +34,10 @@ spring:
     openai:
       api-key: ${AZURE_OPENAI_API_KEY}
       base-url: ${AZURE_OPENAI_ENDPOINT}
-      microsoft-deployment-name: ${AZURE_OPENAI_DEPLOYMENT_NAME}
+      microsoft-foundry: true
+      chat:
+        options:
+          model: ${AZURE_OPENAI_DEPLOYMENT_NAME}
 
 server:
   port: 8082
