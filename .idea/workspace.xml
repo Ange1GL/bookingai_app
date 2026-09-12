@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cde67c0b-0335-43c3-85c6-1cf38db0d30f" name="Changes" comment="Agrega pruebas automaticas para testear, los flujos del agente">
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/agent-flows.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/azure-openai-content-filter-september11.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/flujos-prueba-con-personas.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/observaciones.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/reporte-pruebas.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mvnw.cmd" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/test-agent-flows.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/BookingappApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/command/BookAppointmentCommand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/command/CancelAppointmentCommand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/command/CreateAppointmentCommand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/command/CreateCustomerCommand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/command/RescheduleAppointmentCommand.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/BookAppointmentUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/CancelAppointmentUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/CreateAppointmentUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/CreateCustomerUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/QueryAppointmentsUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/RescheduleAppointmentUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/in/SearchCustomersUseCase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/out/AppointmentRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/port/out/CustomerRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/BookAppointmentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/CancelAppointmentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/CreateAppointmentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/CreateCustomerService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/QueryAppointmentsService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/RescheduleAppointmentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/application/service/SearchCustomersService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/exception/AppointmentNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/exception/AppointmentOverlapException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/exception/CustomerNotFoundException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/exception/InvalidStatusAppointmentExcepcion.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/model/Appointment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/model/Customer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/domain/model/StatusAppointment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/ai/tool/BookingTools.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/GlobalExceptionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/controller/AgentController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/controller/AppointmentController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/controller/CustomerController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/AppointmentResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/BookAppointmentRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/ChatRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/ChatResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/CreateAppointmentRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/CreateCustomerRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/CustomerResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/dto/SessionResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/mapper/AppointmentRestMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/mapper/BookAppointmentRestMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/in/rest/mapper/CustomerRestMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/adapter/AppointmentRepositoryAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/adapter/CustomerRepositoryAdapter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/entity/AppointmentEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/entity/CustomerEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/entity/StatusAppointmentEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/mapper/AppointmentMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/mapper/CustomerMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/mapper/StatusMapper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/repository/AppointmentRepositoryJpa.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/adapter/out/persistence/repository/CustomerRepositoryJpa.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/config/AiConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/additional-spring-configuration-metadata.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/data.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/github/angellariosacosta/bookingapp/BookingappApplicationTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/Users/RAM/projects_personal/java_leetcode/app_springs/bookingapp/bookingapp" value="3J4XJF8kygOe4U5GQuVqecEooRs" />
+    </persistenceIdMap>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Ange1GL&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Ange1GL/bookingai_app.git&quot;,
+    &quot;accountId&quot;: &quot;7390b0ed-340d-4384-a332-8389d234015a&quot;
+  }
+}</component>
+  <component name="HttpClientEndpointsTabState">
+    <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests /&gt;" />
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3J4XJF8kygOe4U5GQuVqecEooRs" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
+    &quot;Spring Boot.BookingappApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/RAM/projects_personal/java_leetcode/app_springs/bookingapp/bookingapp&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\RAM\projects_personal\java_leetcode\app_springs\bookingapp\bookingapp\docs_confidencial" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="BookingappApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="bookingapp" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.github.angellariosacosta.bookingapp.BookingappApplication" />
+      <extension name="net.ashald.envfile">
+        <option name="IS_ENABLED" value="true" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+          <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH=".env" />
+        </ENTRIES>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.26094.121" />
+        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-IU-251.26094.121" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cde67c0b-0335-43c3-85c6-1cf38db0d30f" name="Changes" comment="" />
+      <created>1788921240357</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1788921240357</updated>
+      <workItem from="1788921241449" duration="1358000" />
+      <workItem from="1788992646710" duration="7624000" />
+      <workItem from="1789002828505" duration="6462000" />
+      <workItem from="1789047692035" duration="23823000" />
+      <workItem from="1789139397065" duration="13553000" />
+      <workItem from="1789182198720" duration="31000" />
+    </task>
+    <task id="LOCAL-00001" summary="Agrega flujos principales para crear una cita cuando existe cliente y cuando no existe">
+      <option name="closed" value="true" />
+      <created>1788994782007</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1788994782007</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Agrega flujos principales para crear una cita cuando existe cliente y cuando no existe">
+      <option name="closed" value="true" />
+      <created>1788994840029</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1788994840029</updated>
+    </task>
+    <task id="LOCAL-00003" summary="fix: arregla bug relacionado a sobre configuracioin de hibernate y el mapper al guardar una reservacion">
+      <option name="closed" value="true" />
+      <created>1788997915415</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1788997915415</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix: agrega configuracion de tools, configuracion env, configuracion del modelo AI">
+      <option name="closed" value="true" />
+      <created>1789052792304</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1789052792304</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: configura tools y configura para que open api funcione correctamente con tools">
+      <option name="closed" value="true" />
+      <created>1789094839861</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1789094839861</updated>
+    </task>
+    <task id="LOCAL-00006" summary="CORRIGE los estatus de in_progress a pedning">
+      <option name="closed" value="true" />
+      <created>1789164046395</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1789164046395</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Agrega pruebas automaticas para testear, los flujos del agente">
+      <option name="closed" value="true" />
+      <created>1789174985808</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1789174985808</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Agrega flujos principales para crear una cita cuando existe cliente y cuando no existe" />
+    <MESSAGE value="fix: arregla bug relacionado a sobre configuracioin de hibernate y el mapper al guardar una reservacion" />
+    <MESSAGE value="fix: agrega configuracion de tools, configuracion env, configuracion del modelo AI" />
+    <MESSAGE value="fix: configura tools y configura para que open api funcione correctamente con tools" />
+    <MESSAGE value="CORRIGE los estatus de in_progress a pedning" />
+    <MESSAGE value="Agrega pruebas automaticas para testear, los flujos del agente" />
+    <option name="LAST_COMMIT_MESSAGE" value="Agrega pruebas automaticas para testear, los flujos del agente" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
