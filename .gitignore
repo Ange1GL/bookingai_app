@@ -34,3 +34,7 @@ build/
 
 ### Secrets ###
 .env
+
+
+### Private / confidential data ###
+docs_confidencial/
