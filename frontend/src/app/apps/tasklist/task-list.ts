@@ -20,37 +20,48 @@ import { Task } from '@/types/task';
             {{ title }}
         </div>
         <ul class="list-none p-0 m-0">
-            <li *ngFor="let task of taskList" class="flex flex-col gap-4 md:flex-row md:items-center p-2 border-b border-surface-200 dark:border-surface-700">
-                <div class="flex items-center flex-1">
-                    <p-checkbox [binary]="true" (onChange)="onCheckboxChange($event, task)" [(ngModel)]="task.completed" [inputId]="task.id.toString()"></p-checkbox>
-                    <label for="task.id" style="word-break: break-word;" class="font-medium whitespace-nowrap text-ellipsis overflow-hidden ml-2" [ngClass]="{ 'line-through': task.completed }" style="max-width: 500px">{{ task.name }}</label>
-                </div>
-                <div class="flex flex-1 gap-4 flex-col sm:flex-row sm:justify-between">
-                    <div class="flex items-center">
-                        <span *ngIf="task.comments" class="flex items-center font-semibold mr-4"><i class="pi pi-comment mr-2"></i>{{ task.comments }}</span>
-                        <span *ngIf="task.attachments" class="flex items-center font-semibold mr-4"><i class="pi pi-paperclip mr-2"></i>{{ task.attachments }}</span>
-                        <span class="flex items-center font-semibold whitespace-nowrap" *ngIf="task.startDate"><i class="pi pi-clock mr-2"></i>{{ parseDate(task.startDate) }}</span>
+            @for (task of taskList; track task) {
+                <li class="flex flex-col gap-4 md:flex-row md:items-center p-2 border-b border-surface-200 dark:border-surface-700">
+                    <div class="flex items-center flex-1">
+                        <p-checkbox [binary]="true" (onChange)="onCheckboxChange($event, task)" [(ngModel)]="task.completed" [inputId]="task.id.toString()"></p-checkbox>
+                        <label for="task.id" style="word-break: break-word;" class="font-medium whitespace-nowrap text-ellipsis overflow-hidden ml-2" [ngClass]="{ 'line-through': task.completed }" style="max-width: 500px">{{ task.name }}</label>
                     </div>
-                    <div class="flex items-center sm:justify-end">
-                        <p-avatargroup styleClass="mr-4">
-                            <p-avatar *ngFor="let member of task.members | slice: 0 : 4" image="/demo/images/avatar/{{ member.image }}" size="large" shape="circle"></p-avatar>
-                            <p-avatar
-                                *ngIf="task && task.members && task.members.length > 4"
-                                label="+ {{ task.members.length - 4 }}"
-                                shape="circle"
-                                size="large"
-                                class="bg-blue-500"
-                                [style]="{
-                                    color: '#212121',
-                                    border: '2px solid var(--surface-border)'
-                                }"
-                            ></p-avatar>
-                        </p-avatargroup>
-                        <button pButton pRipple type="button" icon="pi pi-ellipsis-v" class="z-30 ml-auto sm:ml-0" text rounded (click)="toggleMenu($event, task)"></button>
-                        <p-menu #menu [popup]="true" [model]="menuItems" styleClass="w-32" appendTo="body"></p-menu>
+                    <div class="flex flex-1 gap-4 flex-col sm:flex-row sm:justify-between">
+                        <div class="flex items-center">
+                            @if (task.comments) {
+                                <span class="flex items-center font-semibold mr-4"><i class="pi pi-comment mr-2"></i>{{ task.comments }}</span>
+                            }
+                            @if (task.attachments) {
+                                <span class="flex items-center font-semibold mr-4"><i class="pi pi-paperclip mr-2"></i>{{ task.attachments }}</span>
+                            }
+                            @if (task.startDate) {
+                                <span class="flex items-center font-semibold whitespace-nowrap"><i class="pi pi-clock mr-2"></i>{{ parseDate(task.startDate) }}</span>
+                            }
+                        </div>
+                        <div class="flex items-center sm:justify-end">
+                            <p-avatargroup styleClass="mr-4">
+                                @for (member of task.members | slice: 0 : 4; track member) {
+                                    <p-avatar image="/demo/images/avatar/{{ member.image }}" size="large" shape="circle"></p-avatar>
+                                }
+                                @if (task && task.members && task.members.length > 4) {
+                                    <p-avatar
+                                        label="+ {{ task.members.length - 4 }}"
+                                        shape="circle"
+                                        size="large"
+                                        class="bg-blue-500"
+                                        [style]="{
+                                            color: '#212121',
+                                            border: '2px solid var(--surface-border)'
+                                        }"
+                                    ></p-avatar>
+                                }
+                            </p-avatargroup>
+                            <button pButton pRipple type="button" icon="pi pi-ellipsis-v" class="z-30 ml-auto sm:ml-0" text rounded (click)="toggleMenu($event, task)"></button>
+                            <p-menu #menu [popup]="true" [model]="menuItems" styleClass="w-32" appendTo="body"></p-menu>
+                        </div>
                     </div>
-                </div>
-            </li>
+                </li>
+            }
         </ul>
     </div>`,
     changeDetection: ChangeDetectionStrategy.OnPush

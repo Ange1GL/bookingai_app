@@ -1,6 +1,6 @@
 import { Component, computed, effect, HostBinding, inject, input } from '@angular/core';
 import { ChartModule } from 'primeng/chart';
-import { CommonModule } from '@angular/common';
+
 import { LayoutService } from '@/layout/service/layout.service';
 import { sampleDataByFixedLength } from '@/lib/utils';
 import 'chartjs-adapter-date-fns';
@@ -8,7 +8,7 @@ import 'chartjs-adapter-date-fns';
 @Component({
     selector: 'bar-chart',
     standalone: true,
-    imports: [CommonModule, ChartModule],
+    imports: [ChartModule],
     template: `<p-chart type="bar" [data]="chartData" [plugins]="plugins" [options]="chartOptions" style="height:100%; display: block" /> `,
     host: {
         class: 'h-full w-full cursor-pointer min-w-[640px] max-h-80'

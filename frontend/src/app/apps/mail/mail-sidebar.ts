@@ -1,12 +1,12 @@
-import {Component, OnDestroy} from '@angular/core';
-import {MenuItem} from 'primeng/api';
-import {NavigationEnd, Router, RouterModule} from '@angular/router';
-import {Mail} from '@/types/mail';
-import {MailService} from './service/mail.service';
-import {filter, Subscription} from 'rxjs';
-import {ButtonModule} from 'primeng/button';
-import {RippleModule} from 'primeng/ripple';
-import {CommonModule} from '@angular/common';
+import { Component, OnDestroy } from '@angular/core';
+import { MenuItem } from 'primeng/api';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { Mail } from '@/types/mail';
+import { MailService } from './service/mail.service';
+import { filter, Subscription } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-mail-sidebar',
@@ -16,42 +16,44 @@ import {CommonModule} from '@angular/common';
         <button pButton pRipple label="Compose New" class="mb-8 w-full" outlined [routerLink]="'/apps/mail/compose/'"></button>
         <div class="overflow-auto">
             <ul class="flex flex-row md:flex-col gap-1 md:gap-2 list-none m-0 p-0 overflow-auto">
-                <li
-                    [routerLinkActive]="'bg-primary'"
-                    [routerLink]="item?.routerLink"
-                    pRipple
-                    *ngFor="let item of items; let i = index"
-                    class="cursor-pointer select-none p-4 duration-150 rounded flex items-center justify-center md:justify-start md:flex-1 flex-auto"
-                    [ngClass]="{
-                        'bg-primary': url === item.routerLink,
-                        'hover:surface-hover': url !== item.routerLink
-                    }"
-                >
-                    <i
-                        [class]="item.icon || ''"
-                        class="md:mr-4 text-surface-600 dark:text-surface-200 duration-150 text-lg"
+                @for (item of items; track item; let i = $index) {
+                    <li
+                        [routerLinkActive]="'bg-primary'"
+                        [routerLink]="item?.routerLink"
+                        pRipple
+                        class="cursor-pointer select-none p-4 duration-150 rounded flex items-center justify-center md:justify-start md:flex-1 flex-auto"
                         [ngClass]="{
-                            'text-white dark:text-surface-900': url === item.routerLink
+                            'bg-primary': url === item.routerLink,
+                            'hover:surface-hover': url !== item.routerLink
                         }"
-                    ></i>
-                    <span
-                        class="text-surface-900 dark:text-surface-0 font-medium hidden md:inline"
-                        [ngClass]="{
-                            'text-white dark:text-surface-900': url === item.routerLink
-                        }"
-                        >{{ item.label }}</span
                     >
-                    <span
-                        *ngIf="item.badge"
-                        [ngClass]="{
-                            'dark:bg-primary-900 dark:text-white': url === item.routerLink
-                        }"
-                        class="ml-auto text-sm font-semibold bg-primary-50 text-primary-900 px-2 py-1 hidden md:inline-flex items-center justify-center"
-                        style="border-radius: 50%; min-width: 23px; height: auto; aspect-ratio: 1; padding: 0 6px;"
-                    >
-                        {{ item.badge }}
-                    </span>
-                </li>
+                        <i
+                            [class]="item.icon || ''"
+                            class="md:mr-4 text-surface-600 dark:text-surface-200 duration-150 text-lg"
+                            [ngClass]="{
+                                'text-white dark:text-surface-900': url === item.routerLink
+                            }"
+                        ></i>
+                        <span
+                            class="text-surface-900 dark:text-surface-0 font-medium hidden md:inline"
+                            [ngClass]="{
+                                'text-white dark:text-surface-900': url === item.routerLink
+                            }"
+                            >{{ item.label }}</span
+                        >
+                        @if (item.badge) {
+                            <span
+                                [ngClass]="{
+                                    'dark:bg-primary-900 dark:text-white': url === item.routerLink
+                                }"
+                                class="ml-auto text-sm font-semibold bg-primary-50 text-primary-900 px-2 py-1 hidden md:inline-flex items-center justify-center"
+                                style="border-radius: 50%; min-width: 23px; height: auto; aspect-ratio: 1; padding: 0 6px;"
+                            >
+                                {{ item.badge }}
+                            </span>
+                        }
+                    </li>
+                }
             </ul>
         </div>
     </div>`

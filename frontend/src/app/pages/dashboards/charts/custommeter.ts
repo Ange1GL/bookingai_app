@@ -7,7 +7,9 @@ import { trackByFn } from '@/lib/utils';
     selector: 'custom-meter',
     standalone: true,
     imports: [CommonModule, MeterGroupModule],
-    template: `<div *ngIf="title()" class="mb-2 body-xsmall text-left">{{ title() }}</div>
+    template: `@if (title()) {
+            <div class="mb-2 body-xsmall text-left">{{ title() }}</div>
+        }
         <p-meter-group [value]="processData()" labelPosition="end">
             <ng-template #label let-value>
                 <div class="flex flex-nowrap">

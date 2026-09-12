@@ -34,34 +34,39 @@ import { ButtonModule } from 'primeng/button';
                 </div>
             </div>
             <div class="user-message-container p-4 md:px-6 lg:px-12 lg:py-6 mt-2 overflow-y-auto" style="max-height: 53vh;" #chatWindow [scrollTop]="chatWindow.scrollHeight">
-                <div *ngFor="let message of user.messages">
-                    <div *ngIf="message.ownerId !== 123" class="grid gap-4 grid-nogutter mb-6">
-                        <div class="mr-4 mt-1">
-                            <img src="/demo/images/avatar/{{ user.image }}" alt="user.name" class="w-12 h-12 rounded-full shadow-lg" />
-                        </div>
-                        <div class="col mt-4">
-                            <p class="text-surface-900 dark:text-surface-0 font-semibold mb-4">
-                                {{ user.name }}
-                            </p>
-                            <span class="text-surface-700 dark:text-surface-100 inline-block font-medium border border-surface-200 dark:border-surface-700 p-4 whitespace-normal rounded" style="word-break: break-word; max-width:80%;">{{
-                                message.text
-                            }}</span>
-                            <p class="text-surface-700 dark:text-surface-100 mt-4">{{ parseDate(message.createdAt) }}<i class="pi pi-check ml-2 text-green-400"></i></p>
-                        </div>
+                @for (message of user.messages; track message) {
+                    <div>
+                        @if (message.ownerId !== 123) {
+                            <div class="grid gap-4 grid-nogutter mb-6">
+                                <div class="mr-4 mt-1">
+                                    <img src="/demo/images/avatar/{{ user.image }}" alt="user.name" class="w-12 h-12 rounded-full shadow-lg" />
+                                </div>
+                                <div class="col mt-4">
+                                    <p class="text-surface-900 dark:text-surface-0 font-semibold mb-4">
+                                        {{ user.name }}
+                                    </p>
+                                    <span class="text-surface-700 dark:text-surface-100 inline-block font-medium border border-surface-200 dark:border-surface-700 p-4 whitespace-normal rounded" style="word-break: break-word; max-width:80%;">{{
+                                        message.text
+                                    }}</span>
+                                    <p class="text-surface-700 dark:text-surface-100 mt-4">{{ parseDate(message.createdAt) }}<i class="pi pi-check ml-2 text-green-400"></i></p>
+                                </div>
+                            </div>
+                        }
+                        @if (message.ownerId === defaultUserId) {
+                            <div class="grid gap-4 grid-nogutter mb-6">
+                                <div class="col mt-4 text-right">
+                                    <span class="inline-block text-left font-medium border border-surface-200 dark:border-surface-700 bg-primary-100 text-primary-900 p-4 whitespace-normal rounded" style="word-break: break-word; max-width:80%;">{{
+                                        message.text
+                                    }}</span>
+                                    <p class="text-surface-700 dark:text-surface-100 mt-4">
+                                        {{ parseDate(message.createdAt) }}
+                                        <i class="pi pi-check ml-2 text-green-400"></i>
+                                    </p>
+                                </div>
+                            </div>
+                        }
                     </div>
-
-                    <div *ngIf="message.ownerId === defaultUserId" class="grid gap-4 grid-nogutter mb-6">
-                        <div class="col mt-4 text-right">
-                            <span class="inline-block text-left font-medium border border-surface-200 dark:border-surface-700 bg-primary-100 text-primary-900 p-4 whitespace-normal rounded" style="word-break: break-word; max-width:80%;">{{
-                                message.text
-                            }}</span>
-                            <p class="text-surface-700 dark:text-surface-100 mt-4">
-                                {{ parseDate(message.createdAt) }}
-                                <i class="pi pi-check ml-2 text-green-400"></i>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                }
             </div>
             <div class="p-4 md:p-6 lg:p-12 flex flex-col sm:flex-row items-center mt-auto border-t border-surface-200 dark:border-surface-700 gap-4">
                 <input id="message" type="text" pInputText placeholder="Type a message" class="flex-1 w-full sm:w-auto rounded" [(ngModel)]="textContent" (keydown.enter)="sendMessage()" />
@@ -74,9 +79,11 @@ import { ButtonModule } from 'primeng/button';
 
         <p-popover #op styleClass="w-full sm:w-30rem">
             <ng-template #content>
-                <button *ngFor="let emoji of emojis" pButton pRipple (click)="op.hide(); onEmojiSelect(emoji)" type="button" [label]="emoji" class="p-2 text-2xl" text></button>
+                @for (emoji of emojis; track emoji) {
+                    <button pButton pRipple (click)="op.hide(); onEmojiSelect(emoji)" type="button" [label]="emoji" class="p-2 text-2xl" text></button>
+                }
             </ng-template>
-        </p-popover> `
+        </p-popover>`
 })
 export class ChatBox {
     defaultUserId: number = 123;

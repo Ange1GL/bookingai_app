@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { LazyImageWidget } from '@/pages/landing/components/lazyimagewidget';
 import { LayoutService } from '@/layout/service/layout.service';
@@ -7,7 +6,7 @@ import { RouterLink } from '@angular/router';
 @Component({
     selector: 'app-section-one-widget',
     standalone: true,
-    imports: [CommonModule, LazyImageWidget, RouterLink],
+    imports: [LazyImageWidget, RouterLink],
     template: `
         <section class="max-w-308 landing-container mx-auto relative py-12 lg:py-24">
             <div class="flex lg:flex-row flex-col items-center gap-14 lg:gap-4 xl:gap-9">
@@ -47,7 +46,7 @@ import { RouterLink } from '@angular/router';
                     <div class="badge mx-0">Financial Management</div>
                     <h4 class="title-h5 md:title-h4 text-center lg:text-left mt-4 max-w-xs md:max-w-lg">Automated Bill Payment System</h4>
                     <p class="body-small md:body-medium text-center lg:text-left mt-6">Cuts down on manual tasks by automatically scheduling and processing bill payments, ensuring timely payments and hassle-free financial management.</p>
-                    <a routerLink='/landing' class="body-button mt-8">Get Started</a>
+                    <a routerLink="/landing" class="body-button mt-8">Get Started</a>
                 </div>
             </div>
         </section>

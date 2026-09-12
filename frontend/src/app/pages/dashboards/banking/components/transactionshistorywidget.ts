@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-import { CommonModule } from '@angular/common';
+
 import { TableModule } from 'primeng/table';
 import { AvatarModule } from 'primeng/avatar';
 
 @Component({
     selector: 'transactions-history-widget',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TableModule, AvatarModule],
+    imports: [ButtonModule, TableModule, AvatarModule],
     template: `<div class="flex items-center gap-2">
             <div class="flex-1 flex flex-col gap-1">
                 <span class="label-medium">Transactions History</span>

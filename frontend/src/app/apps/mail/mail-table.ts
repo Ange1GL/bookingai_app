@@ -52,28 +52,32 @@ import { Mail } from '@/types/mail';
                     <td style="width: 4rem" class="pl-3">
                         <p-tableCheckbox [value]="mail" (click)="$event.stopPropagation()" (touchend)="$event.stopPropagation()"></p-tableCheckbox>
                     </td>
-                    <td *ngIf="!mail.trash && !mail.spam" style="width: 4rem">
-                        <span (click)="onStar($event, mail.id)" (touchend)="onStar($event, mail.id)" class="cursor-pointer">
-                            <i
-                                class="pi pi-fw text-xl"
-                                [ngClass]="{
-                                    'pi-star-fill': mail.starred,
-                                    'pi-star': !mail.starred
-                                }"
-                            ></i>
-                        </span>
-                    </td>
-                    <td *ngIf="!mail.trash && !mail.spam" style="width: 4rem">
-                        <span (click)="onBookmark($event, mail.id)" (touchend)="onBookmark($event, mail.id)" class="cursor-pointer">
-                            <i
-                                class="pi pi-fw text-xl"
-                                [ngClass]="{
-                                    'pi-bookmark-fill': mail.important,
-                                    'pi-bookmark': !mail.important
-                                }"
-                            ></i>
-                        </span>
-                    </td>
+                    @if (!mail.trash && !mail.spam) {
+                        <td style="width: 4rem">
+                            <span (click)="onStar($event, mail.id)" (touchend)="onStar($event, mail.id)" class="cursor-pointer">
+                                <i
+                                    class="pi pi-fw text-xl"
+                                    [ngClass]="{
+                                        'pi-star-fill': mail.starred,
+                                        'pi-star': !mail.starred
+                                    }"
+                                ></i>
+                            </span>
+                        </td>
+                    }
+                    @if (!mail.trash && !mail.spam) {
+                        <td style="width: 4rem">
+                            <span (click)="onBookmark($event, mail.id)" (touchend)="onBookmark($event, mail.id)" class="cursor-pointer">
+                                <i
+                                    class="pi pi-fw text-xl"
+                                    [ngClass]="{
+                                        'pi-bookmark-fill': mail.important,
+                                        'pi-bookmark': !mail.important
+                                    }"
+                                ></i>
+                            </span>
+                        </td>
+                    }
                     <td style="min-width: 4rem">
                         @if (mail.image) {
                             <p-avatar [image]="mail.image ? '/demo/images/avatar/' + mail.image : 'assets/layout/images/avatar.png'"></p-avatar>

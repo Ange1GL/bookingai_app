@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BlockViewer } from './components/blockviewer';
 import { Button } from 'primeng/button';
 import { Chip } from 'primeng/chip';
@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-blocks',
     standalone: true,
-    imports: [CommonModule, BlockViewer, Button, Chip, InputText, Checkbox, FormsModule],
+    imports: [BlockViewer, Button, Chip, InputText, Checkbox, FormsModule],
     template: `<div>
         <block-viewer header="Hero" [code]="block1" free>
             <div class="grid grid-cols-12 gap-4 grid-nogutter bg-surface-0 dark:bg-surface-950 text-surface-800 dark:text-surface-50">

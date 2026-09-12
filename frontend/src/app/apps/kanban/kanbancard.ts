@@ -24,19 +24,35 @@ import { CdkDragHandle } from '@angular/cdk/drag-drop';
                 <p-tiered-menu #menu [model]="menuItems" appendTo="body" [popup]="true"></p-tiered-menu>
             </div>
         </div>
-        <div *ngIf="card.description" style="word-break: break-word" class="text-surface-700 dark:text-surface-100">{{ card.description }}</div>
-        <p-progress-bar *ngIf="card.taskList.tasks.length" [value]="card.progress" [showValue]="false" [style]="{ height: '.5rem' }"></p-progress-bar>
+        @if (card.description) {
+            <div style="word-break: break-word" class="text-surface-700 dark:text-surface-100">{{ card.description }}</div>
+        }
+        @if (card.taskList.tasks.length) {
+            <p-progress-bar [value]="card.progress" [showValue]="false" [style]="{ height: '.5rem' }"></p-progress-bar>
+        }
 
         <div class="flex items-center justify-between flex-col md:flex-row gap-6 md:gap-0">
             <p-avatar-group>
-                <p-avatar *ngFor="let assignee of card.assignees | slice: 0 : 3" image="/demo/images/avatar/{{ assignee.image }}" shape="circle" styleClass="border-2 border-surface"></p-avatar>
-                <p-avatar *ngIf="card.assignees && card.assignees.length > 3" label="+ {{ card.assignees.length - 3 }}" shape="circle" styleClass="border-2 border-surface mb-1 bg-surface-50 dark:bg-surface-950"></p-avatar>
+                @for (assignee of card.assignees | slice: 0 : 3; track assignee) {
+                    <p-avatar image="/demo/images/avatar/{{ assignee.image }}" shape="circle" styleClass="border-2 border-surface"></p-avatar>
+                }
+                @if (card.assignees && card.assignees.length > 3) {
+                    <p-avatar label="+ {{ card.assignees.length - 3 }}" shape="circle" styleClass="border-2 border-surface mb-1 bg-surface-50 dark:bg-surface-950"></p-avatar>
+                }
             </p-avatar-group>
-            <div *ngIf="card.attachments || card.dueDate" class="flex items-center gap-4">
-                <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0" *ngIf="card.taskList.tasks.length"><i class="pi pi-check-square text-surface-700 dark:text-surface-100 mr-2"></i>{{ generateTaskInfo() }}</span>
-                <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0" *ngIf="card.attachments"><i class="pi pi-paperclip text-surface-700 dark:text-surface-100 mr-2"></i>{{ card.attachments }}</span>
-                <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0" *ngIf="card.dueDate"><i class="pi pi-clock text-surface-700 dark:text-surface-100 mr-2"></i>{{ parseDate(card.dueDate) }}</span>
-            </div>
+            @if (card.attachments || card.dueDate) {
+                <div class="flex items-center gap-4">
+                    @if (card.taskList.tasks.length) {
+                        <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0"><i class="pi pi-check-square text-surface-700 dark:text-surface-100 mr-2"></i>{{ generateTaskInfo() }}</span>
+                    }
+                    @if (card.attachments) {
+                        <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0"><i class="pi pi-paperclip text-surface-700 dark:text-surface-100 mr-2"></i>{{ card.attachments }}</span>
+                    }
+                    @if (card.dueDate) {
+                        <span class="text-surface-900 dark:text-surface-0 font-semibold shrink-0"><i class="pi pi-clock text-surface-700 dark:text-surface-100 mr-2"></i>{{ parseDate(card.dueDate) }}</span>
+                    }
+                </div>
+            }
         </div>
     </div>`
 })

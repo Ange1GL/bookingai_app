@@ -15,15 +15,16 @@ import { TabsModule } from 'primeng/tabs';
                 <div class="col-span-12 lg:col-span-7">
                     <div class="flex">
                         <div class="flex flex-col w-2/12 justify-between" style="row-gap: 1rem;">
-                            <img
-                                *ngFor="let image of images; let i = index"
-                                [ngClass]="{
-                                    'border-primary': selectedImageIndex === i
-                                }"
-                                src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productoverview/{{ image }}"
-                                class="w-full cursor-pointer border-2 border-transparent transition-colors duration-150 border-round"
-                                (click)="selectedImageIndex = i"
-                            />
+                            @for (image of images; track image; let i = $index) {
+                                <img
+                                    [ngClass]="{
+                                        'border-primary': selectedImageIndex === i
+                                    }"
+                                    src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productoverview/{{ image }}"
+                                    class="w-full cursor-pointer border-2 border-transparent transition-colors duration-150 border-round"
+                                    (click)="selectedImageIndex = i"
+                                />
+                            }
                         </div>
                         <div class="pl-4 w-10/12 flex">
                             <img src="https://fqjltiegiezfetthbags.supabase.co/storage/v1/render/image/public/block.images/blocks/ecommerce/productoverview/{{ images[selectedImageIndex] }}" class="w-full border-2 border-transparent rounded" />

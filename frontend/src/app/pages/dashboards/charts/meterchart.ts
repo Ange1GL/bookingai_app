@@ -8,13 +8,15 @@ import { sampleDataByFixedLength, trackByFn } from '@/lib/utils';
     standalone: true,
     imports: [CommonModule],
     template: `
-        <div *ngIf="meterOptions?.showY" class="flex flex-col justify-between" [ngClass]="meterOptions.showX ? (meterOptionsProps().xAxisPosition === 'top' ? 'pt-8' : 'pb-8') : 'p-0'">
-            @for (val of meterOptions.yAxis; track trackByFn(); let idx = $index) {
-                <div class="body-xsmall leading-none text-right">
-                    {{ idx === meterOptions?.yAxis.length - 1 ? 0 : (val / 1000).toFixed(1) + 'K' }}
-                </div>
-            }
-        </div>
+        @if (meterOptions?.showY) {
+            <div class="flex flex-col justify-between" [ngClass]="meterOptions.showX ? (meterOptionsProps().xAxisPosition === 'top' ? 'pt-8' : 'pb-8') : 'p-0'">
+                @for (val of meterOptions.yAxis; track trackByFn(); let idx = $index) {
+                    <div class="body-xsmall leading-none text-right">
+                        {{ idx === meterOptions?.yAxis.length - 1 ? 0 : (val / 1000).toFixed(1) + 'K' }}
+                    </div>
+                }
+            </div>
+        }
         <div class="flex-1 flex flex-col">
             <div #container class="flex-1 relative flex justify-between w-full h-full">
                 @for (data of meterOptions?.data; track trackByFn(); let idx = $index) {
@@ -23,20 +25,19 @@ import { sampleDataByFixedLength, trackByFn } from '@/lib/utils';
                             <div class="w-px h-1.5 bg-surface-950 dark:bg-surface-0 rounded-full"></div>
                             <div class="relative w-3 flex-1 flex flex-col justify-end cursor-pointer">
                                 <div class="bg-surface-200 dark:bg-surface-800 rounded-full w-[0.5px] h-full absolute top-0 left-1/2 -translate-x-1/2"></div>
-                                <div
-                                    *ngIf="isDataArray"
-                                    class="flex flex-col-reverse relative z-10 w-full rounded-full transition-all duration-300 overflow-hidden"
-                                    [style]="{ height: (parseFloat(meterOptions.totalsByYAxis[idx]) / meterOptions?.max) * 100 + '%' }"
-                                >
-                                    @for (val of data.y; track trackByFn(); let j = $index) {
-                                        <div class="w-full min-h-4" [style]="{ background: meterOptions.bgColors[j] ?? meterOptions.bgColors[0], height: (parseFloat(val) / meterOptions.totalsByYAxis[idx]) * 100 + '%' }"></div>
-                                    }
-                                </div>
-                                <div
-                                    *ngIf="!isDataArray"
-                                    class="relative z-10 w-full rounded-full cursor-pointer transition-all duration-300 min-h-4"
-                                    [style]="{ background: meterOptions.bgColors[0], height: (parseFloat(data.y) / meterOptions?.max) * 100 + '%' }"
-                                ></div>
+                                @if (isDataArray) {
+                                    <div class="flex flex-col-reverse relative z-10 w-full rounded-full transition-all duration-300 overflow-hidden" [style]="{ height: (parseFloat(meterOptions.totalsByYAxis[idx]) / meterOptions?.max) * 100 + '%' }">
+                                        @for (val of data.y; track trackByFn(); let j = $index) {
+                                            <div class="w-full min-h-4" [style]="{ background: meterOptions.bgColors[j] ?? meterOptions.bgColors[0], height: (parseFloat(val) / meterOptions.totalsByYAxis[idx]) * 100 + '%' }"></div>
+                                        }
+                                    </div>
+                                }
+                                @if (!isDataArray) {
+                                    <div
+                                        class="relative z-10 w-full rounded-full cursor-pointer transition-all duration-300 min-h-4"
+                                        [style]="{ background: meterOptions.bgColors[0], height: (parseFloat(data.y) / meterOptions?.max) * 100 + '%' }"
+                                    ></div>
+                                }
                             </div>
                             <div class="w-px h-1.5 bg-surface-950 dark:bg-surface-0 rounded-full"></div>
                         </div>

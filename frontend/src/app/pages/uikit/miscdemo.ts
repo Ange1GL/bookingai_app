@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
 import { AvatarGroupModule } from 'primeng/avatargroup';
@@ -16,7 +15,7 @@ import { MeterGroupModule } from 'primeng/metergroup';
 @Component({
     selector: 'app-misc-demo',
     standalone: true,
-    imports: [CommonModule, ProgressBarModule, BadgeModule, AvatarModule, ScrollPanelModule, TagModule, ChipModule, ButtonModule, SkeletonModule, AvatarGroupModule, ScrollTopModule, OverlayBadgeModule, MeterGroupModule],
+    imports: [ProgressBarModule, BadgeModule, AvatarModule, ScrollPanelModule, TagModule, ChipModule, ButtonModule, SkeletonModule, AvatarGroupModule, ScrollTopModule, OverlayBadgeModule, MeterGroupModule],
     template: `
         <div class="card">
             <div class="font-semibold text-xl mb-4">ProgressBar</div>

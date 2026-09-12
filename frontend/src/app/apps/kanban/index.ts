@@ -1,20 +1,22 @@
-import {Component} from '@angular/core';
-import {KanbanService} from '@/apps/kanban/service/kanban.service';
-import {KanbanSidebar} from '@/apps/kanban/kanbansidebar';
-import {KanbanListType} from '@/types/kanban';
-import {KanbanList} from '@/apps/kanban/kanbanlist';
-import {CommonModule} from '@angular/common';
-import {RippleModule} from 'primeng/ripple';
-import {ButtonModule} from 'primeng/button';
-import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
-import {Subscription} from 'rxjs';
+import { Component } from '@angular/core';
+import { KanbanService } from '@/apps/kanban/service/kanban.service';
+import { KanbanSidebar } from '@/apps/kanban/kanbansidebar';
+import { KanbanListType } from '@/types/kanban';
+import { KanbanList } from '@/apps/kanban/kanbanlist';
+
+import { RippleModule } from 'primeng/ripple';
+import { ButtonModule } from 'primeng/button';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'kanban',
     standalone: true,
-    imports: [KanbanSidebar, KanbanList, CommonModule, ButtonModule, RippleModule, DragDropModule],
+    imports: [KanbanSidebar, KanbanList, ButtonModule, RippleModule, DragDropModule],
     template: `<div id="kanban-wrapper" cdkDropList cdkDropListOrientation="horizontal" (cdkDropListDropped)="dropList($event)" [cdkDropListData]="lists" class="flex gap-8 w-full flex-col md:flex-row flex-nowrap lg:overflow-y-hidden overflow-x-auto">
-        <kanban-list *ngFor="let list of lists; let i = index" [list]="list" [listIds]="listIds" cdkDrag cdkDragHandle [cdkDragDisabled]="isMobileDevice" class="p-kanban-list"></kanban-list>
+        @for (list of lists; track list; let i = $index) {
+            <kanban-list [list]="list" [listIds]="listIds" cdkDrag cdkDragHandle [cdkDragDisabled]="isMobileDevice" class="p-kanban-list"></kanban-list>
+        }
         <div class="px-4 py-1 mb-4 md:w-100 shrink-0">
             <button pButton pRipple label="New List" icon="pi pi-plus font-semibold" class="py-4 justify-center font-semibold w-full rounded" (click)="addList()"></button>
         </div>

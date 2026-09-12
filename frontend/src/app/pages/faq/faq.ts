@@ -18,18 +18,20 @@ import { RippleModule } from 'primeng/ripple';
 
             <div class="max-w-6xl mx-auto mt-16 flex flex-col md:flex-row items-start gap-6">
                 <div class="card p-5 flex flex-col gap-3 md:max-w-80 w-full">
-                    <button *ngFor="let item of items; let i = index" (click)="changeItem(i)" class="mb-2 ">
-                        <a
-                            class="flex items-center cursor-pointer select-none p-4 transition-colors duration-150 rounded-border"
-                            [ngClass]="{
-                                'bg-primary text-primary-contrast': activeIndex === i,
-                                'hover:bg-surface-100 dark:hover:bg-surface-800': activeIndex !== i
-                            }"
-                        >
-                            <i [class]="item.icon" class="mr-2 text-lg"></i>
-                            <span>{{ item.label }}</span>
-                        </a>
-                    </button>
+                    @for (item of items; track item; let i = $index) {
+                        <button (click)="changeItem(i)" class="mb-2 ">
+                            <a
+                                class="flex items-center cursor-pointer select-none p-4 transition-colors duration-150 rounded-border"
+                                [ngClass]="{
+                                    'bg-primary text-primary-contrast': activeIndex === i,
+                                    'hover:bg-surface-100 dark:hover:bg-surface-800': activeIndex !== i
+                                }"
+                            >
+                                <i [class]="item.icon" class="mr-2 text-lg"></i>
+                                <span>{{ item.label }}</span>
+                            </a>
+                        </button>
+                    }
                 </div>
                 <div class="card flex-1">
                     <p-accordion>

@@ -1,14 +1,13 @@
-import {Component, computed, ElementRef, ViewChild} from '@angular/core';
-import {AppMenu} from './app.menu';
-import {LayoutService} from '@/layout/service/layout.service';
-import {RouterModule} from '@angular/router';
-import {AppTopbar} from "@/layout/components/app.topbar";
-import {CommonModule} from "@angular/common";
+import { Component, computed, ElementRef, ViewChild } from '@angular/core';
+import { AppMenu } from './app.menu';
+import { LayoutService } from '@/layout/service/layout.service';
+import { RouterModule } from '@angular/router';
+import { AppTopbar } from '@/layout/components/app.topbar';
 
 @Component({
     selector: '[app-sidebar]',
     standalone: true,
-    imports: [CommonModule,AppMenu, RouterModule, AppTopbar],
+    imports: [AppMenu, RouterModule, AppTopbar],
     template: `<div class="layout-sidebar" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
         <div class="sidebar-header">
             <a class="logo" [routerLink]="['/']">
@@ -21,8 +20,10 @@ import {CommonModule} from "@angular/common";
         <div #menuContainer class="layout-menu-container">
             <div app-menu></div>
         </div>
-        <div app-topbar *ngIf="isHorizontal()"></div>
-    </div>`,
+        @if (isHorizontal()) {
+            <div app-topbar></div>
+        }
+    </div>`
 })
 export class AppSidebar {
     timeout: any = null;

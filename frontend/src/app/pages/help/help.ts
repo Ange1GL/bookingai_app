@@ -24,7 +24,7 @@ import { InputTextModule } from 'primeng/inputtext';
                 </p-iconfield>
             </div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-                <ng-container *ngFor="let item of helps; let index = index">
+                @for (item of helps; track item; let index = $index) {
                     <div class="card mb-0!">
                         <i [ngClass]="item.icon" class="text-3xl! text-primary"></i>
                         <h5 class="title-h7 text-left mt-4">{{ item.title }}</h5>
@@ -34,16 +34,18 @@ import { InputTextModule } from 'primeng/inputtext';
                             <span><i class="pi pi-arrow-right text-lg! text-primary"></i></span>
                         </a>
                     </div>
-                </ng-container>
+                }
             </div>
             <div class="max-w-6xl mx-auto card mt-6">
                 <p-accordion value="0">
-                    <p-accordion-panel *ngFor="let item of faqs; let i = index" [value]="i + ''">
-                        <p-accordion-header>{{ item.title }}</p-accordion-header>
-                        <p-accordion-content>
-                            <p class="m-0">{{ item.description }}</p>
-                        </p-accordion-content>
-                    </p-accordion-panel>
+                    @for (item of faqs; track item; let i = $index) {
+                        <p-accordion-panel [value]="i + ''">
+                            <p-accordion-header>{{ item.title }}</p-accordion-header>
+                            <p-accordion-content>
+                                <p class="m-0">{{ item.description }}</p>
+                            </p-accordion-content>
+                        </p-accordion-panel>
+                    }
                 </p-accordion>
             </div>
         </div>

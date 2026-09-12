@@ -2,13 +2,13 @@ import { Component } from '@angular/core';
 import { generateRandomData, trackByFn } from '@/lib/utils';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
-import { CommonModule } from '@angular/common';
+
 import { MeterChart } from '@/pages/dashboards/charts/meterchart';
 
 @Component({
     selector: 'mini-stat-card-widget',
     standalone: true,
-    imports: [CommonModule, FormsModule, SelectModule, MeterChart],
+    imports: [FormsModule, SelectModule, MeterChart],
     template: `@for (data of datasets; track trackByFn(); let idx = $index) {
         <div class="card h-72 z-0 flex-1 mb-0! p-0! min-w-80 flex flex-col border border-surface rounded-2xl">
             <div class="flex-1 flex flex-col p-6">

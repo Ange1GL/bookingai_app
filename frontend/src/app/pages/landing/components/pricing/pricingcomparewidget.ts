@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-pricing-compare-widget',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     template: `
         <section class="landing-container mx-auto py-10 lg:py-20">
             <div class="max-w-lg md:max-w-4xl xl:max-w-full mx-auto p-7 border border-surface-200 dark:border-surface-800 rounded-3xl">
@@ -13,40 +12,52 @@ import { CommonModule } from '@angular/common';
                 >
                     <span class="flex-[1.15] px-6 py-3 text-left">Plan</span>
                     <div class="flex flex-3">
-                        <span *ngFor="let data of plans; let index = index" class="flex-1 px-6 py-3 text-center capitalize">
-                            {{ data }}
-                        </span>
+                        @for (data of plans; track data; let index = $index) {
+                            <span class="flex-1 px-6 py-3 text-center capitalize">
+                                {{ data }}
+                            </span>
+                        }
                     </div>
                 </div>
 
                 <div class="md:mt-7">
-                    <div *ngFor="let data of planDetails; let index = index">
-                        <div class="flex md:flex-row flex-col">
-                            <div
-                                class="md:bg-transparent! bg-surface-100 dark:bg-surface-900 border md:border-0 rounded-xl border-surface-200 dark:border-surface-800 flex-[1.15] px-6 py-4 text-left body-medium leading-normal text-surface-950 dark:text-surface-0"
-                            >
-                                {{ data.plan }}
-                            </div>
-
-                            <div class="flex md:flex-3">
-                                <div *ngFor="let ingredient of data.ingredients; let j = index" class="flex-1 md:px-6 md:py-4 text-surface-950 dark:text-surface-0 text-center">
-                                    <span class="md:hidden block flex-1 py-4 text-center capitalize body-medium leading-normal text-surface-950 dark:text-surface-0">
-                                        {{ plans[j] }}
-                                    </span>
-                                    <div class="w-full h-px bg-surface-200 dark:bg-surface-800 md:hidden block"></div>
-                                    <div class="py-4 md:py-0">
-                                        <i *ngIf="ingredient.includes('_yes')" class="pi pi-check text-center text-sm! text-surface-950 font-bold dark:text-surface-0"></i>
-                                        <i *ngIf="ingredient.includes('_no')" class="pi pi-minus text-center text-sm! text-surface-500"></i>
-                                        <span *ngIf="!ingredient.includes('_yes') && !ingredient.includes('_no')" class="text-surface-950 dark:text-surface-0 body-medium leading-normal">
-                                            {{ ingredient }}
-                                        </span>
-                                    </div>
+                    @for (data of planDetails; track data; let index = $index) {
+                        <div>
+                            <div class="flex md:flex-row flex-col">
+                                <div
+                                    class="md:bg-transparent! bg-surface-100 dark:bg-surface-900 border md:border-0 rounded-xl border-surface-200 dark:border-surface-800 flex-[1.15] px-6 py-4 text-left body-medium leading-normal text-surface-950 dark:text-surface-0"
+                                >
+                                    {{ data.plan }}
+                                </div>
+                                <div class="flex md:flex-3">
+                                    @for (ingredient of data.ingredients; track ingredient; let j = $index) {
+                                        <div class="flex-1 md:px-6 md:py-4 text-surface-950 dark:text-surface-0 text-center">
+                                            <span class="md:hidden block flex-1 py-4 text-center capitalize body-medium leading-normal text-surface-950 dark:text-surface-0">
+                                                {{ plans[j] }}
+                                            </span>
+                                            <div class="w-full h-px bg-surface-200 dark:bg-surface-800 md:hidden block"></div>
+                                            <div class="py-4 md:py-0">
+                                                @if (ingredient.includes('_yes')) {
+                                                    <i class="pi pi-check text-center text-sm! text-surface-950 font-bold dark:text-surface-0"></i>
+                                                }
+                                                @if (ingredient.includes('_no')) {
+                                                    <i class="pi pi-minus text-center text-sm! text-surface-500"></i>
+                                                }
+                                                @if (!ingredient.includes('_yes') && !ingredient.includes('_no')) {
+                                                    <span class="text-surface-950 dark:text-surface-0 body-medium leading-normal">
+                                                        {{ ingredient }}
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
+                            @if (index !== planDetails.length - 1) {
+                                <div class="w-full md:block hidden h-px bg-surface-200 dark:bg-surface-800"></div>
+                            }
                         </div>
-
-                        <div *ngIf="index !== planDetails.length - 1" class="w-full md:block hidden h-px bg-surface-200 dark:bg-surface-800"></div>
-                    </div>
+                    }
                 </div>
             </div>
         </section>

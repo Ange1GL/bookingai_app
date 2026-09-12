@@ -1,6 +1,6 @@
-import {booleanAttribute, Component, Input} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {TooltipModule} from 'primeng/tooltip';
+import { booleanAttribute, Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TooltipModule } from 'primeng/tooltip';
 
 enum BlockView {
     PREVIEW,
@@ -16,8 +16,12 @@ enum BlockView {
             <div class="block-header">
                 <span class="block-title">
                     <span>{{ header }}</span>
-                    <span class="badge-free" *ngIf="free">Free</span>
-                    <span class="badge-new" *ngIf="new">New</span>
+                    @if (free) {
+                        <span class="badge-free">Free</span>
+                    }
+                    @if (new) {
+                        <span class="badge-new">New</span>
+                    }
                 </span>
                 <div class="block-actions">
                     <a
@@ -41,12 +45,16 @@ enum BlockView {
                 </div>
             </div>
             <div class="block-content">
-                <div [class]="containerClass" [ngStyle]="previewStyle" *ngIf="blockView === BlockView.PREVIEW">
-                    <ng-content></ng-content>
-                </div>
-                <div *ngIf="blockView === BlockView.CODE">
-                    <pre class="app-code"><code>{{code}}</code></pre>
-                </div>
+                @if (blockView === BlockView.PREVIEW) {
+                    <div [class]="containerClass" [ngStyle]="previewStyle">
+                        <ng-content></ng-content>
+                    </div>
+                }
+                @if (blockView === BlockView.CODE) {
+                    <div>
+                        <pre class="app-code"><code>{{code}}</code></pre>
+                    </div>
+                }
             </div>
         </div>
     `,

@@ -1,43 +1,42 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {InputTextModule} from 'primeng/inputtext';
-import {ButtonModule} from 'primeng/button';
-import {CommonModule} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {CheckboxModule} from 'primeng/checkbox';
-import {RadioButtonModule} from 'primeng/radiobutton';
-import {SelectButtonModule} from 'primeng/selectbutton';
-import {InputGroupModule} from 'primeng/inputgroup';
-import {FluidModule} from 'primeng/fluid';
-import {IconFieldModule} from 'primeng/iconfield';
-import {InputIconModule} from 'primeng/inputicon';
-import {FloatLabelModule} from 'primeng/floatlabel';
-import {AutoCompleteCompleteEvent, AutoCompleteModule} from 'primeng/autocomplete';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {SliderModule} from 'primeng/slider';
-import {RatingModule} from 'primeng/rating';
-import {ColorPickerModule} from 'primeng/colorpicker';
-import {KnobModule} from 'primeng/knob';
-import {SelectModule} from 'primeng/select';
-import {DatePickerModule} from 'primeng/datepicker';
-import {ToggleSwitchModule} from 'primeng/toggleswitch';
-import {TreeSelectModule} from 'primeng/treeselect';
-import {MultiSelectModule} from 'primeng/multiselect';
-import {ListboxModule} from 'primeng/listbox';
-import {InputGroupAddonModule} from 'primeng/inputgroupaddon';
-import {TextareaModule} from 'primeng/textarea';
-import {ToggleButtonModule} from 'primeng/togglebutton';
-import {CountryService} from '@/pages/service/country.service';
-import {NodeService} from '@/pages/service/node.service';
-import {TreeNode} from 'primeng/api';
-import {Country} from '@/pages/service/customer.service';
-import {IftaLabelModule} from 'primeng/iftalabel';
-import {InputOtpModule} from 'primeng/inputotp';
+import { Component, inject, OnInit } from '@angular/core';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+
+import { FormsModule } from '@angular/forms';
+import { CheckboxModule } from 'primeng/checkbox';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { FluidModule } from 'primeng/fluid';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SliderModule } from 'primeng/slider';
+import { RatingModule } from 'primeng/rating';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { KnobModule } from 'primeng/knob';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { TreeSelectModule } from 'primeng/treeselect';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { ListboxModule } from 'primeng/listbox';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { TextareaModule } from 'primeng/textarea';
+import { ToggleButtonModule } from 'primeng/togglebutton';
+import { CountryService } from '@/pages/service/country.service';
+import { NodeService } from '@/pages/service/node.service';
+import { TreeNode } from 'primeng/api';
+import { Country } from '@/pages/service/customer.service';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputOtpModule } from 'primeng/inputotp';
 
 @Component({
     selector: 'app-input-demo',
     standalone: true,
     imports: [
-        CommonModule,
         FormsModule,
         InputTextModule,
         ButtonModule,

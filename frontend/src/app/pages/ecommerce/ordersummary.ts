@@ -24,21 +24,22 @@ import { ButtonModule } from 'primeng/button';
             </div>
             <div class="rounded border-surface-200 dark:border-surface-700 border">
                 <ul class="list-none p-0 m-0">
-                    <li
-                        *ngFor="let product of products; let i = index"
-                        class="p-4 border-surface-200 dark:border-surface-700 flex items-start sm:items-center"
-                        [ngClass]="{
-                            'border-bottom-1': i !== products.length - 1
-                        }"
-                    >
-                        <img [src]="product.image" class="w-12 sm:w-32 shrink-0 mr-4 shadow" />
-                        <div class="flex flex-col">
-                            <span class="text-surface-900 dark:text-surface-0 font-semibold text-xl mb-2">{{ product.name }}</span>
-                            <span class="text-surface-700 dark:text-surface-100 font-medium mb-4">{{ product.color }} | {{ product.size }}</span>
-                            <span class="text-surface-900 dark:text-surface-0 font-medium">Quantity: {{ product.quantity }}</span>
-                        </div>
-                        <span class="text-surface-900 dark:text-surface-0 font-medium text-lg ml-auto">{{ product.price }}</span>
-                    </li>
+                    @for (product of products; track product; let i = $index) {
+                        <li
+                            class="p-4 border-surface-200 dark:border-surface-700 flex items-start sm:items-center"
+                            [ngClass]="{
+                                'border-bottom-1': i !== products.length - 1
+                            }"
+                        >
+                            <img [src]="product.image" class="w-12 sm:w-32 shrink-0 mr-4 shadow" />
+                            <div class="flex flex-col">
+                                <span class="text-surface-900 dark:text-surface-0 font-semibold text-xl mb-2">{{ product.name }}</span>
+                                <span class="text-surface-700 dark:text-surface-100 font-medium mb-4">{{ product.color }} | {{ product.size }}</span>
+                                <span class="text-surface-900 dark:text-surface-0 font-medium">Quantity: {{ product.quantity }}</span>
+                            </div>
+                            <span class="text-surface-900 dark:text-surface-0 font-medium text-lg ml-auto">{{ product.price }}</span>
+                        </li>
+                    }
                 </ul>
             </div>
             <div class="flex flex-wrap mt-8 pb-4">

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { BarChart } from '@/pages/dashboards/charts/barchart';
-import { CommonModule } from '@angular/common';
+
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { generateRandomMultiData } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { generateRandomMultiData } from '@/lib/utils';
 @Component({
     selector: 'overview-widget',
     standalone: true,
-    imports: [CommonModule, SelectModule, FormsModule, BarChart],
+    imports: [SelectModule, FormsModule, BarChart],
     template: `<div class="flex items-start justify-between gap-2 mb-4">
             <div>
                 <h3 class="label-medium">E-Commerce Overview</h3>

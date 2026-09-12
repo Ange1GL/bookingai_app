@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { LayoutService } from '@/layout/service/layout.service';
 import { LazyImageWidget } from '@/pages/landing/components/lazyimagewidget';
@@ -7,7 +6,7 @@ import { RouterLink } from '@angular/router';
 @Component({
     selector: 'app-section-two-widget',
     standalone: true,
-    imports: [CommonModule, LazyImageWidget, RouterLink],
+    imports: [LazyImageWidget, RouterLink],
     template: `
         <section class="max-w-6xl mx-auto landing-container relative py-12 lg:py-24">
             <div class="flex lg:flex-row-reverse flex-col items-center gap-14 lg:gap-4 xl:gap-10">

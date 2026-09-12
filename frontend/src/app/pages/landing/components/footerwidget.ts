@@ -28,23 +28,27 @@ import { RouterModule } from '@angular/router';
                         </a>
                         <div class="h-4 w-px bg-surface-200 dark:bg-surface-800 mx-4 md:block hidden"></div>
                         <ul class="flex items-center gap-4">
-                            <li *ngFor="let nav of navs">
-                                <a [routerLink]="nav.to" class="body-small hover:underline">
-                                    {{ nav.label }}
-                                </a>
-                            </li>
+                            @for (nav of navs; track nav) {
+                                <li>
+                                    <a [routerLink]="nav.to" class="body-small hover:underline">
+                                        {{ nav.label }}
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
                     <ul class="flex items-center gap-2">
-                        <li *ngFor="let data of socials">
-                            <a
-                                [href]="data.to"
-                                target="_blank"
-                                class="px-4 py-2 rounded-full border border-surface-200 dark:border-surface-800 text-surface-950 dark:text-surface-0 flex items-center justify-center hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
-                            >
-                                <i [ngClass]="data.icon" class="text-md leading-none"></i>
-                            </a>
-                        </li>
+                        @for (data of socials; track data) {
+                            <li>
+                                <a
+                                    [href]="data.to"
+                                    target="_blank"
+                                    class="px-4 py-2 rounded-full border border-surface-200 dark:border-surface-800 text-surface-950 dark:text-surface-0 flex items-center justify-center hover:bg-surface-100 dark:hover:bg-surface-800 transition-all"
+                                >
+                                    <i [ngClass]="data.icon" class="text-md leading-none"></i>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </footer>
                 <div class="w-full h-px bg-surface-200 dark:bg-surface-800 my-7 md:my-4"></div>

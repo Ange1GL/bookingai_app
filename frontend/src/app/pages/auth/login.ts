@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -12,7 +11,7 @@ import { LogoWidget } from '@/pages/landing/components/logowidget';
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [LogoWidget, CommonModule, ReactiveFormsModule, InputTextModule, LazyImageWidget, GoogleWidget, AppleWidget, CheckboxModule, RouterLink],
+    imports: [LogoWidget, ReactiveFormsModule, InputTextModule, LazyImageWidget, GoogleWidget, AppleWidget, CheckboxModule, RouterLink],
     template: `
         <section class="min-h-screen flex items-center lg:items-start lg:py-20 justify-center animate-fadein animate-duration-300 animate-ease-in max-w-400 mx-auto">
             <div class="flex w-full h-full justify-center gap-12">

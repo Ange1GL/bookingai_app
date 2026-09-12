@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataViewModule } from 'primeng/dataview';
@@ -8,7 +7,7 @@ import { AvatarModule } from 'primeng/avatar';
 @Component({
     selector: 'app-list',
     standalone: true,
-    imports: [CommonModule, FormsModule, DataViewModule, SelectModule, AvatarModule],
+    imports: [FormsModule, DataViewModule, SelectModule, AvatarModule],
     template: ` <div class="card">
             <p-dataview [value]="totalBlogs" paginator [rows]="3" layout="grid" [sortOrder]="sortOrder" [sortField]="sortField">
                 <ng-template #header>
@@ -19,47 +18,49 @@ import { AvatarModule } from 'primeng/avatar';
                 </ng-template>
                 <ng-template #grid let-items>
                     <div class="grid grid-cols-12 gap-4 grid-nogutter">
-                        <div *ngFor="let item of items" class="col-span-12 md:col-span-4">
-                            <div class="p-4">
-                                <div class="bg-surface-100 dark:bg-surface-700 cursor-pointer z-index rounded">
-                                    <div class="relative">
-                                        <img [src]="item.coverImage" class="w-full" [alt]="item.description.split(' ', 1)" />
-                                        <img
-                                            [src]="item.profile"
-                                            class="flex absolute w-16 h-16"
-                                            [style]="{
-                                                bottom: '-1.5rem',
-                                                right: '1.5rem'
-                                            }"
-                                            [alt]="item.description.split(' ', 1)"
-                                        />
-                                    </div>
-                                    <div class="p-4">
-                                        <div class="text-surface-900 dark:text-surface-0 font-semibold text-xl mb-4">
-                                            {{ item.title }}
+                        @for (item of items; track item) {
+                            <div class="col-span-12 md:col-span-4">
+                                <div class="p-4">
+                                    <div class="bg-surface-100 dark:bg-surface-700 cursor-pointer z-index rounded">
+                                        <div class="relative">
+                                            <img [src]="item.coverImage" class="w-full" [alt]="item.description.split(' ', 1)" />
+                                            <img
+                                                [src]="item.profile"
+                                                class="flex absolute w-16 h-16"
+                                                [style]="{
+                                                    bottom: '-1.5rem',
+                                                    right: '1.5rem'
+                                                }"
+                                                [alt]="item.description.split(' ', 1)"
+                                            />
                                         </div>
-                                        <p class="text-surface-700 dark:text-surface-100 text-lg mt-0 mb-8">
-                                            {{ item.description }}
-                                        </p>
-                                        <div class="flex flex-wrap gap-2 items-center justify-between">
-                                            <span class="flex items-center text-surface-900 dark:text-surface-0">
-                                                <i class="pi pi-comment mr-2"></i>
-                                                <span class="font-semibold">{{ item.comment }}</span>
-                                            </span>
-                                            <span class="flex items-center text-surface-900 dark:text-surface-0">
-                                                <i class="pi pi-share-alt mr-2"></i>
-                                                <span class="font-semibold">{{ item.share }}</span>
-                                            </span>
-                                            <span class="flex items-center text-surface-900 dark:text-surface-0">
-                                                <i class="pi pi-clock mr-2"></i>
-                                                <span class="font-semibold mr-1">{{ item.day }}</span>
-                                                <span class="font-semibold">{{ item.month }}</span>
-                                            </span>
+                                        <div class="p-4">
+                                            <div class="text-surface-900 dark:text-surface-0 font-semibold text-xl mb-4">
+                                                {{ item.title }}
+                                            </div>
+                                            <p class="text-surface-700 dark:text-surface-100 text-lg mt-0 mb-8">
+                                                {{ item.description }}
+                                            </p>
+                                            <div class="flex flex-wrap gap-2 items-center justify-between">
+                                                <span class="flex items-center text-surface-900 dark:text-surface-0">
+                                                    <i class="pi pi-comment mr-2"></i>
+                                                    <span class="font-semibold">{{ item.comment }}</span>
+                                                </span>
+                                                <span class="flex items-center text-surface-900 dark:text-surface-0">
+                                                    <i class="pi pi-share-alt mr-2"></i>
+                                                    <span class="font-semibold">{{ item.share }}</span>
+                                                </span>
+                                                <span class="flex items-center text-surface-900 dark:text-surface-0">
+                                                    <i class="pi pi-clock mr-2"></i>
+                                                    <span class="font-semibold mr-1">{{ item.day }}</span>
+                                                    <span class="font-semibold">{{ item.month }}</span>
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </ng-template>
             </p-dataview>

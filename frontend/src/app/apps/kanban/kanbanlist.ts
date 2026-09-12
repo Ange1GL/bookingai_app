@@ -1,23 +1,23 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {InplaceModule} from 'primeng/inplace';
-import {ButtonModule} from 'primeng/button';
-import {RippleModule} from 'primeng/ripple';
-import {MenuModule} from 'primeng/menu';
-import {FormsModule} from '@angular/forms';
-import {InputTextModule} from 'primeng/inputtext';
-import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
-import {MenuItem} from 'primeng/api';
-import {Kanban} from '@/apps/kanban/index';
-import {KanbanService} from '@/apps/kanban/service/kanban.service';
-import {KanbanCardType, KanbanListType} from '@/types/kanban';
-import {KanbanCard} from '@/apps/kanban/kanbancard';
-import {TooltipModule} from 'primeng/tooltip';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+
+import { InplaceModule } from 'primeng/inplace';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
+import { MenuModule } from 'primeng/menu';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { MenuItem } from 'primeng/api';
+import { Kanban } from '@/apps/kanban/index';
+import { KanbanService } from '@/apps/kanban/service/kanban.service';
+import { KanbanCardType, KanbanListType } from '@/types/kanban';
+import { KanbanCard } from '@/apps/kanban/kanbancard';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'kanban-list',
     standalone: true,
-    imports: [CommonModule, InplaceModule, ButtonModule, RippleModule, MenuModule, KanbanCard, FormsModule, InputTextModule, CdkDropList, CdkDrag, TooltipModule],
+    imports: [InplaceModule, ButtonModule, RippleModule, MenuModule, KanbanCard, FormsModule, InputTextModule, CdkDropList, CdkDrag, TooltipModule],
     template: `
         <div class="flex justify-between items-center w-full">
             <p-inplace>
@@ -48,7 +48,9 @@ import {TooltipModule} from 'primeng/tooltip';
             #listEl
             style="min-height:2rem"
         >
-            <kanban-card *ngFor="let card of list.cards" [card]="card" [listId]="list.listId" (click)="onCardClick($event, card)" cdkDrag [cdkDragDisabled]="isMobileDevice"></kanban-card>
+            @for (card of list.cards; track card) {
+                <kanban-card [card]="card" [listId]="list.listId" (click)="onCardClick($event, card)" cdkDrag [cdkDragDisabled]="isMobileDevice"></kanban-card>
+            }
         </div>
         <div class="px-6 mb-4 w-full mt-6 flex">
             <button pButton pRipple label="New Card" icon="pi pi-plus font-semibold" class="py-4 justify-center font-semibold w-full rounded-border" (click)="insertCard()"></button>

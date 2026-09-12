@@ -1,21 +1,20 @@
-import {CommonModule} from '@angular/common';
-import {Component} from '@angular/core';
-import {ButtonModule} from 'primeng/button';
-import {ChipModule} from 'primeng/chip';
-import {FileUploadModule} from 'primeng/fileupload';
-import {FluidModule} from 'primeng/fluid';
-import {InputTextModule} from 'primeng/inputtext';
-import {TextareaModule} from 'primeng/textarea';
-import {EditorModule} from 'primeng/editor';
-import {MessageService} from 'primeng/api';
-import {PrimeNG} from 'primeng/config';
-import {BadgeModule} from 'primeng/badge';
-import {ProgressBarModule} from 'primeng/progressbar';
+import { Component } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { ChipModule } from 'primeng/chip';
+import { FileUploadModule } from 'primeng/fileupload';
+import { FluidModule } from 'primeng/fluid';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { EditorModule } from 'primeng/editor';
+import { MessageService } from 'primeng/api';
+import { PrimeNG } from 'primeng/config';
+import { BadgeModule } from 'primeng/badge';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
     selector: 'app-edit',
     standalone: true,
-    imports: [FileUploadModule, ChipModule, InputTextModule, TextareaModule, ButtonModule, CommonModule, FluidModule, EditorModule, BadgeModule, ProgressBarModule],
+    imports: [FileUploadModule, ChipModule, InputTextModule, TextareaModule, ButtonModule, FluidModule, EditorModule, BadgeModule, ProgressBarModule],
     template: `<div class="card">
         <span class="block text-surface-900 dark:text-surface-0 font-bold text-xl mb-6">Create a new post</span>
         <div class="grid grid-cols-12 gap-4">
@@ -32,33 +31,41 @@ import {ProgressBarModule} from 'primeng/progressbar';
                     </ng-template>
                     <ng-template #content let-files let-uploadedFiles="uploadedFiles" let-removeFileCallback="removeFileCallback" let-removeUploadedFileCallback="removeUploadedFileCallback">
                         <div class="flex flex-col gap-8 pt-4">
-                            <div *ngIf="files?.length > 0">
-                                <div class="flex flex-wrap gap-4">
-                                    <div *ngFor="let file of files; let i = index" class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
-                                        <div>
-                                            <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100" height="50" />
-                                        </div>
-                                        <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
-                                        <div>{{ formatSize(file.size) }}</div>
-                                        <p-badge value="Pending" severity="warn" />
-                                        <p-button icon="pi pi-times" (click)="onRemoveTemplatingFile($event, file, removeFileCallback, i)" [outlined]="true" [rounded]="true" severity="danger" />
+                            @if (files?.length > 0) {
+                                <div>
+                                    <div class="flex flex-wrap gap-4">
+                                        @for (file of files; track file; let i = $index) {
+                                            <div class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
+                                                <div>
+                                                    <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100" height="50" />
+                                                </div>
+                                                <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
+                                                <div>{{ formatSize(file.size) }}</div>
+                                                <p-badge value="Pending" severity="warn" />
+                                                <p-button icon="pi pi-times" (click)="onRemoveTemplatingFile($event, file, removeFileCallback, i)" [outlined]="true" [rounded]="true" severity="danger" />
+                                            </div>
+                                        }
                                     </div>
                                 </div>
-                            </div>
-                            <div *ngIf="uploadedFiles?.length > 0">
-                                <h5>Completed</h5>
-                                <div class="flex flex-wrap gap-4">
-                                    <div *ngFor="let file of uploadedFiles; let i = index" class="card m-0 px-12 flex flex-col border border-surface items-center gap-4">
-                                        <div>
-                                            <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100" height="50" />
-                                        </div>
-                                        <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
-                                        <div>{{ formatSize(file.size) }}</div>
-                                        <p-badge value="Completed" class="mt-4" severity="success" />
-                                        <p-button icon="pi pi-times" (onClick)="removeUploadedFileCallback(i)" [outlined]="true" [rounded]="true" severity="danger" />
+                            }
+                            @if (uploadedFiles?.length > 0) {
+                                <div>
+                                    <h5>Completed</h5>
+                                    <div class="flex flex-wrap gap-4">
+                                        @for (file of uploadedFiles; track file; let i = $index) {
+                                            <div class="card m-0 px-12 flex flex-col border border-surface items-center gap-4">
+                                                <div>
+                                                    <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100" height="50" />
+                                                </div>
+                                                <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
+                                                <div>{{ formatSize(file.size) }}</div>
+                                                <p-badge value="Completed" class="mt-4" severity="success" />
+                                                <p-button icon="pi pi-times" (onClick)="removeUploadedFileCallback(i)" [outlined]="true" [rounded]="true" severity="danger" />
+                                            </div>
+                                        }
                                     </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     </ng-template>
                     <ng-template #file></ng-template>
@@ -101,7 +108,9 @@ import {ProgressBarModule} from 'primeng/progressbar';
                 <div class="border border-surface-200 dark:border-surface-700 rounded mb-6">
                     <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Tags</span>
                     <div class="p-4 flex gap-2">
-                        <p-chip *ngFor="let tag of tags; let i = index" [label]="tag" [attr.key]="i"></p-chip>
+                        @for (tag of tags; track tag; let i = $index) {
+                            <p-chip [label]="tag" [attr.key]="i"></p-chip>
+                        }
                     </div>
                 </div>
                 <p-fluid>
@@ -123,7 +132,7 @@ import {ProgressBarModule} from 'primeng/progressbar';
                 </div>
             </div>
         </div>
-    </div> `,
+    </div>`,
     providers: [MessageService]
 })
 export class Edit {
@@ -138,8 +147,7 @@ export class Edit {
     constructor(
         private config: PrimeNG,
         private messageService: MessageService
-    ) {
-    }
+    ) {}
 
     choose(event: any, callback: any) {
         callback();

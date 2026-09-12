@@ -1,41 +1,43 @@
-import {CommonModule} from '@angular/common';
-import {Component} from '@angular/core';
-import {MenuItem} from 'primeng/api';
-import {ButtonModule} from 'primeng/button';
-import {ChartModule} from 'primeng/chart';
-import {MenuModule} from 'primeng/menu';
-import {TableModule} from 'primeng/table';
-import {Subscription} from 'rxjs';
-import {FileAppService} from '@/apps/files/service/file.service';
-import {UploaderComponent} from '@/apps/files/uploader/uploader';
-import {LayoutService} from '@/layout/service/layout.service';
-import {Ripple} from 'primeng/ripple';
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { MenuItem } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ChartModule } from 'primeng/chart';
+import { MenuModule } from 'primeng/menu';
+import { TableModule } from 'primeng/table';
+import { Subscription } from 'rxjs';
+import { FileAppService } from '@/apps/files/service/file.service';
+import { UploaderComponent } from '@/apps/files/uploader/uploader';
+import { LayoutService } from '@/layout/service/layout.service';
+import { Ripple } from 'primeng/ripple';
 
 @Component({
     selector: 'app-files',
     standalone: true,
     imports: [CommonModule, MenuModule, ButtonModule, ChartModule, TableModule, UploaderComponent, Ripple],
     template: `<div class="grid grid-cols-12 gap-4">
-        <div *ngFor="let metric of metrics" class="col-span-12 md:col-span-6 lg:col-span-3">
-            <div class="card h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">{{ metric.title }}</span>
+        @for (metric of metrics; track metric) {
+            <div class="col-span-12 md:col-span-6 lg:col-span-3">
+                <div class="card h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-surface-900 dark:text-surface-0 text-xl font-semibold">{{ metric.title }}</span>
+                        <div>
+                            <button pButton pRipple [icon]="metric.icon" text rounded size="small" (click)="menu.toggle($event)"></button>
+                            <p-menu #menu [popup]="true" appendTo="body" [model]="menuitems"></p-menu>
+                        </div>
+                    </div>
                     <div>
-                        <button pButton pRipple [icon]="metric.icon" text rounded size="small" (click)="menu.toggle($event)"></button>
-                        <p-menu #menu [popup]="true" appendTo="body" [model]="menuitems"></p-menu>
-                    </div>
-                </div>
-                <div>
-                    <div [ngClass]="metric.color" class="rounded" style="height: 6px">
-                        <div [ngClass]="metric.fieldColor" class="h-full! rounded" style="width:34%"></div>
-                    </div>
-                    <div class="flex align-item-center justify-between">
-                        <span class="text-surface-900 dark:text-surface-0 mt-4 text-md font-medium">{{ metric.files }}</span>
-                        <span class="text-surface-900 dark:text-surface-0 mt-4 text-md font-medium">{{ metric.fileSize }}</span>
+                        <div [ngClass]="metric.color" class="rounded" style="height: 6px">
+                            <div [ngClass]="metric.fieldColor" class="h-full! rounded" style="width:34%"></div>
+                        </div>
+                        <div class="flex align-item-center justify-between">
+                            <span class="text-surface-900 dark:text-surface-0 mt-4 text-md font-medium">{{ metric.files }}</span>
+                            <span class="text-surface-900 dark:text-surface-0 mt-4 text-md font-medium">{{ metric.fileSize }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
         <div class="col-span-12 md:col-span-5 xl:col-span-3">
             <div class="card">
                 <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold mb-4">Account Storage</div>
@@ -84,15 +86,17 @@ import {Ripple} from 'primeng/ripple';
             <div class="card">
                 <div class="text-surface-900 dark:text-surface-0 text-xl font-semibold mb-4">Folders</div>
                 <div class="grid grid-cols-12 gap-4">
-                    <div *ngFor="let folder of folders" class="col-span-12 md:col-span-6 xl:col-span-4">
-                        <div class="p-4 border border-surface-200 dark:border-surface-700 flex items-center justify-between hover:bg-surface-100 dark:hover:bg-surface-700 cursor-pointer rounded">
-                            <div class="flex items-center">
-                                <i [ngClass]="folder.icon" class="text-2xl mr-4"></i>
-                                <span class="text-surface-900 dark:text-surface-0 text-lg font-medium">{{ folder.name }}</span>
+                    @for (folder of folders; track folder) {
+                        <div class="col-span-12 md:col-span-6 xl:col-span-4">
+                            <div class="p-4 border border-surface-200 dark:border-surface-700 flex items-center justify-between hover:bg-surface-100 dark:hover:bg-surface-700 cursor-pointer rounded">
+                                <div class="flex items-center">
+                                    <i [ngClass]="folder.icon" class="text-2xl mr-4"></i>
+                                    <span class="text-surface-900 dark:text-surface-0 text-lg font-medium">{{ folder.name }}</span>
+                                </div>
+                                <span class="text-surface-600 dark:text-surface-200 text-lg font-semibold">{{ folder.size }}</span>
                             </div>
-                            <span class="text-surface-600 dark:text-surface-200 text-lg font-semibold">{{ folder.size }}</span>
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
             <div class="card">
@@ -135,7 +139,7 @@ import {Ripple} from 'primeng/ripple';
                 </p-table>
             </div>
         </div>
-    </div> `,
+    </div>`,
     providers: [FileAppService]
 })
 export class Files {

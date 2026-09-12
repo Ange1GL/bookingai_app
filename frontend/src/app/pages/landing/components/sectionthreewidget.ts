@@ -99,14 +99,15 @@ import { LayoutService } from '@/layout/service/layout.service';
                 </div>
             </div>
             <div class="-mt-32 md:-mt-56 lg:-mt-64 max-w-md px-6 md:landing-container w-full mx-auto relative z-50 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-7">
-                <div *ngFor="let data of details; let index = index" class="p-2.5 lg:p-3.5 flex items-start gap-3.5">
-                    <div class="bg-primary w-12 h-10" [ngStyle]="{ mask: 'url(' + data.icon + ') no-repeat center' }"></div>
-
-                    <div class="flex-1">
-                        <span class="title-h7">{{ data.title }}</span>
-                        <p class="body-small mt-2 text-left text-surface-700 dark:text-surface-400">{{ data.description }}</p>
+                @for (data of details; track data; let index = $index) {
+                    <div class="p-2.5 lg:p-3.5 flex items-start gap-3.5">
+                        <div class="bg-primary w-12 h-10" [ngStyle]="{ mask: 'url(' + data.icon + ') no-repeat center' }"></div>
+                        <div class="flex-1">
+                            <span class="title-h7">{{ data.title }}</span>
+                            <p class="body-small mt-2 text-left text-surface-700 dark:text-surface-400">{{ data.description }}</p>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
         </section>
     `

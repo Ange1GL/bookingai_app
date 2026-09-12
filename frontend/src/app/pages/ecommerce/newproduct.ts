@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -33,7 +32,7 @@ interface Image {
 
 @Component({
     selector: 'app-new-product',
-    imports: [CommonModule, EditorModule, InputTextModule, FormsModule, FileUploadModule, ButtonModule, SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule],
+    imports: [EditorModule, InputTextModule, FormsModule, FileUploadModule, ButtonModule, SelectModule, ToggleSwitchModule, RippleModule, ChipModule, FluidModule],
     template: `
         <div class="card">
             <span class="block text-surface-900 dark:text-surface-0 font-bold text-xl mb-6">Create Product</span>
@@ -72,30 +71,36 @@ interface Image {
                             >
                                 <ng-template #content>
                                     <div class="w-full h-full py-4" style="cursor: copy" (click)="fileUploader.advancedFileInput.nativeElement.click()">
-                                        <div *ngIf="!product.images.length" class="h-full flex flex-col justify-center items-center">
-                                            <i class="pi pi-file text-primary text-4xl mb-4"></i>
-                                            <span class="block font-semibold text-surface-900 dark:text-surface-0 text-lg">Drop or select a cover image</span>
-                                        </div>
-                                        <div class="w-full py-4" *ngIf="product.images.length" [style]="{ cursor: 'copy' }">
-                                            <div *ngFor="let file of product.images; let i = index" class="flex flex-wrap gap-8" (mouseenter)="onImageMouseOver(file)" (mouseleave)="onImageMouseLeave(file)" style="padding: 1px;">
-                                                <div class="remove-file-wrapper relative w-full h-60 border-4 border-transparent rounded hover:bg-primary hover:text-primary-contrast duration-100 cursor-auto" [style]="{ padding: '1px' }">
-                                                    <img [src]="file.objectURL" [alt]="file.name" class="w-full h-full rounded shadow" />
-                                                    <button
-                                                        [id]="file.name"
-                                                        #buttonEl
-                                                        pButton
-                                                        pRipple
-                                                        rounded
-                                                        type="button"
-                                                        class="remove-button text-sm absolute justify-center items-center cursor-pointer"
-                                                        style="top: -10px; right: -10px; display: none;"
-                                                        (click)="removeImage($event, file)"
-                                                    >
-                                                        <i pButtonIcon class="pi pi-times"></i>
-                                                    </button>
-                                                </div>
+                                        @if (!product.images.length) {
+                                            <div class="h-full flex flex-col justify-center items-center">
+                                                <i class="pi pi-file text-primary text-4xl mb-4"></i>
+                                                <span class="block font-semibold text-surface-900 dark:text-surface-0 text-lg">Drop or select a cover image</span>
                                             </div>
-                                        </div>
+                                        }
+                                        @if (product.images.length) {
+                                            <div class="w-full py-4" [style]="{ cursor: 'copy' }">
+                                                @for (file of product.images; track file; let i = $index) {
+                                                    <div class="flex flex-wrap gap-8" (mouseenter)="onImageMouseOver(file)" (mouseleave)="onImageMouseLeave(file)" style="padding: 1px;">
+                                                        <div class="remove-file-wrapper relative w-full h-60 border-4 border-transparent rounded hover:bg-primary hover:text-primary-contrast duration-100 cursor-auto" [style]="{ padding: '1px' }">
+                                                            <img [src]="file.objectURL" [alt]="file.name" class="w-full h-full rounded shadow" />
+                                                            <button
+                                                                [id]="file.name"
+                                                                #buttonEl
+                                                                pButton
+                                                                pRipple
+                                                                rounded
+                                                                type="button"
+                                                                class="remove-button text-sm absolute justify-center items-center cursor-pointer"
+                                                                style="top: -10px; right: -10px; display: none;"
+                                                                (click)="removeImage($event, file)"
+                                                            >
+                                                                <i pButtonIcon class="pi pi-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 </ng-template>
                             </p-fileUpload>
@@ -118,16 +123,14 @@ interface Image {
                     <div class="border border-surface-200 dark:border-surface-700 rounded">
                         <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Tags</span>
                         <div class="p-4 flex flex-wrap gap-1">
-                            <p-chip
-                                *ngFor="let tag of product.tags; let i = index"
-                                styleClass="mr-2 py-2 px-4 text-surface-900 dark:text-surface-0 font-bold bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700"
-                                [style]="{ 'border-radius': '20px' }"
-                            >
-                                <span class="mr-4">{{ tag }}</span>
-                                <span class="flex w-4 h-4 items-center justify-center border border-surface-200 dark:border-surface-700 bg-gray-100 rounded-full cursor-pointer" (click)="onChipRemove(tag)">
-                                    <i class="pi pi-fw pi-times text-black/60" style="font-size: 9px"></i>
-                                </span>
-                            </p-chip>
+                            @for (tag of product.tags; track tag; let i = $index) {
+                                <p-chip styleClass="mr-2 py-2 px-4 text-surface-900 dark:text-surface-0 font-bold bg-surface-0 dark:bg-surface-900 border border-surface-200 dark:border-surface-700" [style]="{ 'border-radius': '20px' }">
+                                    <span class="mr-4">{{ tag }}</span>
+                                    <span class="flex w-4 h-4 items-center justify-center border border-surface-200 dark:border-surface-700 bg-gray-100 rounded-full cursor-pointer" (click)="onChipRemove(tag)">
+                                        <i class="pi pi-fw pi-times text-black/60" style="font-size: 9px"></i>
+                                    </span>
+                                </p-chip>
+                            }
                         </div>
                     </div>
 
@@ -141,14 +144,13 @@ interface Image {
                     <div class="border border-surface-200 dark:border-surface-700 rounded">
                         <span class="text-surface-900 dark:text-surface-0 font-bold block border-b border-surface-200 dark:border-surface-700 p-4">Colors</span>
                         <div class="p-4 flex">
-                            <div
-                                *ngFor="let color of colorOptions"
-                                class="w-8 h-8 mr-2 border border-surface-200 dark:border-surface-700 rounded-full cursor-pointer flex justify-center items-center"
-                                [class]="color.background"
-                                (click)="onColorSelect(color.name)"
-                            >
-                                <i class="pi pi-check text-sm text-white z-50" *ngIf="product.colors.indexOf(color.name) !== -1"></i>
-                            </div>
+                            @for (color of colorOptions; track color) {
+                                <div class="w-8 h-8 mr-2 border border-surface-200 dark:border-surface-700 rounded-full cursor-pointer flex justify-center items-center" [class]="color.background" (click)="onColorSelect(color.name)">
+                                    @if (product.colors.indexOf(color.name) !== -1) {
+                                        <i class="pi pi-check text-sm text-white z-50"></i>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
 

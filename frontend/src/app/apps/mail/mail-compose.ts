@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MailService } from './service/mail.service';
@@ -14,7 +14,7 @@ import { Mail } from '@/types/mail';
 
 @Component({
     standalone: true,
-    imports: [ButtonModule, CommonModule, FormsModule, RippleModule, InputTextModule, IconFieldModule, InputIconModule, EditorModule],
+    imports: [ButtonModule, FormsModule, RippleModule, InputTextModule, IconFieldModule, InputIconModule, EditorModule],
     template: `<div class="flex items-center px-6 md:px-0 border-t border-surface-200 dark:border-surface-700 md:border-0 pt-6 md:pt-0">
             <button pButton pRipple type="button" icon="pi pi-chevron-left" class="border-surface-200 dark:border-surface-700 text-surface-900 dark:text-surface-0 w-12 h-12 mr-4" outlined severity="secondary" (click)="goBack()"></button>
             <span class="block text-surface-900 dark:text-surface-0 font-bold text-xl">Compose Message</span>

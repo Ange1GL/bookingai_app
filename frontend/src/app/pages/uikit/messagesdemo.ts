@@ -1,16 +1,15 @@
-import {CommonModule} from '@angular/common';
-import {Component} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {MessageService, ToastMessageOptions} from 'primeng/api';
-import {ButtonModule} from 'primeng/button';
-import {InputTextModule} from 'primeng/inputtext';
-import {MessageModule} from 'primeng/message';
-import {ToastModule} from 'primeng/toast';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MessageService, ToastMessageOptions } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-messages-demo',
     standalone: true,
-    imports: [CommonModule, ToastModule, ButtonModule, InputTextModule, MessageModule, FormsModule],
+    imports: [ToastModule, ButtonModule, InputTextModule, MessageModule, FormsModule],
     template: `
         <div class="flex flex-col md:flex-row gap-8">
             <div class="md:w-1/2">

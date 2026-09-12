@@ -1,14 +1,14 @@
 import { Component, computed, effect, HostBinding, inject, input, untracked } from '@angular/core';
 import { LayoutService } from '@/layout/service/layout.service';
 import { sampleDataReductionByArray } from '@/lib/utils';
-import { CommonModule } from '@angular/common';
+
 import { ChartModule } from 'primeng/chart';
 import 'chartjs-adapter-date-fns';
 
 @Component({
     selector: 'multi-line-chart',
     standalone: true,
-    imports: [CommonModule, ChartModule],
+    imports: [ChartModule],
     template: `<p-chart type="line" [data]="chartData" [plugins]="plugins" [options]="chartOptions" />`,
     host: {
         class: 'max-h-80! min-h-72 min-w-[640px] w-full overflow-auto h-full cursor-pointer'

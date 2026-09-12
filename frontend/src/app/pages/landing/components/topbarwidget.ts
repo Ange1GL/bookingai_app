@@ -40,18 +40,20 @@ import { LogoWidget } from '@/pages/landing/components/logowidget';
                             </a>
                         </div>
                         <ul class="flex-none hidden md:flex items-center gap-2">
-                            <li *ngFor="let nav of navs; let index = index" [attr.key]="index">
-                                <a
-                                    [routerLink]="nav.to"
-                                    [ngClass]="{
-                                        'border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-950 shadow-[0px_1px_2px_0px_rgba(18,18,23,0.05)]': activeRouteName === nav.name,
-                                        'border-transparent hover:border-surface-200 dark:hover:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-950': activeRouteName !== nav.name
-                                    }"
-                                    class="flex items-center justify-center text-surface-500 font-medium px-3.5 py-2 leading-normal border rounded-lg transition-all"
-                                >
-                                    {{ nav.label }}
-                                </a>
-                            </li>
+                            @for (nav of navs; track nav; let index = $index) {
+                                <li [attr.key]="index">
+                                    <a
+                                        [routerLink]="nav.to"
+                                        [ngClass]="{
+                                            'border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-950 shadow-[0px_1px_2px_0px_rgba(18,18,23,0.05)]': activeRouteName === nav.name,
+                                            'border-transparent hover:border-surface-200 dark:hover:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-950': activeRouteName !== nav.name
+                                        }"
+                                        class="flex items-center justify-center text-surface-500 font-medium px-3.5 py-2 leading-normal border rounded-lg transition-all"
+                                    >
+                                        {{ nav.label }}
+                                    </a>
+                                </li>
+                            }
                         </ul>
                         <div class="flex-1 hidden md:flex items-center justify-end gap-4">
                             <a
@@ -78,19 +80,21 @@ import { LogoWidget } from '@/pages/landing/components/logowidget';
                     <div class="md:hidden block transition-all duration-300 ease-out overflow-hidden" [ngStyle]="{ maxHeight: openMobileMenu ? maxHeightStyle : '0' }" [ngClass]="openMobileMenu ? 'mt-8 opacity-100' : 'opacity-0'">
                         <div #menuContent class="flex flex-col gap-8 transition-all">
                             <ul class="flex flex-col gap-2">
-                                <li *ngFor="let nav of navs; let index = index" [attr.key]="index">
-                                    <a
-                                        [routerLink]="nav.to"
-                                        (click)="openMobileMenu = false"
-                                        [ngClass]="{
-                                            'border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-950 shadow-[0px_1px_2px_0px_rgba(18,18,23,0.05)]': activeRouteName === nav.name,
-                                            'border-transparent hover:border-surface-200 dark:hover:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-950': activeRouteName !== nav.name
-                                        }"
-                                        class="flex items-center justify-center text-surface-500 font-medium px-3.5 py-2 leading-normal border rounded-lg transition-all"
-                                    >
-                                        {{ nav.label }}
-                                    </a>
-                                </li>
+                                @for (nav of navs; track nav; let index = $index) {
+                                    <li [attr.key]="index">
+                                        <a
+                                            [routerLink]="nav.to"
+                                            (click)="openMobileMenu = false"
+                                            [ngClass]="{
+                                                'border-surface-200 dark:border-surface-800 bg-surface-50 dark:bg-surface-950 shadow-[0px_1px_2px_0px_rgba(18,18,23,0.05)]': activeRouteName === nav.name,
+                                                'border-transparent hover:border-surface-200 dark:hover:border-surface-800 hover:bg-surface-50 dark:hover:bg-surface-950': activeRouteName !== nav.name
+                                            }"
+                                            class="flex items-center justify-center text-surface-500 font-medium px-3.5 py-2 leading-normal border rounded-lg transition-all"
+                                        >
+                                            {{ nav.label }}
+                                        </a>
+                                    </li>
+                                }
                             </ul>
                             <div class="flex flex-col items-center gap-4">
                                 <a

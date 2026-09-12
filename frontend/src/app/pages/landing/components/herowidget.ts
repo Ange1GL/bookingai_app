@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject, Input } from '@angular/core';
 import { HorizontalGridWidget } from './horizontalgridwidget';
 import { LazyImageWidget } from '@/pages/landing/components/lazyimagewidget';
@@ -9,7 +8,7 @@ import { RouterLink } from '@angular/router';
 @Component({
     selector: 'app-hero-widget',
     standalone: true,
-    imports: [CommonModule, HorizontalGridWidget, LazyImageWidget, CustomersLogoWidget, RouterLink],
+    imports: [HorizontalGridWidget, LazyImageWidget, CustomersLogoWidget, RouterLink],
     template: `
         <section class="animate-fadein animate-duration-300 animate-ease-in relative lg:pb-14 lg:pt-52 pt-36 pb-10">
             <app-horizontal-grid-widget class="top-108 lg:top-104"></app-horizontal-grid-widget>

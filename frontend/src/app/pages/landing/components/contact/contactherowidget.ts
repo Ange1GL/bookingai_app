@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -10,7 +10,7 @@ import { CustomersLogoWidget } from '@/pages/landing/components/customerslogowid
 @Component({
     selector: 'app-contact-hero-widget',
     standalone: true,
-    imports: [CommonModule, HorizontalGridWidget, FormsModule, CustomersLogoWidget, InputTextModule, RadioButtonModule, TextareaModule],
+    imports: [HorizontalGridWidget, FormsModule, CustomersLogoWidget, InputTextModule, RadioButtonModule, TextareaModule],
     template: `
         <section class="animate-fadein animate-duration-300 animate-ease-in relative lg:pb-14 lg:pt-52 pt-36 pb-10">
             <app-horizontal-grid-widget class="top-96 lg:top-104"></app-horizontal-grid-widget>
@@ -45,9 +45,11 @@ import { CustomersLogoWidget } from '@/pages/landing/components/customerslogowid
                             </div>
                         </div>
                         <div class="relative z-10 flex items-center gap-2">
-                            <a *ngFor="let s of socials" [href]="s.href" class="flex items-center justify-center px-4 py-1 rounded-full border border-surface-0/50 text-surface-0 hover:bg-surface-0/15 transition-all">
-                                <i [class]="s.icon" class="leading-none!"></i>
-                            </a>
+                            @for (s of socials; track s) {
+                                <a [href]="s.href" class="flex items-center justify-center px-4 py-1 rounded-full border border-surface-0/50 text-surface-0 hover:bg-surface-0/15 transition-all">
+                                    <i [class]="s.icon" class="leading-none!"></i>
+                                </a>
+                            }
                         </div>
                     </div>
 
@@ -63,10 +65,12 @@ import { CustomersLogoWidget } from '@/pages/landing/components/customerslogowid
                             <div>
                                 <label class="label-medium">Select Subject?</label>
                                 <div class="flex items-center flex-wrap gap-4 mt-4">
-                                    <div *ngFor="let s of subjects" class="flex items-center">
-                                        <p-radiobutton type="radio" [id]="s.key" name="subject" [(ngModel)]="selectedSubject" [value]="s.name" />
-                                        <label [for]="s.key" class="ml-2 flex-1 text-sm text-surface-950 dark:text-surface-0 cursor-pointer">{{ s.name }}</label>
-                                    </div>
+                                    @for (s of subjects; track s) {
+                                        <div class="flex items-center">
+                                            <p-radiobutton type="radio" [id]="s.key" name="subject" [(ngModel)]="selectedSubject" [value]="s.name" />
+                                            <label [for]="s.key" class="ml-2 flex-1 text-sm text-surface-950 dark:text-surface-0 cursor-pointer">{{ s.name }}</label>
+                                        </div>
+                                    }
                                 </div>
                             </div>
 

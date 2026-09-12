@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { LayoutService } from '@/layout/service/layout.service';
 import { LazyImageWidget } from '@/pages/landing/components/lazyimagewidget';
@@ -7,7 +6,7 @@ import { RouterLink } from '@angular/router';
 @Component({
     selector: 'app-cta-widget',
     standalone: true,
-    imports: [CommonModule, LazyImageWidget, RouterLink],
+    imports: [LazyImageWidget, RouterLink],
     template: `
         <section class="py-10 lg:py-28 landing-container mx-auto">
             <div class="relative overflow-hidden pr-8 sm:pr-0 pt-8 sm:pt-16 xl:pt-20 pb-8 sm:pb-20 xl:pb-24 pl-8 sm:pl-12 xl:pl-20 w-full bg-surface-50 dark:bg-surface-900 rounded-2xl flex items-start sm:flex-row flex-col gap-16 sm:gap-8 lg:gap-14">

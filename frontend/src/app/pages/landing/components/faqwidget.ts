@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
 @Component({
     selector: 'app-faq-widget',
     standalone: true,
-    imports: [CommonModule, AccordionModule],
+    imports: [AccordionModule],
     template: `
         <section class="py-10 lg:py-28 landing-container mx-auto">
             <div class="w-full">
@@ -12,14 +11,16 @@ import { AccordionModule } from 'primeng/accordion';
                 <p class="mt-6 label-small lg:body-large max-w-md lg:max-w-none mx-auto">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
                 <div class="max-w-3xl lg:max-w-6xl mx-auto mt-10 p-4 lg:p-6 rounded-2xl border border-surface-200 dark:border-surface-800">
                     <p-accordion [value]="0" expandIcon="pi pi-plus" collapseIcon="pi pi-minus">
-                        <p-accordion-panel *ngFor="let faq of faqs; let i = index" [value]="i">
-                            <p-accordion-header>
-                                <h5 class="label-medium">{{ faq.question }}</h5>
-                            </p-accordion-header>
-                            <p-accordion-content>
-                                <p class="m-0 body-small text-left">{{ faq.answer }}</p>
-                            </p-accordion-content>
-                        </p-accordion-panel>
+                        @for (faq of faqs; track faq; let i = $index) {
+                            <p-accordion-panel [value]="i">
+                                <p-accordion-header>
+                                    <h5 class="label-medium">{{ faq.question }}</h5>
+                                </p-accordion-header>
+                                <p-accordion-content>
+                                    <p class="m-0 body-small text-left">{{ faq.answer }}</p>
+                                </p-accordion-content>
+                            </p-accordion-panel>
+                        }
                     </p-accordion>
                 </div>
             </div>

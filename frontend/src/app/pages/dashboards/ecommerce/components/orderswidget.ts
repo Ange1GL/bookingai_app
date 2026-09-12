@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DividerModule } from 'primeng/divider';
-import { CommonModule } from '@angular/common';
+
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { trackByFn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { trackByFn } from '@/lib/utils';
 @Component({
     selector: 'orders-widget',
     standalone: true,
-    imports: [CommonModule, ButtonModule, TagModule, DividerModule],
+    imports: [ButtonModule, TagModule, DividerModule],
     template: ` <div class="flex items-center justify-between">
             <span class="label-medium text-surface-950 dark:text-surface-0">Orders</span>
             <button pButton severity="secondary" outlined class="text-surface-950! dark:text-surface-0! px-2! py-1.5! rounded-lg! label-xsmall!"><span pButtonLabel>See All</span><i class="pi pi-chevron-right text-xs!"></i></button>
@@ -26,7 +26,9 @@ import { trackByFn } from '@/lib/utils';
                         <span class="mt-1 body-xsmall">{{ item.id }}</span>
                     </div>
                 </div>
-                <p-divider *ngIf="idx < orders.length - 1" class="my-3.5" />
+                @if (idx < orders.length - 1) {
+                    <p-divider class="my-3.5" />
+                }
             }
         </div>`,
     host: {

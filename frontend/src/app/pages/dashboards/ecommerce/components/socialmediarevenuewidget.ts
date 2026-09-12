@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { LayoutService } from '@/layout/service/layout.service';
 import { generateRandomMultiData, trackByFn } from '@/lib/utils';
-import { CommonModule } from '@angular/common';
+
 import { TagModule } from 'primeng/tag';
 import { DividerModule } from 'primeng/divider';
 import { ButtonModule } from 'primeng/button';
@@ -10,7 +10,7 @@ import { MeterChart } from '@/pages/dashboards/charts/meterchart';
 @Component({
     selector: 'social-media-revenue-widget',
     standalone: true,
-    imports: [CommonModule, TagModule, DividerModule, ButtonModule, MeterChart],
+    imports: [TagModule, DividerModule, ButtonModule, MeterChart],
     template: ` <div class="flex items-center justify-between">
             <span class="label-medium text-surface-950 dark:text-surface-0">Social media revenue</span>
             <button pButton severity="secondary" outlined class="text-surface-950! dark:text-surface-0! px-2! py-1.5! rounded-lg! label-xsmall!"><span pButtonLabel>See All</span><i class="pi pi-chevron-right text-xs!"></i></button>
@@ -28,7 +28,9 @@ import { MeterChart } from '@/pages/dashboards/charts/meterchart';
                     <span class="flex-1 body-small text-left text-surface-950 dark:text-surface-0">{{ item.title }}</span>
                     <span class="label-small text-surface-950 dark:text-surface-0">{{ '$' + _computedData()?.[idx].toFixed(2) }}</span>
                 </div>
-                <p-divider *ngIf="dataLabels.length - 1 > idx" class="my-3" />
+                @if (dataLabels.length - 1 > idx) {
+                    <p-divider class="my-3" />
+                }
             }
         </div>`,
     host: {

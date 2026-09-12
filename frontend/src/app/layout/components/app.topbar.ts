@@ -65,7 +65,9 @@ interface NotificationsBars {
                                     (click)="selectedNotificationBar.set(item.id)"
                                 >
                                     <span [ngClass]="{ 'text-surface-950 dark:text-surface-0': selectedNotificationBar() === item.id }" class="label-small">{{ item.label }}</span>
-                                    <p-badge *ngIf="item?.badge" [value]="item.badge" severity="success" size="small" class="rounded-md!" />
+                                    @if (item?.badge) {
+                                        <p-badge [value]="item.badge" severity="success" size="small" class="rounded-md!" />
+                                    }
                                 </button>
                             }
                         </div>
@@ -84,10 +86,14 @@ interface NotificationsBars {
                                                 <span class="label-xsmall text-left line-clamp-1">{{ item.description }}</span>
                                                 <span class="label-xsmall text-left">{{ item.time }}</span>
                                             </div>
-                                            <p-badge *ngIf="item.new" value="" severity="success" />
+                                            @if (item.new) {
+                                                <p-badge value="" severity="success" />
+                                            }
                                         </div>
                                     </div>
-                                    <span *ngIf="i !== notifications().length - 1"></span>
+                                    @if (i !== notifications().length - 1) {
+                                        <span></span>
+                                    }
                                 </li>
                             }
                         </ul>

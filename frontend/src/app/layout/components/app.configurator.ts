@@ -1,4 +1,4 @@
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { booleanAttribute, Component, computed, inject, Input, model, OnInit, PLATFORM_ID, Signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { $t, updatePreset, updateSurfacePalette } from '@primeuix/themes';
@@ -42,7 +42,7 @@ declare type SurfacesType = {
 @Component({
     selector: 'app-configurator',
     standalone: true,
-    imports: [CommonModule, FormsModule, SelectButtonModule, DrawerModule, ToggleSwitchModule, RadioButtonModule],
+    imports: [FormsModule, SelectButtonModule, DrawerModule, ToggleSwitchModule, RadioButtonModule],
     template: `
         <p-drawer [visible]="visible()" (onHide)="onDrawerHide()" position="right" [transitionOptions]="'.3s cubic-bezier(0, 0, 0.2, 1)'" styleClass="layout-config-sidebar w-80" header="Settings">
             <div class="flex flex-col gap-6">
@@ -59,7 +59,9 @@ declare type SurfacesType = {
                                     'background-color': primaryColor?.name === 'noir' ? 'var(--text-color)' : primaryColor?.palette?.['500']
                                 }"
                             >
-                                <i *ngIf="primaryColor.name === selectedPrimaryColor()" class="pi pi-check text-white"></i>
+                                @if (primaryColor.name === selectedPrimaryColor()) {
+                                    <i class="pi pi-check text-white"></i>
+                                }
                             </button>
                         }
                     </div>
@@ -78,7 +80,9 @@ declare type SurfacesType = {
                                     'background-color': surface?.palette?.['500']
                                 }"
                             >
-                                <i *ngIf="selectedSurfaceColor() ? selectedSurfaceColor() === surface.name : darkTheme() ? surface.name === 'zinc' : surface.name === 'slate'" class="pi pi-check text-white"></i>
+                                @if (selectedSurfaceColor() ? selectedSurfaceColor() === surface.name : darkTheme() ? surface.name === 'zinc' : surface.name === 'slate') {
+                                    <i class="pi pi-check text-white"></i>
+                                }
                             </button>
                         }
                     </div>
@@ -95,60 +99,65 @@ declare type SurfacesType = {
                         <p-selectbutton [ngModel]="darkTheme()" (ngModelChange)="toggleDarkMode()" [options]="themeOptions" optionLabel="name" optionValue="value" [allowEmpty]="false"></p-selectbutton>
                     </div>
                 </div>
-                <div *ngIf="!simple && location === 'app'" class="flex flex-col gap-2">
-                    <span class="text-lg text-muted-color font-semibold">Card Style</span>
-                    <p-selectbutton [ngModel]="cardStyle()" (ngModelChange)="onCardStyleChange($event)" [options]="cardStyleOptions" optionLabel="name" optionValue="value" [allowEmpty]="false" [allowEmpty]="false" />
-                </div>
-
-                <div *ngIf="!simple && location === 'app'" class="flex flex-col gap-2">
-                    <span class="text-lg text-muted-color font-semibold">Menu Theme</span>
-                    <p-selectbutton [ngModel]="menuTheme()" (ngModelChange)="onMenuThemeChange($event)" [options]="menuThemeOptions" optionLabel="name" optionValue="value" [allowEmpty]="false" [allowEmpty]="false" />
-                </div>
-
-                <div *ngIf="!simple && location === 'app'">
+                @if (!simple && location === 'app') {
                     <div class="flex flex-col gap-2">
-                        <span class="text-lg text-muted-color font-semibold">Menu Type</span>
-                        <div class="flex flex-wrap flex-col gap-3">
-                            <div class="flex">
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="static" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('static')" inputId="static"></p-radio-button>
-                                    <label for="static">Static</label>
-                                </div>
+                        <span class="text-lg text-muted-color font-semibold">Card Style</span>
+                        <p-selectbutton [ngModel]="cardStyle()" (ngModelChange)="onCardStyleChange($event)" [options]="cardStyleOptions" optionLabel="name" optionValue="value" [allowEmpty]="false" [allowEmpty]="false" />
+                    </div>
+                }
 
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="overlay" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('overlay')" inputId="overlay"></p-radio-button>
-                                    <label for="overlay">Overlay</label>
+                @if (!simple && location === 'app') {
+                    <div class="flex flex-col gap-2">
+                        <span class="text-lg text-muted-color font-semibold">Menu Theme</span>
+                        <p-selectbutton [ngModel]="menuTheme()" (ngModelChange)="onMenuThemeChange($event)" [options]="menuThemeOptions" optionLabel="name" optionValue="value" [allowEmpty]="false" [allowEmpty]="false" />
+                    </div>
+                }
+
+                @if (!simple && location === 'app') {
+                    <div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-lg text-muted-color font-semibold">Menu Type</span>
+                            <div class="flex flex-wrap flex-col gap-3">
+                                <div class="flex">
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="static" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('static')" inputId="static"></p-radio-button>
+                                        <label for="static">Static</label>
+                                    </div>
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="overlay" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('overlay')" inputId="overlay"></p-radio-button>
+                                        <label for="overlay">Overlay</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex">
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="slim" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('slim')" inputId="slim"></p-radio-button>
-                                    <label for="slim">Slim</label>
+                                <div class="flex">
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="slim" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('slim')" inputId="slim"></p-radio-button>
+                                        <label for="slim">Slim</label>
+                                    </div>
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="compact" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('compact')" inputId="compact"></p-radio-button>
+                                        <label for="compact">Compact</label>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="compact" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('compact')" inputId="compact"></p-radio-button>
-                                    <label for="compact">Compact</label>
+                                <div class="flex">
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="reveal" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('reveal')" inputId="reveal"></p-radio-button>
+                                        <label for="reveal">Reveal</label>
+                                    </div>
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="drawer" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('drawer')" inputId="drawer"></p-radio-button>
+                                        <label for="drawer">Drawer</label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex">
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="reveal" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('reveal')" inputId="reveal"></p-radio-button>
-                                    <label for="reveal">Reveal</label>
-                                </div>
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="drawer" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('drawer')" inputId="drawer"></p-radio-button>
-                                    <label for="drawer">Drawer</label>
-                                </div>
-                            </div>
-                            <div class="flex">
-                                <div class="flex items-center gap-2 w-6/12">
-                                    <p-radio-button name="menuMode" value="horizontal" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('horizontal')" inputId="horizontal"></p-radio-button>
-                                    <label for="horizontal">Horizontal</label>
+                                <div class="flex">
+                                    <div class="flex items-center gap-2 w-6/12">
+                                        <p-radio-button name="menuMode" value="horizontal" [(ngModel)]="menuMode" (ngModelChange)="setMenuMode('horizontal')" inputId="horizontal"></p-radio-button>
+                                        <label for="horizontal">Horizontal</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </p-drawer>
     `

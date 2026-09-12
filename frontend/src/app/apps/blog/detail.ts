@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -11,7 +10,7 @@ import { TextareaModule } from 'primeng/textarea';
 @Component({
     selector: 'app-detail',
     standalone: true,
-    imports: [CommonModule, FluidModule, IconFieldModule, InputIconModule, TextareaModule, InputTextModule, ButtonModule],
+    imports: [FluidModule, IconFieldModule, InputIconModule, TextareaModule, InputTextModule, ButtonModule],
     template: ` <div class="card">
         <div class="flex justify-between flex-col-reverse md:flex-row items-center">
             <div>
@@ -72,20 +71,22 @@ import { TextareaModule } from 'primeng/textarea';
             <span class="inline-flex items-center justify-center w-8 h-8 border border-surface-200 dark:border-surface-700 rounded">{{ comments.length }}</span>
         </div>
         <ul class="list-none p-0 m-0">
-            <li *ngFor="let comment of comments; let i = index" [attr.key]="i" class="flex p-4 mb-4 border border-surface-200 dark:border-surface-700 rounded">
-                <img [src]="comment.image" class="w-12 h-12 mr-4 shrink-0" [alt]="'Image ' + i" />
-                <div>
-                    <span class="font-semibold text-surface-900 dark:text-surface-0">
-                        {{ comment.name }}
-                    </span>
-                    <p class="font-semibold text-surface-600 dark:text-surface-200 m-0 text-sm">
-                        {{ comment.date }}
-                    </p>
-                    <p class="leading-normal mb-0 my-4">
-                        {{ comment.description }}
-                    </p>
-                </div>
-            </li>
+            @for (comment of comments; track comment; let i = $index) {
+                <li [attr.key]="i" class="flex p-4 mb-4 border border-surface-200 dark:border-surface-700 rounded">
+                    <img [src]="comment.image" class="w-12 h-12 mr-4 shrink-0" [alt]="'Image ' + i" />
+                    <div>
+                        <span class="font-semibold text-surface-900 dark:text-surface-0">
+                            {{ comment.name }}
+                        </span>
+                        <p class="font-semibold text-surface-600 dark:text-surface-200 m-0 text-sm">
+                            {{ comment.date }}
+                        </p>
+                        <p class="leading-normal mb-0 my-4">
+                            {{ comment.description }}
+                        </p>
+                    </div>
+                </li>
+            }
         </ul>
         <div class="text-xl text-surface-900 dark:text-surface-0 mb-6 font-bold mt-20">Post a Comment</div>
 

@@ -1,11 +1,10 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { TestimonialCardWidget } from '@/pages/landing/components/testimonialcardwidget';
 
 @Component({
     selector: 'app-testimonial-widget',
     standalone: true,
-    imports: [CommonModule, TestimonialCardWidget],
+    imports: [TestimonialCardWidget],
     template: `<section class="relative landing-container mx-auto py-10 lg:py-28">
         <div class="badge">Testimonial</div>
         <h2 class="title-h5 lg:title-h2 mt-4">Customer Reviews</h2>
@@ -14,9 +13,11 @@ import { TestimonialCardWidget } from '@/pages/landing/components/testimonialcar
         <div class="lg:overflow-hidden transition-all duration-500 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-[26.5%_1fr_26.5%] items-start gap-4 xl:gap-6 mt-16 lg:pt-32 lg:-mt-16 max-w-3xl lg:max-w-none mx-auto">
                 <div class="hidden lg:grid grid-cols-1 gap-4 xl:gap-6 order-2 lg:order-1">
-                    <div *ngFor="let testimonial of testimonial1; let i = index">
-                        <app-testimonial-card-widget [testimonial]="testimonial" />
-                    </div>
+                    @for (testimonial of testimonial1; track testimonial; let i = $index) {
+                        <div>
+                            <app-testimonial-card-widget [testimonial]="testimonial" />
+                        </div>
+                    }
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 xl:gap-6 order-1 lg:order-2">
@@ -35,23 +36,29 @@ import { TestimonialCardWidget } from '@/pages/landing/components/testimonialcar
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 items-start gap-4 xl:gap-6">
                         <div class="grid grid-cols-1 gap-4 xl:gap-6">
-                            <div *ngFor="let testimonial of testimonial2; let i = index">
-                                <app-testimonial-card-widget [testimonial]="testimonial" />
-                            </div>
+                            @for (testimonial of testimonial2; track testimonial; let i = $index) {
+                                <div>
+                                    <app-testimonial-card-widget [testimonial]="testimonial" />
+                                </div>
+                            }
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 xl:gap-6">
-                            <div *ngFor="let testimonial of testimonial3; let i = index">
-                                <app-testimonial-card-widget [testimonial]="testimonial" />
-                            </div>
+                            @for (testimonial of testimonial3; track testimonial; let i = $index) {
+                                <div>
+                                    <app-testimonial-card-widget [testimonial]="testimonial" />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
 
                 <div class="hidden lg:grid grid-cols-1 gap-4 xl:gap-6 order-3">
-                    <div *ngFor="let testimonial of testimonial4; let i = index">
-                        <app-testimonial-card-widget [testimonial]="testimonial" />
-                    </div>
+                    @for (testimonial of testimonial4; track testimonial; let i = $index) {
+                        <div>
+                            <app-testimonial-card-widget [testimonial]="testimonial" />
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -65,7 +72,7 @@ import { TestimonialCardWidget } from '@/pages/landing/components/testimonialcar
         >
             <button class="py-3 px-7 hover:cursor-pointer rounded-xl bg-surface-950 dark:bg-surface-0 text-surface-0 dark:text-surface-950 hover:opacity-75 transition-all absolute left-1/2 -translate-x-1/2 bottom-1/3">All Customers Reviews</button>
         </div>
-    </section> `
+    </section>`
 })
 export class TestimonialWidget {
     testimonial1 = [
