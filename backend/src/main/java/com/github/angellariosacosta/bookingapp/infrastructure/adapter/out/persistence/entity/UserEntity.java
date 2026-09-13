@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -13,25 +14,27 @@ import java.util.Set;
 @Entity
 @Builder
 @Table(name = "user_app")
-public class UserEntity extends  BaseEntity {
+public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
+
     @Column(unique = true, nullable = false)
     private String email;
+
     private String name;
     private String password;
     private boolean active;
 
     @Builder.Default
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<RoleEntity> roles = new HashSet<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<UserRoleEntity> userRoles = new HashSet<>();
 
+    public Set<RoleEntity> getRoleEntities() {
+        return userRoles.stream()
+                .map(UserRoleEntity::getRole)
+                .collect(Collectors.toSet());
+    }
 }

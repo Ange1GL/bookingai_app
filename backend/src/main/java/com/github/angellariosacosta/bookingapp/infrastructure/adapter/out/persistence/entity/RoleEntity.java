@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -27,11 +28,12 @@ public class RoleEntity extends BaseEntity {
     private String description;
 
     @Builder.Default
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "role_permissions",
-            joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
-    private Set<PermissionEntity> permissions = new HashSet<>();
+    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+    private Set<RolePermissionEntity> rolePermissions = new HashSet<>();
+
+    public Set<PermissionEntity> getPermissionEntities() {
+        return rolePermissions.stream()
+                .map(RolePermissionEntity::getPermission)
+                .collect(Collectors.toSet());
+    }
 }
