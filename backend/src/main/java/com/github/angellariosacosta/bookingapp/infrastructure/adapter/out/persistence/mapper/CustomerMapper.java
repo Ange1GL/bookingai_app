@@ -9,7 +9,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 public class CustomerMapper {
 	
 	
-	public CustomerEntity toEntiy(Customer customer) {
+	public CustomerEntity toEntity(Customer customer) {
 		CustomerEntity entity = new CustomerEntity();
 		entity.setFullName(customer.getName());
 		entity.setPhone(customer.getPhone());

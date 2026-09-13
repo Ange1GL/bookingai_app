@@ -11,7 +11,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 public class StatusMapper {
 
 	
-	public StatusAppointmentEntity toEntiy(StatusAppointment domain) {
+	public StatusAppointmentEntity toEntity(StatusAppointment domain) {
 		StatusAppointmentEntity entity = new StatusAppointmentEntity();
 		entity.setId(domain.getId());
 		entity.setNombre(domain.getName());

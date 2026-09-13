@@ -20,6 +20,9 @@ Este documento define las reglas, convenciones y estructura que **todo agente de
 
 El proyecto sigue **arquitectura hexagonal**. Todo el código debe organizarse respetando la separación entre **dominio**, **aplicación** e **infraestructura**, evitando que el dominio dependa de frameworks externos.
 
+> **Excepción deliberada — `@Service` en la capa application:**  
+> Aunque la arquitectura hexagonal pura evita anotaciones de framework fuera de infraestructura, en este proyecto **los servicios de aplicación (`application/service/`) SÍ usan `@Service`** para que Spring los registre como beans y los gestione en el contexto de la aplicación. El dominio (`domain/`) sigue siendo Java puro sin ninguna anotación de Spring o JPA.
+
 ### Capas
 
 ```
@@ -124,8 +127,67 @@ private CustomerEntity customer;
 
 ## Detalles del código
 
-- Prioiza escribir ingles, solamente sera en español los mensajes o comentarios de algun linea en espefico
-- Evita usar a lo maximo var, es tu ultima opción usar la declarion var de Java
+- Prioriza escribir en inglés; solo serán en español los mensajes visibles al usuario o comentarios de línea específicos.
+- Evita usar `var` al máximo — es tu **última opción**. Siempre declara el tipo explícito.
+
+### Tipos de retorno en REST: usar `record`, no `Map` ni wildcards
+
+**Regla obligatoria:** Los controladores REST y el `@RestControllerAdvice` **nunca** deben devolver `Map<String, Object>` ni usar `?` (wildcard) en `ResponseEntity<?>`. Siempre usa un `record` con nombre y tipo explícito.
+
+#### Prohibido
+
+```java
+// MAL — wildcard sin tipo concreto
+public ResponseEntity<?> login(@RequestBody LoginRequest request) { ... }
+
+// MAL — Map como cuerpo de respuesta
+private ResponseEntity<Map<String, Object>> toErrorResponse(AuthError error) { ... }
+
+// MAL — Map en GlobalExceptionHandler
+public Map<String, Object> handleNotFound(CustomerNotFoundException ex) { ... }
+```
+
+#### Correcto
+
+```java
+// BIEN — record tipado, ubicado en infrastructure.adapter.in.rest.dto
+public record ErrorResponse(String timestamp, int status, String error, String message) {}
+
+// BIEN — tipo explícito en el controlador
+public ResponseEntity<AuthTokenResult> login(@RequestBody LoginRequest request) { ... }
+
+// BIEN — tipo explícito en el handler de errores
+public ResponseEntity<ErrorResponse> toErrorResponse(AuthError error) { ... }
+
+// BIEN — record en GlobalExceptionHandler
+public ErrorResponse handleNotFound(CustomerNotFoundException ex) { ... }
+```
+
+Los records de respuesta se ubican en `infrastructure.adapter.in.rest.dto`. Cuando la respuesta de éxito ya es un `record` existente (ej. `AuthTokenResult`), úsalo directamente sin envolverlo en otro `Map`.
+
+#### Caso especial: controlador con `Result<S, E>` y dos tipos de cuerpo
+
+Cuando un controller usa el patrón `Result<S, E>` y los cuerpos de éxito y fallo son tipos distintos (ej. `AuthSuccessResponse` vs `ErrorResponse`), usar una **`sealed interface`** como tipo común. Nunca resolver con `?` ni con `Map`.
+
+```java
+// dto/AuthResponse.java
+public sealed interface AuthResponse permits AuthSuccessResponse, ErrorResponse {}
+
+// El controller retorna ResponseEntity<AuthResponse> — tipo explícito, sin wildcard
+public ResponseEntity<AuthResponse> login(...) {
+    if (result.isFailure()) {
+        return toErrorResponse(result.getError()); // → ErrorResponse
+    }
+    return ResponseEntity.ok(new AuthSuccessResponse(...)); // → AuthSuccessResponse
+}
+```
+
+### Checklist de tipos de retorno REST
+
+- [ ] ¿El tipo de retorno del controller/handler es un `record` tipado en lugar de `Map<String, Object>`?
+- [ ] ¿No hay ningún `ResponseEntity<?>` (wildcard) en controladores ni `@RestControllerAdvice`?
+- [ ] ¿Cuando el body varía entre éxito y fallo, se usa una `sealed interface` como tipo común?
+- [ ] ¿`var` se usa solo cuando no existe una alternativa más clara con tipo explícito?
 
 ---
 

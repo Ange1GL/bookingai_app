@@ -40,7 +40,36 @@ spring:
           model: deepseek-flash
           temperature: 0.7
       
+security:
+  jwt:
+    private-key: ${JWT_PRIVATE_KEY_PATH:classpath:certs/private.pem}
+    public-key: ${JWT_PUBLIC_KEY_PATH:classpath:certs/public.pem}
+    expiration: 15
+    refresh-expiration: 43200
 
+  cookie:
+    name: auth-token
+    http-only: true
+    secure: true
+    max-age: 900
+    same-site: Strict
+
+cors:
+  allowed-origins:
+    - http://localhost:4200
+  allowed-methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    - OPTIONS
+  allowed-headers:
+    - "*"
+  exposed-headers:
+    - Authorization
+  allow-credentials: true
+  max-age: 3600
 
 server:
   port: 8082

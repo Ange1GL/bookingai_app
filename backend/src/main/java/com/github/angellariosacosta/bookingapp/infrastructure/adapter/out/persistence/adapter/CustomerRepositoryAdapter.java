@@ -22,7 +22,7 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
 
 	@Override
 	public Customer save(Customer customer) {
-		CustomerEntity entity = mapper.toEntiy(customer);
+		CustomerEntity entity = mapper.toEntity(customer);
 		CustomerEntity saved = jpaRepository.save(entity);
 		return mapper.toDomain(saved);
 	}
