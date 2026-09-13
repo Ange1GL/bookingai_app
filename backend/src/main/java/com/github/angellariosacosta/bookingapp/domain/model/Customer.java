@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class Customer {
-	private Long id; 
+	private Long id;
 	private String name;
 	private String phone;
-		
+	private Long userId;
 }

@@ -23,11 +23,12 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 	@Override
 	@Transactional
 	public Appointment book(BookAppointmentCommand command) {
-		Customer customer = customerRepository.findByPhone(command.phone())
+		Customer customer = customerRepository.findByPhone(command.phone(), command.userId())
 				.orElseGet(() -> customerRepository.save(
 						Customer.builder()
 								.name(command.name())
 								.phone(command.phone())
+								.userId(command.userId())
 								.build()
 				));
 

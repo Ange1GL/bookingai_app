@@ -28,18 +28,18 @@ public class CustomerRepositoryAdapter implements CustomerRepository {
 	}
 
 	@Override
-	public Optional<Customer> findById(Long id) {
-		return jpaRepository.findById(id).map(mapper::toDomain);
+	public Optional<Customer> findById(Long id, Long userId) {
+		return jpaRepository.findByIdAndUserId(id, userId).map(mapper::toDomain);
 	}
 
 	@Override
-	public Optional<Customer> findByPhone(String phone) {
-		return jpaRepository.findByPhone(phone).map(mapper::toDomain);
+	public Optional<Customer> findByPhone(String phone, Long userId) {
+		return jpaRepository.findByPhoneAndUserId(phone, userId).map(mapper::toDomain);
 	}
 
 	@Override
-	public List<Customer> searchByNameContaining(String name) {
-		return jpaRepository.findByFullNameContainingIgnoreCase(name)
+	public List<Customer> searchByNameContaining(String name, Long userId) {
+		return jpaRepository.findByFullNameContainingIgnoreCaseAndUserId(name, userId)
 				.stream()
 				.map(mapper::toDomain)
 				.toList();

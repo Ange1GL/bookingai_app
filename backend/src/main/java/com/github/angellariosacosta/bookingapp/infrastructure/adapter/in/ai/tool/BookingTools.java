@@ -38,7 +38,7 @@ public class BookingTools {
 
 	@Tool(description = "Busca clientes por nombre. Devuelve lista de coincidencias parciales.")
 	public List<CustomerSummary> searchCustomersByName(String name) {
-		return searchCustomers.search(name).stream()
+		return searchCustomers.search(name, currentUserPort.getCurrentUserId()).stream()
 				.map(CustomerSummary::from)
 				.toList();
 	}

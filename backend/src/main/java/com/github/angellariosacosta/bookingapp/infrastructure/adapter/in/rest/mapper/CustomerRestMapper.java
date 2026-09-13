@@ -10,8 +10,8 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 @Component
 public class CustomerRestMapper {
 
-	public CreateCustomerCommand toCommand(CreateCustomerRequest request) {
-		return new CreateCustomerCommand(request.name(), request.phone());
+	public CreateCustomerCommand toCommand(CreateCustomerRequest request, Long userId) {
+		return new CreateCustomerCommand(request.name(), request.phone(), userId);
 	}
 
 	public CustomerResponse toResponse(Customer customer) {

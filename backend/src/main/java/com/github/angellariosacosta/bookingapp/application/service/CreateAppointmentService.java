@@ -24,7 +24,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 	@Override
 	@Transactional
 	public Appointment create(CreateAppointmentCommand command) {
-		Customer customer = customerRepository.findById(command.customerId())
+		Customer customer = customerRepository.findById(command.customerId(), command.userId())
 				.orElseThrow(() -> new CustomerNotFoundException(
 						"Customer not found with id: " + command.customerId()));
 

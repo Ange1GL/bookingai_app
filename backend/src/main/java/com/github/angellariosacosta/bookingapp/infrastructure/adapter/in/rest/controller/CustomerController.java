@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateCustomerRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CustomerResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.CustomerRestMapper;
@@ -25,8 +26,8 @@ public class CustomerController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public CustomerResponse create(@RequestBody CreateCustomerRequest request) {
-		Customer customer = createCustomerUseCase.create(mapper.toCommand(request));
+	public CustomerResponse create(@RequestBody CreateCustomerRequest request, @CurrentUserId Long userId) {
+		Customer customer = createCustomerUseCase.create(mapper.toCommand(request, userId));
 		return mapper.toResponse(customer);
 	}
 }

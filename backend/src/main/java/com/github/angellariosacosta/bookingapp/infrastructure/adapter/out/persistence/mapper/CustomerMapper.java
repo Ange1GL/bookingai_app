@@ -13,18 +13,20 @@ public class CustomerMapper {
 		CustomerEntity entity = new CustomerEntity();
 		entity.setFullName(customer.getName());
 		entity.setPhone(customer.getPhone());
+		entity.setUserId(customer.getUserId());
 		return entity;
 	}
-	
-	
+
+
 	public Customer toDomain(CustomerEntity entity) {
 		return Customer
 							.builder()
 							.name(entity.getFullName())
 							.phone(entity.getPhone())
 							.id(entity.getId())
+							.userId(entity.getUserId())
 							.build();
-		
+
 
 	}
 }

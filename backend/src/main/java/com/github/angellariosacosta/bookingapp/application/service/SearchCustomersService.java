@@ -19,7 +19,7 @@ public class SearchCustomersService implements SearchCustomersUseCase {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Customer> search(String name) {
-		return customerRepository.searchByNameContaining(name);
+	public List<Customer> search(String name, Long userId) {
+		return customerRepository.searchByNameContaining(name, userId);
 	}
 }

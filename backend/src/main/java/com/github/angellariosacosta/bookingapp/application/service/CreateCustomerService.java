@@ -19,10 +19,13 @@ public class CreateCustomerService implements CreateCustomerUseCase {
 	@Override
 	@Transactional
 	public Customer create(CreateCustomerCommand command) {
-		Customer customer = Customer.builder()
-				.name(command.name())
-				.phone(command.phone())
-				.build();
-		return customerRepository.save(customer);
+		return customerRepository.findByPhone(command.phone(), command.userId())
+				.orElseGet(() -> customerRepository.save(
+						Customer.builder()
+								.name(command.name())
+								.phone(command.phone())
+								.userId(command.userId())
+								.build()
+				));
 	}
 }
