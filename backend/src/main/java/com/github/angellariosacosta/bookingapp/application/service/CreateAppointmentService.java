@@ -33,7 +33,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 
-		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer);
+		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId());
 		return appointmentRepository.save(appointment);
 	}
 }

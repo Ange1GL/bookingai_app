@@ -1,3 +1,3 @@
 package com.github.angellariosacosta.bookingapp.application.command;
 
-public record CancelAppointmentCommand(Long appointmentId) {}
+public record CancelAppointmentCommand(Long appointmentId, Long userId) {}

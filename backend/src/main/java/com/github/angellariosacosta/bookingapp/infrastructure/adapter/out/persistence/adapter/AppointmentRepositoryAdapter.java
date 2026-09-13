@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
@@ -31,8 +32,18 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
 	}
 
 	@Override
+	public Optional<Appointment> findById(Long id) {
+		return jpaRepository.findById(id).map(mapper::toDomain);
+	}
+
+	@Override
 	public boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime) {
 		return jpaRepository.existsOverlapping(startTime, endTime);
+	}
+
+	@Override
+	public boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime, Long excludeAppointmentId) {
+		return jpaRepository.existsOverlappingExcludingId(startTime, endTime, excludeAppointmentId);
 	}
 
 	@Override

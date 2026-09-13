@@ -12,21 +12,22 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class AppointmentMapper {
-	
+
 
 	private final CustomerMapper customerMapper;
-	
-	
+
+
 	public AppointmentEntity toEntity(Appointment domain) {
 		AppointmentEntity entity = new AppointmentEntity();
 		entity.setStartTime(domain.getStartTime());
 		entity.setEndTime(domain.getEndTime());
 		entity.setCustomerId(domain.getCustomer().getId());
 		entity.setStatusId(domain.getStatus().getId());
+		entity.setUserId(domain.getUserId());
 		return entity;
 	}
-	
-	
+
+
 	public Appointment toDomain(AppointmentEntity entity) {
 		StatusAppointment status = StatusAppointment.fromId(entity.getStatusId());
 		Customer customer = customerMapper.toDomain(entity.getCustomer());
@@ -34,10 +35,11 @@ public class AppointmentMapper {
 				entity.getStartTime(),
 				entity.getEndTime(),
 				customer,
-				status
+				status,
+				entity.getUserId()
 		);
 		domain.setId(entity.getId());
 		return domain;
 	}
-	
+
 }

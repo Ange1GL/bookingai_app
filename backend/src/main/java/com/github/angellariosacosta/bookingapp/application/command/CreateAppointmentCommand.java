@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record CreateAppointmentCommand(
 		LocalDateTime startTime,
 		LocalDateTime endTime,
-		Long customerId
+		Long customerId,
+		Long userId
 ) {
 }

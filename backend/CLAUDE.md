@@ -130,6 +130,30 @@ private CustomerEntity customer;
 - Prioriza escribir en inglés; solo serán en español los mensajes visibles al usuario o comentarios de línea específicos.
 - Evita usar `var` al máximo — es tu **última opción**. Siempre declara el tipo explícito.
 
+### Valores por defecto ante `null`: usar `Objects.requireNonNullElse`
+
+**Regla obligatoria:** Cuando la lógica de negocio lo permita, para resolver un valor por defecto ante un posible `null` siempre usa `Objects.requireNonNullElse(valor, porDefecto)` en lugar de un `if`/ternario que compare explícitamente contra `null` (`valor == null ? ... : ...`, `valor != null ? ... : ...`).
+
+Motivo: SonarLint (el linter del IDE) frecuentemente marca esas comparaciones manuales como *"the condition is always true/false"* en falsos positivos difíciles de silenciar. `Objects.requireNonNullElse` expresa la misma intención sin disparar ese warning.
+
+#### Prohibido
+
+```java
+// MAL — dispara "condition is always true" en SonarLint
+String detail = authException.getMessage() != null
+        ? authException.getMessage()
+        : "sin detalle";
+```
+
+#### Correcto
+
+```java
+// BIEN
+String detail = Objects.requireNonNullElse(authException.getMessage(), "sin detalle");
+```
+
+Esto aplica solo cuando la semántica es "usar un valor por defecto si el original es `null`". No aplica si la rama `null` requiere lanzar una excepción, ejecutar lógica adicional, o si el valor por defecto es costoso de calcular (en ese caso usar `Objects.requireNonNullElseGet`).
+
 ### Tipos de retorno en REST: usar `record`, no `Map` ni wildcards
 
 **Regla obligatoria:** Los controladores REST y el `@RestControllerAdvice` **nunca** deben devolver `Map<String, Object>` ni usar `?` (wildcard) en `ResponseEntity<?>`. Siempre usa un `record` con nombre y tipo explícito.

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.angellariosacosta.bookingapp.application.port.in.BookAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AppointmentResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.BookAppointmentRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateAppointmentRequest;
@@ -30,15 +31,15 @@ public class AppointmentController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public AppointmentResponse create(@RequestBody CreateAppointmentRequest request) {
-		Appointment appointment = createAppointmentUseCase.create(mapper.toCommand(request));
+	public AppointmentResponse create(@RequestBody CreateAppointmentRequest request, @CurrentUserId Long userId) {
+		Appointment appointment = createAppointmentUseCase.create(mapper.toCommand(request, userId));
 		return mapper.toResponse(appointment);
 	}
 
 	@PostMapping("/book")
 	@ResponseStatus(HttpStatus.CREATED)
-	public AppointmentResponse book(@RequestBody BookAppointmentRequest request) {
-		Appointment appointment = bookAppointmentUseCase.book(bookMapper.toCommand(request));
+	public AppointmentResponse book(@RequestBody BookAppointmentRequest request, @CurrentUserId Long userId) {
+		Appointment appointment = bookAppointmentUseCase.book(bookMapper.toCommand(request, userId));
 		return bookMapper.toResponse(appointment);
 	}
 }

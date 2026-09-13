@@ -10,12 +10,13 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 @Component
 public class BookAppointmentRestMapper {
 
-	public BookAppointmentCommand toCommand(BookAppointmentRequest request) {
+	public BookAppointmentCommand toCommand(BookAppointmentRequest request, Long userId) {
 		return new BookAppointmentCommand(
 				request.name(),
 				request.phone(),
 				request.startTime(),
-				request.endTime()
+				request.endTime(),
+				userId
 		);
 	}
 
@@ -25,7 +26,8 @@ public class BookAppointmentRestMapper {
 				appointment.getStartTime(),
 				appointment.getEndTime(),
 				appointment.getCustomer().getName(),
-				appointment.getStatus().getName()
+				appointment.getStatus().getName(),
+				appointment.getUserId()
 		);
 	}
 }

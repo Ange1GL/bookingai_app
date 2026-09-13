@@ -32,6 +32,25 @@ public interface AppointmentRepositoryJpa extends JpaRepository<AppointmentEntit
 			@Param("endTime") LocalDateTime endTime
 	);
 
+	// Igual que existsOverlapping, pero excluyendo la propia cita del chequeo.
+	// Necesario para reagendar: al momento de validar el nuevo horario, la cita
+	// todavía existe en la BD con su horario ANTERIOR, así que sin este exclude
+	// cualquier reagendado que toque su propio slot actual se detectaría como
+	// solapado consigo mismo (falso positivo).
+	@Query("""
+			SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+			FROM AppointmentEntity a
+			WHERE a.startTime < :endTime
+			  AND a.endTime > :startTime
+			  AND a.statusId <> 2
+			  AND a.id <> :excludeId
+			""")
+	boolean existsOverlappingExcludingId(
+			@Param("startTime") LocalDateTime startTime,
+			@Param("endTime") LocalDateTime endTime,
+			@Param("excludeId") Long excludeId
+	);
+
 	// Spring Data deriva el SQL completo del nombre del método:
 	// findBy → SELECT, CustomerIdAnd → WHERE customer_id = ?, StatusIdNot → AND status_id <> ?,
 	// OrderByStartTimeAsc → ORDER BY start_time ASC.

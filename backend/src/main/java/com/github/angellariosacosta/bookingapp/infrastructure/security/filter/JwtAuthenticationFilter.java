@@ -1,8 +1,8 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
-
-
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
+import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtAuthenticationException;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtErrorCode;
 import jakarta.servlet.FilterChain;
@@ -10,55 +10,32 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.util.AntPathMatcher;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
-
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-
 
     private final TokenService tokenService;
     private final UserDetailsService userDetailsService;
-
-    /** Patrones públicos (whitelist) */
-    private final List<String> publicEndpointPatterns;
-
-    /** Nombre de la cookie que transporta el JWT */
-    private final String authCookieName;
-
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
-
-    public JwtAuthenticationFilter(
-            TokenService tokenService,
-            UserDetailsService userDetailsService,
-            List<String> publicEndpointPatterns,
-            String authCookieName
-    ) {
-        this.tokenService = tokenService;
-        this.userDetailsService = userDetailsService;
-        this.publicEndpointPatterns = publicEndpointPatterns;
-        this.authCookieName = authCookieName;
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return publicEndpointPatterns.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-    }
-
+    private final CookieProperties cookieProperties;
+    private final SecurityEntryPoint securityEntryPoint;
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -85,32 +62,39 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("Authenticated user={}", email);
 
             filterChain.doFilter(request, response);
 
         } catch (JwtAuthenticationException ex) {
             SecurityContextHolder.clearContext();
-            throw ex;
+            log.warn("JWT authentication failed: {}", ex.getErrorCode());
+            securityEntryPoint.commence(request, response, ex);
 
         } catch (Exception ex) {
             SecurityContextHolder.clearContext();
-            throw new JwtAuthenticationException(JwtErrorCode.TOKEN_INVALID);
+            log.warn("Unexpected error during JWT validation", ex);
+            securityEntryPoint.commence(
+                    request,
+                    response,
+                    new BadCredentialsException(JwtErrorCode.TOKEN_INVALID.getMessage(), ex)
+            );
         }
     }
 
     private Optional<String> extractToken(HttpServletRequest request) {
-
-        String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer ")) {
-            return Optional.of(bearer.substring(7));
+        String bearer = request.getHeader(AUTHORIZATION_HEADER);
+        if (bearer != null && bearer.startsWith(BEARER_PREFIX)) {
+            return Optional.of(bearer.substring(BEARER_PREFIX.length()));
         }
 
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             return Arrays.stream(cookies)
-                    .filter(cookie -> authCookieName.equals(cookie.getName()))
+                    .filter(cookie -> cookieProperties.getName().equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst();
         }
@@ -118,5 +102,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return Optional.empty();
     }
 }
-
-

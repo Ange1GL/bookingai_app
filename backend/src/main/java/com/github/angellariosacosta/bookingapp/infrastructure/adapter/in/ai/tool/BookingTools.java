@@ -18,6 +18,7 @@ import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppoint
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RescheduleAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.SearchCustomersUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.out.CurrentUserPort;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 
@@ -33,6 +34,7 @@ public class BookingTools {
 	private final CancelAppointmentUseCase cancelAppointment;
 	private final RescheduleAppointmentUseCase rescheduleAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
+	private final CurrentUserPort currentUserPort;
 
 	@Tool(description = "Busca clientes por nombre. Devuelve lista de coincidencias parciales.")
 	public List<CustomerSummary> searchCustomersByName(String name) {
@@ -43,25 +45,28 @@ public class BookingTools {
 
 	@Tool(description = "Registra una cita y crea al cliente si no existe. Busca al cliente por teléfono primero.")
 	public AppointmentSummary bookAppointmentForCustomer(String name, String phone, String startTime, String endTime) {
-		BookAppointmentCommand command = new BookAppointmentCommand(name, phone, parseDateTime(startTime), parseDateTime(endTime));
+		BookAppointmentCommand command = new BookAppointmentCommand(
+				name, phone, parseDateTime(startTime), parseDateTime(endTime), currentUserPort.getCurrentUserId());
 		return AppointmentSummary.from(bookAppointment.book(command));
 	}
 
 	@Tool(description = "Registra una cita para un cliente existente dado su id.")
 	public AppointmentSummary createAppointmentForExistingCustomer(Long customerId, String startTime, String endTime) {
-		CreateAppointmentCommand command = new CreateAppointmentCommand(parseDateTime(startTime), parseDateTime(endTime), customerId);
+		CreateAppointmentCommand command = new CreateAppointmentCommand(
+				parseDateTime(startTime), parseDateTime(endTime), customerId, currentUserPort.getCurrentUserId());
 		return AppointmentSummary.from(createAppointment.create(command));
 	}
 
 	@Tool(description = "Cancela una cita dado su id.")
 	public AppointmentSummary cancelAppointmentById(Long appointmentId) {
-		CancelAppointmentCommand command = new CancelAppointmentCommand(appointmentId);
+		CancelAppointmentCommand command = new CancelAppointmentCommand(appointmentId, currentUserPort.getCurrentUserId());
 		return AppointmentSummary.from(cancelAppointment.cancel(command));
 	}
 
 	@Tool(description = "Mueve una cita a un nuevo horario. Verifica disponibilidad antes de mover.")
 	public AppointmentSummary rescheduleAppointmentById(Long appointmentId, String newStartTime, String newEndTime) {
-		RescheduleAppointmentCommand command = new RescheduleAppointmentCommand(appointmentId, parseDateTime(newStartTime), parseDateTime(newEndTime));
+		RescheduleAppointmentCommand command = new RescheduleAppointmentCommand(
+				appointmentId, parseDateTime(newStartTime), parseDateTime(newEndTime), currentUserPort.getCurrentUserId());
 		return AppointmentSummary.from(rescheduleAppointment.reschedule(command));
 	}
 
@@ -91,7 +96,7 @@ public class BookingTools {
 		}
 	}
 
-	public record AppointmentSummary(Long id, String startTime, String endTime, String status, Long customerId, String customerName) {
+	public record AppointmentSummary(Long id, String startTime, String endTime, String status, Long customerId, String customerName, Long userId) {
 		static AppointmentSummary from(Appointment a) {
 			return new AppointmentSummary(
 					a.getId(),
@@ -99,7 +104,8 @@ public class BookingTools {
 					a.getEndTime().toString(),
 					a.getStatus().getName(),
 					a.getCustomer().getId(),
-					a.getCustomer().getName()
+					a.getCustomer().getName(),
+					a.getUserId()
 			);
 		}
 	}
