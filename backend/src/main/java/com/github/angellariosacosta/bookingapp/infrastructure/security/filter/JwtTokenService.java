@@ -24,13 +24,18 @@ public class JwtTokenService implements TokenService {
     @Value("${security.jwt.expiration}")
     private long expirationMinutes;
 
-    @Value("${security.jwt.refresh-expiration}")
-    private long refreshExpirationMinutes;
+    @Value("${security.jwt.issuer}")
+    private String issuer;
+
+    @Value("${security.jwt.audience}")
+    private String audience;
 
     @Override
     public String generateToken(Long subject, String email, List<String> roles) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(List.of(audience))
                 .subject(subject.toString())
                 .claim("user_id", subject)
                 .claim("email", email)
@@ -54,24 +59,6 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public String generateRefreshToken(Long subject) {
-        Instant now = Instant.now();
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(subject.toString())
-                .claim("user_id", subject)
-                .issuedAt(now)
-                .expiresAt(now.plus(refreshExpirationMinutes, ChronoUnit.MINUTES))
-                .build();
-
-        JwtEncoderParameters params = JwtEncoderParameters.from(
-                JwsHeader.with(SignatureAlgorithm.RS256).build(),
-                claims
-        );
-
-        return jwtEncoder.encode(params).getTokenValue();
-    }
-
-    @Override
     public String getSubject(String token) {
         Jwt jwt = jwtDecoder.decode(token);
         return jwt.getSubject();
@@ -83,7 +70,6 @@ public class JwtTokenService implements TokenService {
             jwtDecoder.decode(token);
             return true;
         } catch (JwtValidationException ex) {
-            // 🔹 Puede contener múltiples errores
             if (ex.getErrors().stream()
                     .anyMatch(error ->
                             OAuth2ErrorCodes.INVALID_TOKEN.equals(error.getErrorCode())
@@ -99,6 +85,5 @@ public class JwtTokenService implements TokenService {
             throw new JwtAuthenticationException(JwtErrorCode.TOKEN_INVALID);
         }
     }
-
 
 }

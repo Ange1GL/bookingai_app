@@ -44,15 +44,23 @@ security:
   jwt:
     private-key: ${JWT_PRIVATE_KEY_PATH:classpath:certs/private.pem}
     public-key: ${JWT_PUBLIC_KEY_PATH:classpath:certs/public.pem}
-    expiration: 15
-    refresh-expiration: 43200
+    expiration: 15               # minutos, vida del access token
+    refresh-expiration: 43200    # minutos = 30 dias, vida del refresh token
+    issuer: bookingapp-api
+    audience: bookingapp-frontend
 
   cookie:
-    name: auth-token
     http-only: true
     secure: true
-    max-age: 900
-    same-site: Strict
+    same-site: Lax              # Strict bloquea el envio cross-port en dev (localhost:4200 -> localhost:8082)
+    access:
+      name: access_token
+      path: /api
+      max-age: 900               # segundos = 15 min, debe coincidir con jwt.expiration
+    refresh:
+      name: refresh_token
+      path: /api/v1/auth/refresh
+      max-age: 2592000           # segundos = 30 dias, debe coincidir con jwt.refresh-expiration
 
 cors:
   allowed-origins:

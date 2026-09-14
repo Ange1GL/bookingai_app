@@ -10,11 +10,17 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class CookieProperties {
-    private String name;
     private boolean httpOnly;
     private boolean secure;
-    private long maxAge;
     private String sameSite;
+    private CookieSettings access = new CookieSettings();
+    private CookieSettings refresh = new CookieSettings();
+
+    @Getter
+    @Setter
+    public static class CookieSettings {
+        private String name;
+        private String path;
+        private long maxAge;
+    }
 }
-
-

@@ -1,3 +1,11 @@
 package com.github.angellariosacosta.bookingapp.application.command;
 
-public record AuthTokenCommand(String token, String refreshToken) {}
+import java.util.List;
+
+public record AuthTokenCommand(
+        String accessToken,
+        String refreshToken,
+        Long userId,
+        String email,
+        List<String> roles
+) {}

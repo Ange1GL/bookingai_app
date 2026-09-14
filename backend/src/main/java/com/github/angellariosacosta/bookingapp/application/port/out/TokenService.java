@@ -10,6 +10,4 @@ public interface TokenService {
     String getEmail(String token);
 
     boolean validateToken(String token);
-
-    String generateRefreshToken(Long subject);
 }

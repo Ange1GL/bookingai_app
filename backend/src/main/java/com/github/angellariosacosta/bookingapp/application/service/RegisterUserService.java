@@ -1,13 +1,11 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
-import java.util.List;
 import java.util.Set;
 
 import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
 import com.github.angellariosacosta.bookingapp.application.port.out.RoleRepository;
-import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
 import com.github.angellariosacosta.bookingapp.domain.model.Role;
@@ -26,10 +24,10 @@ public class RegisterUserService implements RegisterUserCase {
     private final PasswordHasher passwordHasher;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final TokenService tokenService;
+    private final AuthTokenIssuer authTokenIssuer;
 
     @Override
-    public AuthTokenCommand register(String email, String rawPassword, String name) {
+    public AuthTokenCommand register(String email, String rawPassword, String name, String userAgent, String ipAddress) {
         if (userRepository.existsByEmail(email)) {
             throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
         }
@@ -49,13 +47,6 @@ public class RegisterUserService implements RegisterUserCase {
                 .build();
 
         user = userRepository.save(user);
-        return buildTokenResult(user);
-    }
-
-    private AuthTokenCommand buildTokenResult(User user) {
-        List<String> roles = user.getRoles().stream().map(Role::name).toList();
-        String token = tokenService.generateToken(user.getId(), user.getEmail(), roles);
-        String refreshToken = tokenService.generateRefreshToken(user.getId());
-        return new AuthTokenCommand(token, refreshToken);
+        return authTokenIssuer.issue(user, userAgent, ipAddress).command();
     }
 }

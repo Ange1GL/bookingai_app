@@ -1,14 +1,10 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
-import java.util.List;
-
 import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.AuthenticateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.LoadUserByEmailPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
-import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
-import com.github.angellariosacosta.bookingapp.domain.model.Role;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 
@@ -23,10 +19,10 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
 
     private final LoadUserByEmailPort loadUserByEmailPort;
     private final PasswordHasher passwordEncoder;
-    private final TokenService tokenService;
+    private final AuthTokenIssuer authTokenIssuer;
 
     @Override
-    public AuthTokenCommand authenticate(String email, String rawPassword) {
+    public AuthTokenCommand authenticate(String email, String rawPassword, String userAgent, String ipAddress) {
         log.info("Login attempt user={}", email);
 
         User user = loadUserByEmailPort.loadByEmail(email);
@@ -42,13 +38,6 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
         }
 
         log.info("Login success user={}", email);
-        return buildTokenResult(user);
-    }
-
-    private AuthTokenCommand buildTokenResult(User user) {
-        List<String> roles = user.getRoles().stream().map(Role::name).toList();
-        String token = tokenService.generateToken(user.getId(), user.getEmail(), roles);
-        String refreshToken = tokenService.generateRefreshToken(user.getId());
-        return new AuthTokenCommand(token, refreshToken);
+        return authTokenIssuer.issue(user, userAgent, ipAddress).command();
     }
 }

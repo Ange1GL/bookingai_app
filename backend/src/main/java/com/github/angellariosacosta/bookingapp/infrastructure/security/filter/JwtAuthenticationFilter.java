@@ -5,9 +5,9 @@ import com.github.angellariosacosta.bookingapp.infrastructure.config.CookiePrope
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtAuthenticationException;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtErrorCode;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.util.CookieUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Slf4j
@@ -91,14 +90,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return Optional.of(bearer.substring(BEARER_PREFIX.length()));
         }
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            return Arrays.stream(cookies)
-                    .filter(cookie -> cookieProperties.getName().equals(cookie.getName()))
-                    .map(Cookie::getValue)
-                    .findFirst();
-        }
-
-        return Optional.empty();
+        return CookieUtils.readCookie(request, cookieProperties.getAccess().getName());
     }
 }

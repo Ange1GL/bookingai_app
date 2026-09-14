@@ -76,7 +76,8 @@ public class GlobalExceptionHandler {
 
 	private HttpStatus resolveAuthStatus(AuthError error) {
 		return switch (error) {
-			case INVALID_CREDENTIALS  -> HttpStatus.UNAUTHORIZED;
+			case INVALID_CREDENTIALS, REFRESH_TOKEN_INVALID, REFRESH_TOKEN_EXPIRED, REFRESH_TOKEN_REUSED
+					-> HttpStatus.UNAUTHORIZED;
 			case USER_DISABLED        -> HttpStatus.FORBIDDEN;
 			case EMAIL_ALREADY_IN_USE -> HttpStatus.CONFLICT;
 		};

@@ -1,6 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.config;
 
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.CsrfCookieFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -42,7 +44,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                // Habilita CSRF (antes estaba deshabilitado) porque el login va a pasar a viajar en cookie
+                // en vez de header Authorization: con cookie, el navegador la reenvía solo porque existe,
+                // sin que el request lo pida explícitamente, y ahí es donde aparece el riesgo de CSRF.
+                // csrf.spa() (atajo de Spring Security 7.0 pensado justo para este caso) arma un
+                // CookieCsrfTokenRepository (cookie "XSRF-TOKEN" legible por JavaScript) + un
+                // CsrfTokenRequestHandler que compara el valor CRUDO de esa cookie contra el header
+                // X-XSRF-TOKEN. El handler que Spring usa por defecto (XorCsrfTokenRequestAttributeHandler)
+                // espera el valor enmascarado (XOR), no el valor crudo que expone la cookie — con ese
+                // default, ningún cliente (Angular, Postman, curl) que simplemente copie la cookie al
+                // header podía pasar la validación, así que bloqueaba el 100% de los POST. spa() usa el
+                // handler correcto para este patrón. Si el header no coincide, la petición se rechaza —
+                // eso es lo que bloquea a un sitio atacante: puede hacer que el navegador reenvíe la
+                // cookie, pero no puede leer su valor para ponerlo en el header.
+                .csrf(csrf -> csrf.spa())
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
@@ -53,8 +68,9 @@ public class SecurityConfig {
                         ex.authenticationEntryPoint(securityEntryPoint)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated()
                 );
 
