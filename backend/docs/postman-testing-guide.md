@@ -24,7 +24,33 @@ No se usó `Path=/` (raíz) a propósito: mandaría la cookie en cualquier reque
 
 ---
 
-## Por qué Postman no puede loguearte "de una"
+## Modo fácil: perfil `dev` (activo por defecto)
+
+Para no tener que repetir el paso manual de CSRF en cada sesión de pruebas, el proyecto tiene un archivo de perfil [`application-dev.yaml`](../src/main/resources/application-dev.yaml) que desactiva `security.csrf.enabled` y pone `security.cookie.secure: false`. **`dev` es el perfil activo por defecto** (`application.yaml:8-9`, `spring.profiles.active: dev`), así que basta con levantar el backend normal, sin pasar ningún flag:
+
+```bash
+mvn spring-boot:run
+```
+
+Con `dev` activo:
+
+- No hace falta el `GET` de warm-up ni el header `X-XSRF-TOKEN` — CSRF queda desactivado por completo.
+- Las cookies `access_token`/`refresh_token` viajan sin el flag `Secure`, así que Postman (y cualquier cliente) las reenvía automáticamente sobre `http://localhost` sin fricción.
+- El flujo en Postman se reduce a: `POST /api/v1/auth/login` → `200 OK` con las cookies seteadas → cualquier endpoint protegido funciona de inmediato, sin pasos extra.
+
+**Nunca dejes `dev` activo fuera de tu máquina local** — desactiva una protección de seguridad real, y las cookies dejan de llevar `Secure`. Cualquier entorno compartido (qa, producción) debe sobreescribir el perfil explícitamente con la variable de entorno `SPRING_PROFILES_ACTIVE=qa` (o el flag equivalente); si no se sobreescribe, el default del proyecto es `dev`.
+
+Para simular el comportamiento de un entorno real en tu máquina (CSRF completo, cookies `Secure`), usa el perfil [`application-qa.yaml`](../src/main/resources/application-qa.yaml):
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=qa
+```
+
+Ver el razonamiento completo del CSRF en [csrf-decision.md](csrf-decision.md).
+
+---
+
+## Flujo manual (perfil `qa`) — por qué Postman no puede loguearte "de una"
 
 El login no devuelve el JWT en el body — viaja solo en cookies `HttpOnly` (`access_token`, `refresh_token`), lo cual obliga a mantener CSRF de doble-submit (`csrf.spa()` en [SecurityConfig.java:60](../src/main/java/com/github/angellariosacosta/bookingapp/infrastructure/config/SecurityConfig.java), decisión documentada en [csrf-decision.md](csrf-decision.md)). Esto significa que **todo `POST`/`PUT`/`PATCH`/`DELETE`** exige un header `X-XSRF-TOKEN` que coincida con el valor de la cookie `XSRF-TOKEN` que el propio backend emite.
 

@@ -31,6 +31,7 @@ public class SecurityConfig {
     private static final int BCRYPT_STRENGTH = 12;
 
     private final CorsProperties corsProperties;
+    private final CsrfProperties csrfProperties;
     private final SecurityEntryPoint securityEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -57,7 +58,16 @@ public class SecurityConfig {
                 // handler correcto para este patrón. Si el header no coincide, la petición se rechaza —
                 // eso es lo que bloquea a un sitio atacante: puede hacer que el navegador reenvíe la
                 // cookie, pero no puede leer su valor para ponerlo en el header.
-                .csrf(csrf -> csrf.spa())
+                // security.csrf.enabled queda en false solo en el perfil "dev" (ver application.yaml) para
+                // poder probar la API con Postman sin el paso manual de copiar XSRF-TOKEN; en "qa" y en
+                // cualquier otro perfil se mantiene en true. Ver docs/csrf-decision.md.
+                .csrf(csrf -> {
+                    if (csrfProperties.isEnabled()) {
+                        csrf.spa();
+                    } else {
+                        csrf.disable();
+                    }
+                })
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
@@ -68,11 +78,14 @@ public class SecurityConfig {
                         ex.authenticationEntryPoint(securityEntryPoint)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated()
                 );
+
+        if (csrfProperties.isEnabled()) {
+            http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
+        }
 
         return http.build();
     }

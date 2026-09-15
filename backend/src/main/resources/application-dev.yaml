@@ -1,0 +1,9 @@
+# Perfil "dev": desactiva CSRF y el flag Secure de las cookies para poder probar el login y los
+# endpoints protegidos con Postman sin el paso manual de copiar XSRF-TOKEN al header X-XSRF-TOKEN
+# (ver docs/postman-testing-guide.md). Es el perfil activo por defecto (application.yaml: spring.profiles.active).
+# NUNCA usar este perfil fuera de una máquina local de desarrollo.
+security:
+  csrf:
+    enabled: false
+  cookie:
+    secure: false

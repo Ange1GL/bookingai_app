@@ -1,0 +1,8 @@
+# Perfil "qa": mismo comportamiento que un entorno real (cookies Secure + CSRF completo).
+# Activar con SPRING_PROFILES_ACTIVE=qa o --spring.profiles.active=qa.
+# Ver docs/csrf-decision.md.
+security:
+  csrf:
+    enabled: true
+  cookie:
+    secure: true

@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 @Setter
 public class CookieProperties {
     private boolean httpOnly;
-    private boolean secure;
+    // Fail-safe: si un perfil sin application-{perfil}.yaml propio queda activo, se mantiene "secure" en vez
+    // de caer al default de Java (false). Solo application-dev.yaml lo baja explícitamente a false.
+    private boolean secure = true;
     private String sameSite;
     private CookieSettings access = new CookieSettings();
     private CookieSettings refresh = new CookieSettings();
