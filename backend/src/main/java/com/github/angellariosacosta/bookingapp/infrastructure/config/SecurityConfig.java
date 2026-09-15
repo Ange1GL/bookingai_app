@@ -35,9 +35,19 @@ public class SecurityConfig {
     private final SecurityEntryPoint securityEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // JwtAuthenticationFilter ya es un bean, así que Spring Boot lo auto-registraría también
+    // como filtro de servlet a nivel de contenedor (Tomcat), aplicado a todas las rutas ("/*")
+    // además de añadirse manualmente a la cadena de Spring Security via
+    // .addFilterBefore(...) en securityFilterChain(). Sin este bean, el filtro se ejecutaría
+    // dos veces por request. Aquí se declara explícitamente el FilterRegistrationBean solo para
+    // controlar (y desactivar) ese auto-registro del contenedor.
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(JwtAuthenticationFilter filter) {
         FilterRegistrationBean<JwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
+        // false y no true: en true, Spring Boot registraría el filtro también a nivel de
+        // contenedor (servlet), duplicando su ejecución junto con el registro que ya existe en
+        // la cadena de Spring Security (addFilterBefore). En false, el filtro corre una única
+        // vez, solo como parte de esa cadena de Spring Security.
         registration.setEnabled(false);
         return registration;
     }
