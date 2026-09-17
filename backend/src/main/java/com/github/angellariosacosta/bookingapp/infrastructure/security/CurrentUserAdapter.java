@@ -16,6 +16,6 @@ public class CurrentUserAdapter implements CurrentUserPort {
 		if (!(authentication.getPrincipal() instanceof CustomUserDetails principal)) {
 			throw new IllegalStateException("No authenticated user found in the security context");
 		}
-		return principal.getUser().getId();
+		return principal.user().getId();
 	}
 }

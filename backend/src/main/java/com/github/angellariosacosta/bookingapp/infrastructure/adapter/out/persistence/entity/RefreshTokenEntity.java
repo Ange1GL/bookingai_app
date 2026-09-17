@@ -3,12 +3,14 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,10 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Entity
-@Table(name = "refresh_token")
+@Table(
+        name = "refresh_token",
+        uniqueConstraints = @UniqueConstraint(name = "uk_refresh_token_token_hash", columnNames = "token_hash")
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,11 +42,12 @@ public class RefreshTokenEntity {
             name = "user_id",
             referencedColumnName = "user_id",
             updatable = false,
-            insertable = false
+            insertable = false,
+            foreignKey = @ForeignKey(name = "fk_refresh_token_user")
     )
     private UserEntity user;
 
-    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    @Column(name = "token_hash", nullable = false, length = 64)
     private String tokenHash;
 
     @Column(name = "issued_at", nullable = false)

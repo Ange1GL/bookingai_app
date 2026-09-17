@@ -2,7 +2,7 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import java.util.Set;
 
-import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
+import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
 import com.github.angellariosacosta.bookingapp.application.port.out.RoleRepository;
@@ -27,7 +27,11 @@ public class RegisterUserService implements RegisterUserCase {
     private final AuthTokenIssuer authTokenIssuer;
 
     @Override
-    public AuthTokenCommand register(String email, String rawPassword, String name, String userAgent, String ipAddress) {
+    public AuthTokenResult register(String username, String email, String rawPassword, String name, String userAgent, String ipAddress) {
+        if (userRepository.existsByUsername(username)) {
+            throw new AuthException(AuthError.USERNAME_ALREADY_IN_USE);
+        }
+
         if (userRepository.existsByEmail(email)) {
             throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
         }
@@ -39,6 +43,7 @@ public class RegisterUserService implements RegisterUserCase {
                 });
 
         User user = User.builder()
+                .username(username)
                 .email(email)
                 .password(passwordHasher.hash(rawPassword))
                 .name(name)
@@ -47,6 +52,6 @@ public class RegisterUserService implements RegisterUserCase {
                 .build();
 
         user = userRepository.save(user);
-        return authTokenIssuer.issue(user, userAgent, ipAddress).command();
+        return authTokenIssuer.issue(user, userAgent, ipAddress).result();
     }
 }

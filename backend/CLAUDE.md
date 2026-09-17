@@ -10,6 +10,7 @@ Este documento define las reglas, convenciones y estructura que **todo agente de
 - **Framework:** Spring Boot
 - **Persistencia:** JPA / Hibernate
 - **Base de datos:** Relacional (PostgreSQL, MySQL, SQL Server, etc. — el motor específico puede variar según el entorno, pero el enfoque de mapeo siempre es el mismo)
+- **Migraciones de schema:** Flyway (`src/main/resources/db/migration/`). Hibernate está en `ddl-auto: validate` y **no** modifica el schema: toda creación/alteración de tabla o columna va en una migración versionada. Ver `docs/flyway-migrations.md`.
 - **Build tool:** Maven o Gradle (según lo que ya esté configurado en el repositorio)
 
 > **Nota:** Este documento no fija versiones específicas de Java, Spring Boot ni la herramienta de build. El agente debe **inspeccionar el `pom.xml` / `build.gradle` existente** para determinar las versiones reales antes de generar código, y mantener compatibilidad con ellas.
@@ -35,6 +36,8 @@ src/main/java/com/empresa/proyecto/
 │       └── out/              # Puertos de salida (repositorios, gateways, interfaces)
 │
 ├── application/
+│   ├── command/              # Entradas a casos de uso (ej. BookAppointmentCommand)
+│   ├── result/               # Salidas de casos de uso (ej. AuthTokenResult)
 │   └── service/              # Implementación de los casos de uso (implementan port.in)
 │                              # Orquestan lógica de negocio usando los port.out
 │
@@ -80,7 +83,8 @@ private Long customerId;
         name = "customer_id",
         referencedColumnName = "customer_id",
         updatable = false,
-        insertable = false
+        insertable = false,
+        foreignKey = @ForeignKey(name = "fk_appointment_customer")
 )
 private CustomerEntity customer;
 ```
@@ -90,9 +94,31 @@ private CustomerEntity customer;
 - El campo **escalar** (`customerId`) es el que se usa para **escribir/actualizar** la relación (insert/update). Es el dueño real de la FK.
 - El campo de **relación de objeto** (`customer`) es **solo de lectura** (`insertable = false, updatable = false`) y se usa exclusivamente para **navegación/lectura** (evitar N+1 innecesarios, fetch explícito, etc.).
 - `referencedColumnName` debe apuntar siempre al nombre de columna real de la PK/columna referenciada en la tabla destino (no asumir siempre `"id"`; debe coincidir con el `@Column` correspondiente en la entidad referenciada).
+- **Toda FK lleva nombre explícito** con `foreignKey = @ForeignKey(name = "fk_<tabla_origen>_<campo>")`. Sin él, Hibernate genera un hash ilegible (`FKmyowslj1th8d9j6j3wlbwrtoe`) que termina en las migraciones Flyway y en los mensajes de error de la BD.
 - Este patrón aplica también a relaciones `@ManyToOne` y, cuando corresponda, al lado inverso de `@OneToMany` (usando `mappedBy`).
 - **Nunca** usar únicamente `@ManyToOne`/`@OneToOne` sin el campo escalar acompañante: siempre debe generarse el par (campo FK + campo de relación).
-- Al generar nuevas entidades con relaciones, el agente **debe replicar este mismo patrón exacto**, ajustando nombres de columna, tipo de relación (`@OneToOne`, `@ManyToOne`, `@OneToMany`) y `referencedColumnName` según corresponda.
+- Al generar nuevas entidades con relaciones, el agente **debe replicar este mismo patrón exacto**, ajustando nombres de columna, tipo de relación (`@OneToOne`, `@ManyToOne`, `@OneToMany`), `referencedColumnName` y el nombre de la FK según corresponda.
+
+### Constraints UNIQUE: siempre con nombre, a nivel de `@Table`
+
+`@Column(unique = true)` no admite nombre y genera `UK_<hash>`. Las unique se declaran en `@Table` con `@UniqueConstraint` nombrado, y en la columna **no** se pone `unique = true` (si se deja, Hibernate genera dos constraints):
+
+```java
+@Table(
+        name = "user_app",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_app_username", columnNames = "username"),
+                @UniqueConstraint(name = "uk_user_app_email", columnNames = "email")
+        }
+)
+public class UserEntity extends BaseEntity {
+
+    @Column(nullable = false)   // sin unique = true
+    private String username;
+}
+```
+
+Convención de nombres: `fk_<tabla_origen>_<campo>` para foreign keys, `uk_<tabla>_<columna>` para unique. Minúsculas y guiones bajos, igual que tablas y columnas.
 
 ---
 
@@ -113,6 +139,8 @@ private CustomerEntity customer;
 ##  Checklist para el Agente antes de generar código
 
 - [ ] ¿Estoy respetando la separación domain / application / infrastructure?
+- [ ] ¿Todo cambio en una entidad JPA (campo, tabla, constraint) viene acompañado de su migración Flyway en el mismo commit? Sin ella, `ddl-auto: validate` impide que la app arranque.
+- [ ] ¿Si agregué un valor a un enum que refleja una tabla de catálogo (ej. `StatusAppointment` ↔ `status_appointment`), agregué una migración con su `INSERT`? El mapeo es por id (`fromId`); un valor en el enum sin fila en la BD viola la FK al usarse.
 - [ ] ¿La entidad JPA está en `infrastructure.adapter.out.persistence.entity` y no se filtra al dominio?
 - [ ] ¿Toda relación entre entidades sigue el patrón de campo escalar (FK) + campo de relación de solo lectura?
 - [ ] ¿Los puertos (`port.in` / `port.out`) están definidos como interfaces en `domain`?
@@ -178,7 +206,7 @@ public Map<String, Object> handleNotFound(CustomerNotFoundException ex) { ... }
 public record ErrorResponse(String timestamp, int status, String error, String message) {}
 
 // BIEN — tipo explícito en el controlador
-public ResponseEntity<AuthTokenResult> login(@RequestBody LoginRequest request) { ... }
+public ResponseEntity<AuthSuccessResponse> login(@RequestBody LoginRequest request) { ... }
 
 // BIEN — tipo explícito en el handler de errores
 public ResponseEntity<ErrorResponse> toErrorResponse(AuthError error) { ... }
@@ -187,7 +215,7 @@ public ResponseEntity<ErrorResponse> toErrorResponse(AuthError error) { ... }
 public ErrorResponse handleNotFound(CustomerNotFoundException ex) { ... }
 ```
 
-Los records de respuesta se ubican en `infrastructure.adapter.in.rest.dto`. Cuando la respuesta de éxito ya es un `record` existente (ej. `AuthTokenResult`), úsalo directamente sin envolverlo en otro `Map`.
+Los records de respuesta se ubican en `infrastructure.adapter.in.rest.dto` y se construyen en un `XxxRestMapper` (`infrastructure.adapter.in.rest.mapper`), nunca inline en el controller. Un `record` de `application` (command/result) solo puede devolverse directo si contiene **exactamente** lo que la API debe exponer; si lleva datos sensibles el DTO es obligatorio. Ejemplo: `AuthTokenResult` incluye `accessToken`/`refreshToken`, que viajan solo en cookies `HttpOnly`, por eso `AuthRestMapper` lo proyecta a `AuthSuccessResponse` sin los tokens.
 
 #### Caso especial: controlador con `Result<S, E>` y dos tipos de cuerpo
 

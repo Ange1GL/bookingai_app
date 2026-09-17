@@ -16,8 +16,8 @@ public enum StatusAppointment {
     // IN_PROGRESS -> La cita esta en curso
 	IN_PROGRESS(3, "IN_PROGRESS"),
 
-    // FINAZALIDED -> La cita ha finalizado
-    FINAZALIDED(4, "FINAZALIDED");
+    // FINALIZED -> La cita ha finalizado
+    FINALIZED(4, "FINALIZED");
 
 
     private final Integer id;

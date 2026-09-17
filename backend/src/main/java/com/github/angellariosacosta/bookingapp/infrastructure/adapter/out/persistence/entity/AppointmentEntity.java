@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,7 +41,8 @@ public class AppointmentEntity {
 			name = "customer_id",
 			referencedColumnName = "customer_id",
 			updatable = false,
-			insertable = false
+			insertable = false,
+			foreignKey = @ForeignKey(name = "fk_appointment_customer")
 	)
 	private CustomerEntity customer;
 
@@ -53,7 +55,8 @@ public class AppointmentEntity {
 			name = "status_id",
 			referencedColumnName = "status_id",
 			updatable = false,
-			insertable = false
+			insertable = false,
+			foreignKey = @ForeignKey(name = "fk_appointment_status")
 	)
 	private StatusAppointmentEntity status;
 
@@ -65,7 +68,8 @@ public class AppointmentEntity {
 			name = "user_id",
 			referencedColumnName = "user_id",
 			updatable = false,
-			insertable = false
+			insertable = false,
+			foreignKey = @ForeignKey(name = "fk_appointment_user")
 	)
 	private UserEntity user;
 

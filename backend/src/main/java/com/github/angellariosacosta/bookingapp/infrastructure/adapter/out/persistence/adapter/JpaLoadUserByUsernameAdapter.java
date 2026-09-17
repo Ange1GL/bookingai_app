@@ -2,7 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 
 
-import com.github.angellariosacosta.bookingapp.application.port.out.LoadUserByEmailPort;
+import com.github.angellariosacosta.bookingapp.application.port.out.LoadUserByUsernamePort;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class JpaLoadUserByEmailAdapter implements LoadUserByEmailPort {
+public class JpaLoadUserByUsernameAdapter implements LoadUserByUsernamePort {
     private final UserRepository userRepository;
 
     @Override
-    public User loadByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(email));
+    public User loadByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

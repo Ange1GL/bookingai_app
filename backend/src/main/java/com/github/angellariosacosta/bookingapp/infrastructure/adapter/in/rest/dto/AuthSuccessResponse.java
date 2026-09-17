@@ -2,4 +2,4 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.d
 
 import java.util.List;
 
-public record AuthSuccessResponse(Long userId, String email, List<String> roles) {}
+public record AuthSuccessResponse(Long userId, String username, String email, List<String> roles) {}

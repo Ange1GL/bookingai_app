@@ -25,17 +25,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    defer-datasource-initialization: true
+      # validate (no update): el schema lo gestiona Flyway (src/main/resources/db/migration).
+      # Hibernate solo verifica al arrancar que las entidades coincidan con las tablas reales;
+      # si falta una migracion, la app no levanta en vez de parchear la BD por su cuenta.
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     show-sql: false
 
-  sql:
-    init:
-      mode: always
   ai:
     model:
       chat: deepseek

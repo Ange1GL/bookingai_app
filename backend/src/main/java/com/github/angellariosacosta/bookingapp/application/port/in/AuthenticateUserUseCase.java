@@ -1,7 +1,7 @@
 package com.github.angellariosacosta.bookingapp.application.port.in;
 
-import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
+import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 
 public interface AuthenticateUserUseCase {
-    AuthTokenCommand authenticate(String email, String rawPassword, String userAgent, String ipAddress);
+    AuthTokenResult authenticate(String username, String rawPassword, String userAgent, String ipAddress);
 }

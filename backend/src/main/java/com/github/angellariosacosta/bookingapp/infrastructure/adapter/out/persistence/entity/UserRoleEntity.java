@@ -23,10 +23,22 @@ public class UserRoleEntity {
     private Long roleId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "user_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(name = "fk_user_roles_user")
+    )
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id", insertable = false, updatable = false)
+    @JoinColumn(
+            name = "role_id",
+            referencedColumnName = "role_id",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(name = "fk_user_roles_role")
+    )
     private RoleEntity role;
 }

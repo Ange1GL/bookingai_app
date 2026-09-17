@@ -7,6 +7,7 @@ API REST para gestión de reservas y citas, construida con Spring Boot y arquite
 - **Java 25** / **Spring Boot 4.x**
 - **Spring Security** + **JWT RS256** (OAuth2 Resource Server)
 - **JPA / Hibernate** — PostgreSQL
+- **Flyway** — migraciones versionadas del schema
 - **Spring AI** — DeepSeek Flash (agente de reservas por lenguaje natural)
 - **MapStruct** + **Lombok**
 - **Maven**
@@ -25,6 +26,10 @@ API REST para gestión de reservas y citas, construida con Spring Boot y arquite
 ```sql
 CREATE DATABASE bookingapp;
 ```
+
+Solo hay que crear la base vacía: **las tablas las crea Flyway** al arrancar la app, aplicando las
+migraciones de `src/main/resources/db/migration/`. No ejecutes DDL a mano — Hibernate está en
+`ddl-auto: validate` y no modifica el schema. Ver [docs/flyway-migrations.md](docs/flyway-migrations.md).
 
 ### 2. Variables de entorno
 

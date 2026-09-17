@@ -1,7 +1,7 @@
 package com.github.angellariosacosta.bookingapp.application.port.in;
 
-import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
+import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 
 public interface RefreshAccessTokenUseCase {
-    AuthTokenCommand refresh(String rawRefreshToken, String userAgent, String ipAddress);
+    AuthTokenResult refresh(String rawRefreshToken, String userAgent, String ipAddress);
 }

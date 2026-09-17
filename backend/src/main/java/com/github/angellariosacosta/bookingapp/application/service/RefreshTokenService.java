@@ -1,6 +1,6 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
-import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
+import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenGenerator;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
@@ -27,7 +27,7 @@ public class RefreshTokenService implements RefreshAccessTokenUseCase {
 
     @Override
     @Transactional
-    public AuthTokenCommand refresh(String rawRefreshToken, String userAgent, String ipAddress) {
+    public AuthTokenResult refresh(String rawRefreshToken, String userAgent, String ipAddress) {
         String tokenHash = refreshTokenGenerator.hash(rawRefreshToken);
         RefreshToken stored = refreshTokenRepositoryPort.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new AuthException(AuthError.REFRESH_TOKEN_INVALID));
@@ -51,6 +51,6 @@ public class RefreshTokenService implements RefreshAccessTokenUseCase {
         stored.setReplacedBy(issued.refreshTokenId());
         refreshTokenRepositoryPort.save(stored);
 
-        return issued.command();
+        return issued.result();
     }
 }

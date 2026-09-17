@@ -13,7 +13,13 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Entity
 @Builder
-@Table(name = "user_app")
+@Table(
+        name = "user_app",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_app_username", columnNames = "username"),
+                @UniqueConstraint(name = "uk_user_app_email", columnNames = "email")
+        }
+)
 public class UserEntity extends BaseEntity {
 
     @Id
@@ -21,7 +27,10 @@ public class UserEntity extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
     private String email;
 
     private String name;

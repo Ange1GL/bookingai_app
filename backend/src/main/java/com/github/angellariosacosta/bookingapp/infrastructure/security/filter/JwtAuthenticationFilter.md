@@ -43,8 +43,8 @@ Si no hay token (ni header ni cookie), el filtro **no rechaza la petición aquí
 
 ```java
 tokenService.validateToken(tokenOpt.get());
-String email = tokenService.getEmail(tokenOpt.get());
-UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+String username = tokenService.getUsername(tokenOpt.get());
+UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
 UsernamePasswordAuthenticationToken authentication =
         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -54,7 +54,7 @@ SecurityContextHolder.getContext().setAuthentication(authentication);
 filterChain.doFilter(request, response);
 ```
 
-- Valida el JWT y extrae el email (el "subject" del token).
+- Valida el JWT y extrae el claim `username` (identificador estable de sesión; el `subject` real del token es el `user_id`). Antes se usaba el claim `email` para esto, pero al ser un dato editable por el usuario, un cambio de email dejaba el JWT ya emitido apuntando a un valor que ya no existía en BD, rompiendo la sesión a mitad de camino. `username` no cambia, así que el email se puede editar libremente sin afectar sesiones activas.
 - Usa el `UserDetailsService` estándar de Spring Security para cargar el usuario real desde la base de datos (roles, permisos, etc.) — el token solo prueba *quién dice ser*, pero los authorities vigentes se leen en cada request, no del propio JWT. Esto es importante: si revocas un rol en la BD, el cambio aplica en el siguiente request sin esperar a que expire el token.
 - El constructor de 3 argumentos de `UsernamePasswordAuthenticationToken` (principal, credentials, authorities) marca el token como **ya autenticado** (`isAuthenticated() = true`) — por eso `credentials` va en `null`: ya no se necesita la contraseña, el JWT ya cumplió ese rol.
 - `WebAuthenticationDetailsSource().buildDetails(request)` adjunta metadatos de la request (IP remota, session id) al objeto `Authentication`, útil para auditoría/logs, no afecta la autenticación en sí.

@@ -31,14 +31,16 @@ public class JwtTokenService implements TokenService {
     private String audience;
 
     @Override
-    public String generateToken(Long subject, String email, List<String> roles) {
+    public String generateToken(Long subject, String username, List<String> roles) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .audience(List.of(audience))
                 .subject(subject.toString())
                 .claim("user_id", subject)
-                .claim("email", email)
+                // username (no email): es el identificador estable de sesión. El email es un
+                // dato de perfil editable y no debe quedar congelado dentro de un JWT ya emitido.
+                .claim("username", username)
                 .claim("roles", roles)
                 .issuedAt(now)
                 .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
@@ -53,9 +55,9 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public String getEmail(String token) {
+    public String getUsername(String token) {
         Jwt jwt = jwtDecoder.decode(token);
-        return jwt.getClaimAsString("email");
+        return jwt.getClaimAsString("username");
     }
 
     @Override

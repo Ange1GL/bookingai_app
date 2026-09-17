@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "roles")
+@Table(
+        name = "roles",
+        uniqueConstraints = @UniqueConstraint(name = "uk_roles_name", columnNames = "name")
+)
 public class RoleEntity extends BaseEntity {
 
     @Id
@@ -21,7 +24,7 @@ public class RoleEntity extends BaseEntity {
     @Column(name = "role_id")
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String name;
 
     @Column(length = 255)

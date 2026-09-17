@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.github.angellariosacosta.bookingapp.application.command.AuthTokenCommand;
+import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.application.port.in.AuthenticateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
@@ -18,6 +18,7 @@ import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AuthSuccessResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.LoginRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AuthRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.util.AuthCookieFactory;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.util.CookieUtils;
@@ -38,16 +39,17 @@ public class AuthController {
     private final LogoutUseCase logoutUseCase;
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
+    private final AuthRestMapper authRestMapper;
 
     @PostMapping("/login")
     public ResponseEntity<AuthSuccessResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
-        AuthTokenCommand result = authenticateUserUseCase.authenticate(
-                request.email(), request.password(), httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
+        AuthTokenResult result = authenticateUserUseCase.authenticate(
+                request.username(), request.password(), httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
         writeAuthCookies(httpResponse, result);
-        return ResponseEntity.ok(toSuccessResponse(result));
+        return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
 
     @PostMapping("/register")
@@ -55,11 +57,11 @@ public class AuthController {
             @Valid @RequestBody RegisterRequest request,
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
-        AuthTokenCommand result = registerUserCase.register(
-                request.email(), request.password(), request.name(),
+        AuthTokenResult result = registerUserCase.register(
+                request.username(), request.email(), request.password(), request.name(),
                 httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
         writeAuthCookies(httpResponse, result);
-        return ResponseEntity.status(HttpStatus.CREATED).body(toSuccessResponse(result));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authRestMapper.toResponse(result));
     }
 
     @PostMapping("/refresh")
@@ -68,10 +70,10 @@ public class AuthController {
             HttpServletResponse httpResponse) {
         String rawRefreshToken = CookieUtils.readCookie(httpRequest, cookieProperties.getRefresh().getName())
                 .orElseThrow(() -> new AuthException(AuthError.REFRESH_TOKEN_INVALID));
-        AuthTokenCommand result = refreshAccessTokenUseCase.refresh(
+        AuthTokenResult result = refreshAccessTokenUseCase.refresh(
                 rawRefreshToken, httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
         writeAuthCookies(httpResponse, result);
-        return ResponseEntity.ok(toSuccessResponse(result));
+        return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
 
     @PostMapping("/logout")
@@ -83,12 +85,8 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private void writeAuthCookies(HttpServletResponse response, AuthTokenCommand result) {
+    private void writeAuthCookies(HttpServletResponse response, AuthTokenResult result) {
         response.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.buildAccessCookie(result.accessToken()).toString());
         response.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.buildRefreshCookie(result.refreshToken()).toString());
-    }
-
-    private AuthSuccessResponse toSuccessResponse(AuthTokenCommand result) {
-        return new AuthSuccessResponse(result.userId(), result.email(), result.roles());
     }
 }

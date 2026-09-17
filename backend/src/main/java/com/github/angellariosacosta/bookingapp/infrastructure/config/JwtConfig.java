@@ -31,9 +31,18 @@ public class JwtConfig {
     @Value("${security.jwt.public-key}")
     private RSAPublicKey publicKey;
 
+    // issuer = claim "iss" del JWT: identifica quién EMITIÓ el token (en este caso, esta misma
+    // aplicación/authorization server). El decoder compara el "iss" que trae el token contra
+    // este valor; si no coincide, lo rechaza. Sirve para que un token firmado por otro emisor
+    // (aunque use un algoritmo/llave compatible) no sea aceptado como válido.
     @Value("${security.jwt.issuer}")
     private String issuer;
 
+    // audience = claim "aud" del JWT: identifica para QUIÉN está destinado el token (qué
+    // API/servicio consumidor debe aceptarlo). El decoder compara el "aud" del token contra este
+    // valor; si no coincide, lo rechaza. Sirve para evitar que un token válido, emitido
+    // pensando en otro servicio/cliente, se reutilice aquí (protege contra el escenario en que
+    // varios servicios comparten el mismo emisor/llave pero un token de uno se cuela en otro).
     @Value("${security.jwt.audience}")
     private String audience;
 

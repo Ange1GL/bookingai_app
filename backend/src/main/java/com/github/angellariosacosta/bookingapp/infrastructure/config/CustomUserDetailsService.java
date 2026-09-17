@@ -1,6 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.config;
 
-import com.github.angellariosacosta.bookingapp.application.port.out.LoadUserByEmailPort;
+import com.github.angellariosacosta.bookingapp.application.port.out.LoadUserByUsernamePort;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final LoadUserByEmailPort loadUserByEmailPort;
+    private final LoadUserByUsernamePort loadUserByUsernamePort;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
-            User user = loadUserByEmailPort.loadByEmail(email);
+            User user = loadUserByUsernamePort.loadByUsername(username);
             return new CustomUserDetails(user);
         } catch (Exception ex) {
-            throw new UsernameNotFoundException("User not found: " + email, ex);
+            throw new UsernameNotFoundException("User not found: " + username, ex);
         }
     }
 }

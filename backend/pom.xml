@@ -68,6 +68,26 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!-- Flyway: versionado del schema. Son TRES dependencias y las tres hacen falta:
+		     - spring-boot-flyway: la autoconfiguracion. En Spring Boot 4 las autoconfiguraciones
+		       se separaron en un modulo por tecnologia; sin esta, flyway-core queda en el
+		       classpath pero Flyway NUNCA se ejecuta al arrancar (silenciosamente).
+		     - flyway-core: el motor de migraciones.
+		     - flyway-database-postgresql: desde Flyway 10 el soporte de cada motor vive aparte.
+		     Sin version: las gestiona spring-boot-starter-parent. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
