@@ -35,6 +35,15 @@ build/
 ### Secrets ###
 .env
 
+# Llaves privadas / certificados (JWT RSA keys, keystores). Nunca commitear.
+src/main/resources/certs/private.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
 
 ### Private / confidential data ###
 docs_confidencial/
+
+docs

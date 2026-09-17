@@ -6,7 +6,7 @@ spring:
   # En qa/producción, sobreescribir explícitamente con la variable de entorno SPRING_PROFILES_ACTIVE=qa
   # (o el flag --spring.profiles.active=qa) — si no se sobreescribe, el entorno queda en modo dev inseguro.
   profiles:
-    active: qa
+    active: dev
 
   application:
     name: bookingapp
