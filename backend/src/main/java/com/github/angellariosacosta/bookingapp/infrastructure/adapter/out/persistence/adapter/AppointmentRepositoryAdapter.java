@@ -32,8 +32,8 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
 	}
 
 	@Override
-	public Optional<Appointment> findById(Long id) {
-		return jpaRepository.findById(id).map(mapper::toDomain);
+	public Optional<Appointment> findById(Long id, Long userId) {
+		return jpaRepository.findByIdAndUserId(id, userId).map(mapper::toDomain);
 	}
 
 	@Override
@@ -47,8 +47,8 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
 	}
 
 	@Override
-	public List<Appointment> findByCustomerId(Long customerId) {
-		return jpaRepository.findByCustomerIdAndStatusIdNotOrderByStartTimeAsc(customerId, 2)
+	public List<Appointment> findByCustomerId(Long customerId, Long userId) {
+		return jpaRepository.findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(customerId, userId, 2)
 				.stream()
 				.map(mapper::toDomain)
 				.toList();
@@ -63,22 +63,22 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
 	}
 
 	@Override
-	public Appointment updateStatus(Long id, StatusAppointment newStatus) {
-		AppointmentEntity entity = findEntityById(id);
+	public Appointment updateStatus(Long id, Long userId, StatusAppointment newStatus) {
+		AppointmentEntity entity = findEntityByIdAndUserId(id, userId);
 		entity.setStatusId(newStatus.getId());
 		return mapper.toDomain(jpaRepository.save(entity));
 	}
 
 	@Override
-	public Appointment updateTimeSlot(Long id, LocalDateTime newStart, LocalDateTime newEnd) {
-		AppointmentEntity entity = findEntityById(id);
+	public Appointment updateTimeSlot(Long id, Long userId, LocalDateTime newStart, LocalDateTime newEnd) {
+		AppointmentEntity entity = findEntityByIdAndUserId(id, userId);
 		entity.setStartTime(newStart);
 		entity.setEndTime(newEnd);
 		return mapper.toDomain(jpaRepository.save(entity));
 	}
 
-	private AppointmentEntity findEntityById(Long id) {
-		return jpaRepository.findById(id)
+	private AppointmentEntity findEntityByIdAndUserId(Long id, Long userId) {
+		return jpaRepository.findByIdAndUserId(id, userId)
 				.orElseThrow(() -> new AppointmentNotFoundException("Appointment not found with id: " + id));
 	}
 }

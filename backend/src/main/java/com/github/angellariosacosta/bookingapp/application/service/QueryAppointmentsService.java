@@ -22,8 +22,8 @@ public class QueryAppointmentsService implements QueryAppointmentsUseCase {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Appointment> findByCustomer(Long customerId) {
-		return appointmentRepository.findByCustomerId(customerId);
+	public List<Appointment> findByCustomer(Long customerId, Long userId) {
+		return appointmentRepository.findByCustomerId(customerId, userId);
 	}
 
 	@Override

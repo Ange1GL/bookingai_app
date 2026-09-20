@@ -72,7 +72,7 @@ public class BookingTools {
 
 	@Tool(description = "Lista citas activas de un cliente por su id.")
 	public List<AppointmentSummary> getAppointmentsForCustomer(Long customerId) {
-		return queryAppointments.findByCustomer(customerId).stream()
+		return queryAppointments.findByCustomer(customerId, currentUserPort.getCurrentUserId()).stream()
 				.map(AppointmentSummary::from)
 				.toList();
 	}

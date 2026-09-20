@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,11 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 
 @Repository
 public interface AppointmentRepositoryJpa extends JpaRepository<AppointmentEntity, Long> {
+
+	// Scoping por userId a nivel de query: un id que existe pero pertenece a otro
+	// usuario simplemente no aparece, en vez de tener que compararlo manualmente
+	// después de un findById sin filtrar (mismo patrón que CustomerRepositoryJpa).
+	Optional<AppointmentEntity> findByIdAndUserId(Long id, Long userId);
 
 	// Verifica si existe alguna cita que se solape con el intervalo [startTime, endTime].
 	// La condición (startTime < :endTime AND endTime > :startTime) es el algoritmo clásico
@@ -52,11 +58,14 @@ public interface AppointmentRepositoryJpa extends JpaRepository<AppointmentEntit
 	);
 
 	// Spring Data deriva el SQL completo del nombre del método:
-	// findBy → SELECT, CustomerIdAnd → WHERE customer_id = ?, StatusIdNot → AND status_id <> ?,
-	// OrderByStartTimeAsc → ORDER BY start_time ASC.
+	// findBy → SELECT, CustomerIdAnd → WHERE customer_id = ?, UserIdAnd → AND user_id = ?,
+	// StatusIdNot → AND status_id <> ?, OrderByStartTimeAsc → ORDER BY start_time ASC.
+	// El userId scopea el resultado al dueño actual: sin él, cualquiera que conozca un
+	// customerId ajeno podría listar sus citas.
 	// El ORDER BY lo resuelve la BD (no en memoria) y la query se compila como prepared statement
 	// en el arranque de la aplicación, no en cada llamada.
-	List<AppointmentEntity> findByCustomerIdAndStatusIdNotOrderByStartTimeAsc(Long customerId, Integer statusId);
+	List<AppointmentEntity> findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(
+			Long customerId, Long userId, Integer statusId);
 
 	// Devuelve todas las citas activas que tocan el rango [from, to], aunque sea parcialmente.
 	// La condición (startTime <= :to AND endTime >= :from) es la inversa del solapamiento:

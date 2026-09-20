@@ -7,6 +7,6 @@ import java.util.List;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 
 public interface QueryAppointmentsUseCase {
-	List<Appointment> findByCustomer(Long customerId);
+	List<Appointment> findByCustomer(Long customerId, Long userId);
 	List<Appointment> findByTimeSlot(LocalDate date, LocalTime hour);
 }

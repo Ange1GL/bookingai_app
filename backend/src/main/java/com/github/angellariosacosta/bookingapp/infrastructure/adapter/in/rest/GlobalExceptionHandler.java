@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentAccessDeniedException;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
@@ -33,12 +32,6 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErrorResponse handleAppointmentNotFound(AppointmentNotFoundException ex) {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
-	}
-
-	@ExceptionHandler(AppointmentAccessDeniedException.class)
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public ErrorResponse handleAppointmentAccessDenied(AppointmentAccessDeniedException ex) {
-		return errorBody(HttpStatus.FORBIDDEN, ex.getMessage());
 	}
 
 	@ExceptionHandler(AppointmentOverlapException.class)
