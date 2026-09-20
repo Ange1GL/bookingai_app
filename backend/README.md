@@ -94,35 +94,32 @@ security:
 
 #### Paso 1 — Instalar OpenSSL en Windows
 
-Elige **una** opción:
-
-**Opción A — winget (recomendada):**
+Instalar con winget:
 
 ```powershell
 winget install ShiningLight.OpenSSL.Light
 ```
 
-Cierra y vuelve a abrir la terminal para que se refresque el `PATH`. Si `openssl` no se reconoce,
-agrégalo manualmente (ruta por defecto del instalador):
+> Si winget responde *"Se encontró un paquete existente ya instalado"*, OpenSSL **ya está en el equipo**;
+> el problema es que el instalador de Shining Light **no agrega su carpeta `bin` al `PATH`**, por eso
+> `openssl` no se reconoce en la terminal.
+
+Comprobar que el ejecutable existe y si su carpeta ya está en el `PATH` de usuario:
 
 ```powershell
-[Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\OpenSSL-Win64\bin", "User")
+Test-Path "C:\Program Files\OpenSSL-Win64\bin\openssl.exe"
+[Environment]::GetEnvironmentVariable("Path", "User") -split ";" | Where-Object { $_ -match "OpenSSL" }
 ```
 
-**Opción B — Chocolatey:**
+Si el primer comando devuelve `True` y el segundo no imprime nada, agregar la carpeta al `PATH`
+de usuario (persistente, no requiere permisos de administrador):
 
 ```powershell
-choco install openssl
+[Environment]::SetEnvironmentVariable("Path", ([Environment]::GetEnvironmentVariable("Path", "User").TrimEnd(';') + ";C:\Program Files\OpenSSL-Win64\bin"), "User")
 ```
 
-**Opción C — Git for Windows (ya lo tienes si usas Git):** Git incluye un `openssl.exe`. Puedes
-ejecutar los comandos desde **Git Bash**, o desde PowerShell invocándolo con su ruta completa:
-
-```powershell
-& "C:\Program Files\Git\usr\bin\openssl.exe" version
-```
-
-Verifica la instalación:
+Cierra y vuelve a abrir la terminal para que tome el nuevo `PATH` (o, solo para la sesión actual,
+ejecuta `$env:Path += ";C:\Program Files\OpenSSL-Win64\bin"`). Verifica:
 
 ```powershell
 openssl version
@@ -166,9 +163,37 @@ openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in private.pem -out priv
 
 y usa `private_pkcs8.pem` como `private.pem`.
 
+#### Paso 4 — Verificar que la privada es válida y que la pública le corresponde
+
+La privada debe pasar la comprobación interna de OpenSSL:
+
+```powershell
+openssl pkey -in src\main\resources\certs\private.pem -check -noout
+```
+
+Debe imprimir `Key is valid`.
+
+La pública debe derivar de **esa** privada. Compara la pública generada al vuelo con la del archivo:
+
+```powershell
+openssl pkey -in src\main\resources\certs\private.pem -pubout
+Get-Content src\main\resources\certs\public.pem
+```
+
+Ambas salidas deben ser **idénticas**. Si no coinciden, regenera la pública con el comando del
+Paso 2 (`openssl rsa ... -pubout`) y **reinicia la app**: Spring carga las claves una sola vez al arrancar.
+
+> **Síntoma de un par que no coincide:** al hacer login/registro la app lanza
+> `JwtEncodingException: Failed to sign the JWT` con causa raíz
+> `javax.crypto.BadPaddingException: RSA private key operation failed`. Ocurre cuando se rota
+> `private.pem` sin regenerar `public.pem`: `JwtConfig` construye el `RSAKey` de Nimbus con el módulo de
+> la pública y los parámetros privados de la privada, y Java rechaza la firma al verificarla contra
+> un módulo que no es el suyo.
+
 #### Seguridad de las claves
 
-- **Nunca comitees `private.pem`.** Asegúrate de que `src/main/resources/certs/` esté en `.gitignore`.
+- **Nunca comitees `private.pem`.** `.gitignore` ya la excluye (`src/main/resources/certs/private.pem`,
+  además de `*.key`, `*.p12`, `*.pfx`, `*.jks`); `public.pem` sí se versiona.
   Si una clave privada llegó al repositorio, considérala comprometida y genera un par nuevo.
 - En qa/producción no empaquetes las claves en el JAR: móntalas en disco y apunta a ellas con
   `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH` (prefijo `file:`).
