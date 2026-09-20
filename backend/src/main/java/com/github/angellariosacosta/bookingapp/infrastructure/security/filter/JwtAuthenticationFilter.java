@@ -1,5 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
+import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenRevocationRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
@@ -33,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final CookieProperties cookieProperties;
     private final SecurityEntryPoint securityEntryPoint;
+    private final AccessTokenRevocationRepositoryPort accessTokenRevocationRepositoryPort;
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     @Override
@@ -50,10 +52,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            tokenService.validateToken(tokenOpt.get());
+            TokenService.DecodedToken decoded = tokenService.decode(tokenOpt.get());
 
-            String username = tokenService.getUsername(tokenOpt.get());
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (accessTokenRevocationRepositoryPort.existsByJti(decoded.jti())) {
+                throw new JwtAuthenticationException(JwtErrorCode.TOKEN_REVOKED);
+            }
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(decoded.username());
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -64,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("Authenticated user={}", username);
+            log.debug("Authenticated user={}", decoded.username());
 
             filterChain.doFilter(request, response);
 

@@ -53,6 +53,9 @@ security:
     refresh-expiration: 43200    # minutos = 30 dias, vida del refresh token
     issuer: bookingapp-api
     audience: bookingapp-frontend
+    revocation-cleanup:
+      interval-minutes: 5                    # cada cuanto corre el job de limpieza de revoked_access_token
+      clock-skew-safety-margin-minutes: 5     # debe ser mayor que la tolerancia de reloj del JwtDecoder (~60s)
 
   cookie:
     http-only: true

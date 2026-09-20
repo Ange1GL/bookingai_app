@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +38,11 @@ public class JwtTokenService implements TokenService {
                 .issuer(issuer)
                 .audience(List.of(audience))
                 .subject(subject.toString())
+                // jti (JWT ID) único por token: permite revocar UN access token puntual
+                // (ver AccessTokenRevocationRepositoryPort) sin depender de nada más del
+                // contenido del token, que nunca cambia entre dos tokens del mismo usuario
+                // emitidos en el mismo segundo salvo por este id.
+                .id(UUID.randomUUID().toString())
                 .claim("user_id", subject)
                 // username (no email): es el identificador estable de sesión. El email es un
                 // dato de perfil editable y no debe quedar congelado dentro de un JWT ya emitido.
@@ -57,16 +63,10 @@ public class JwtTokenService implements TokenService {
     }
 
     @Override
-    public String getUsername(String token) {
-        Jwt jwt = jwtDecoder.decode(token);
-        return jwt.getClaimAsString(JwtClaims.USERNAME);
-    }
-
-    @Override
-    public boolean validateToken(String token) {
+    public DecodedToken decode(String token) {
         try {
-            jwtDecoder.decode(token);
-            return true;
+            Jwt jwt = jwtDecoder.decode(token);
+            return new DecodedToken(jwt.getClaimAsString(JwtClaims.USERNAME), jwt.getId(), jwt.getExpiresAt());
         } catch (JwtValidationException ex) {
             if (ex.getErrors().stream()
                     .anyMatch(error ->

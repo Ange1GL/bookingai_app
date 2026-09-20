@@ -78,8 +78,11 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        CookieUtils.readCookie(httpRequest, cookieProperties.getRefresh().getName())
-                .ifPresent(logoutUseCase::logout);
+        String rawRefreshToken = CookieUtils.readCookie(httpRequest, cookieProperties.getRefresh().getName())
+                .orElse(null);
+        String rawAccessToken = CookieUtils.readCookie(httpRequest, cookieProperties.getAccess().getName())
+                .orElse(null);
+        logoutUseCase.logout(rawRefreshToken, rawAccessToken);
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.expireAccessCookie().toString());
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.expireRefreshCookie().toString());
         return ResponseEntity.noContent().build();
