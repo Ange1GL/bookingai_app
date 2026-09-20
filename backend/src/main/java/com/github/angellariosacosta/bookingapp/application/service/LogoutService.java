@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenRevocationRepositoryPort;
+import com.github.angellariosacosta.bookingapp.application.port.out.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenGenerator;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
@@ -51,7 +52,7 @@ public class LogoutService implements LogoutUseCase {
         }
 
         try {
-            TokenService.DecodedToken decoded = tokenService.decode(rawAccessToken);
+            DecodedToken decoded = tokenService.decode(rawAccessToken);
             accessTokenRevocationRepositoryPort.revoke(RevokedAccessToken.builder()
                     .jti(decoded.jti())
                     .expiresAt(decoded.expiresAt())

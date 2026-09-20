@@ -1,6 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
 import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenRevocationRepositoryPort;
+import com.github.angellariosacosta.bookingapp.application.port.out.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
@@ -52,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-            TokenService.DecodedToken decoded = tokenService.decode(tokenOpt.get());
+            DecodedToken decoded = tokenService.decode(tokenOpt.get());
 
             if (accessTokenRevocationRepositoryPort.existsByJti(decoded.jti())) {
                 throw new JwtAuthenticationException(JwtErrorCode.TOKEN_REVOKED);
