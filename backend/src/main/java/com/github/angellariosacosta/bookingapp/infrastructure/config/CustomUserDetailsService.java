@@ -16,11 +16,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        try {
-            User user = loadUserByUsernamePort.loadByUsername(username);
-            return new CustomUserDetails(user);
-        } catch (Exception ex) {
-            throw new UsernameNotFoundException("User not found: " + username, ex);
-        }
+        User user = loadUserByUsernamePort.loadByUsername(username);
+        return new CustomUserDetails(user);
     }
 }

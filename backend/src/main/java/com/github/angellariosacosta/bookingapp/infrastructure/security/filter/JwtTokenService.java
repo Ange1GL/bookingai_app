@@ -31,7 +31,7 @@ public class JwtTokenService implements TokenService {
     private String audience;
 
     @Override
-    public String generateToken(Long subject, String username, List<String> roles) {
+    public String generateToken(Long subject, String username) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
@@ -40,8 +40,10 @@ public class JwtTokenService implements TokenService {
                 .claim("user_id", subject)
                 // username (no email): es el identificador estable de sesión. El email es un
                 // dato de perfil editable y no debe quedar congelado dentro de un JWT ya emitido.
-                .claim("username", username)
-                .claim("roles", roles)
+                // Los roles NO se embeben aquí: las authorities se recalculan desde BD en cada
+                // request (CustomUserDetails.getAuthorities()), así que un claim "roles" en el
+                // JWT nunca se lee y solo quedaría desactualizado si se revocan permisos.
+                .claim(JwtClaims.USERNAME, username)
                 .issuedAt(now)
                 .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
                 .build();
@@ -57,13 +59,7 @@ public class JwtTokenService implements TokenService {
     @Override
     public String getUsername(String token) {
         Jwt jwt = jwtDecoder.decode(token);
-        return jwt.getClaimAsString("username");
-    }
-
-    @Override
-    public String getSubject(String token) {
-        Jwt jwt = jwtDecoder.decode(token);
-        return jwt.getSubject();
+        return jwt.getClaimAsString(JwtClaims.USERNAME);
     }
 
     @Override

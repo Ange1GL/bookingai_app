@@ -32,7 +32,7 @@ class AuthTokenIssuer {
 
     IssuedTokens issue(User user, String userAgent, String ipAddress) {
         List<String> roles = user.getRoles().stream().map(Role::name).toList();
-        String accessToken = tokenService.generateToken(user.getId(), user.getUsername(), roles);
+        String accessToken = tokenService.generateToken(user.getId(), user.getUsername());
 
         String rawRefreshToken = refreshTokenGenerator.generateRawToken();
         Instant now = Instant.now();
