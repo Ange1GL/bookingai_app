@@ -27,7 +27,8 @@ class AuthTokenIssuer {
     @Value("${security.jwt.refresh-expiration}")
     private long refreshExpirationMinutes;
 
-    record IssuedTokens(AuthTokenResult result, Long refreshTokenId) {}
+    record IssuedTokens(AuthTokenResult
+                        result, Long refreshTokenId) {}
 
     IssuedTokens issue(User user, String userAgent, String ipAddress) {
         List<String> roles = user.getRoles().stream().map(Role::name).toList();
