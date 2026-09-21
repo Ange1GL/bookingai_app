@@ -18,13 +18,22 @@ import java.time.temporal.ChronoUnit;
 // de tolerancia podría dejar de estar bloqueado antes de que realmente sea inválido.
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class RevokedAccessTokenCleanupJob {
 
     private final AccessTokenRevocationRepositoryPort accessTokenRevocationRepositoryPort;
 
-    @Value("${security.jwt.revocation-cleanup.clock-skew-safety-margin-minutes}")
+
     private long clockSkewSafetyMarginMinutes;
+
+
+    public RevokedAccessTokenCleanupJob(
+            @Value("${security.jwt.revocation-cleanup.clock-skew-safety-margin-minutes}") long clockSkewSafetyMarginMinutes,
+            AccessTokenRevocationRepositoryPort accessTokenRevocationRepositoryPort
+    ) {
+        this.accessTokenRevocationRepositoryPort = accessTokenRevocationRepositoryPort;
+        this.clockSkewSafetyMarginMinutes = clockSkewSafetyMarginMinutes;
+    }
+
 
     @Scheduled(fixedDelayString = "#{${security.jwt.revocation-cleanup.interval-minutes} * 60000}")
     public void purgeExpiredEntries() {

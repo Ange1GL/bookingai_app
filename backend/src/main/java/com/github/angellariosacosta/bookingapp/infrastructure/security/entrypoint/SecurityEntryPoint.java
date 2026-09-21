@@ -22,7 +22,7 @@ import java.util.Objects;
 public class SecurityEntryPoint implements AuthenticationEntryPoint {
 
     private final JsonMapper jsonMapper;
-    private static final String MESSAGE= "Autenticación requerida";
+    private static final String MESSAGE= "Autenticación requeridA";
     private static final String JSON_CONTENT_TYPE = "application/json;charset=UTF-8";
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,

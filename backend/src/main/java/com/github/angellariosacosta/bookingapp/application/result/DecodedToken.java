@@ -1,4 +1,4 @@
-package com.github.angellariosacosta.bookingapp.application.port.out;
+package com.github.angellariosacosta.bookingapp.application.result;
 
 import java.time.Instant;
 

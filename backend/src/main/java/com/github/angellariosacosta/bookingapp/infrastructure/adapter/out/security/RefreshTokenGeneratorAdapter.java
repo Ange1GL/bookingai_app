@@ -23,6 +23,9 @@ public class RefreshTokenGeneratorAdapter implements RefreshTokenGenerator {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
+
+
+    // se usa el hash para guardar información sensible en la base de datos
     @Override
     public String hash(String rawToken) {
         try {

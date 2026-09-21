@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
+import com.github.angellariosacosta.bookingapp.domain.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,12 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
-import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
-import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
-import com.github.angellariosacosta.bookingapp.domain.exception.CustomerNotFoundException;
-import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
-import com.github.angellariosacosta.bookingapp.domain.exception.InvalidStatusAppointmentExcepcion;
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ErrorResponse;
 
@@ -64,6 +59,13 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(AuthException.class)
 	public ResponseEntity<ErrorResponse> handleAuth(AuthException ex) {
 		HttpStatus status = resolveAuthStatus(ex.getError());
+		return ResponseEntity.status(status).body(errorBody(status, ex.getMessage()));
+	}
+
+
+	@ExceptionHandler(AccountBlockedException.class)
+	public ResponseEntity<ErrorResponse> handleAccountBlocked(AccountBlockedException ex) {
+		HttpStatus status = HttpStatus.FORBIDDEN;
 		return ResponseEntity.status(status).body(errorBody(status, ex.getMessage()));
 	}
 

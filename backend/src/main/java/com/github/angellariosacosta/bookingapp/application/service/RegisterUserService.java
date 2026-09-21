@@ -28,6 +28,7 @@ public class RegisterUserService implements RegisterUserCase {
 
     @Override
     public AuthTokenResult register(String username, String email, String rawPassword, String name, String userAgent, String ipAddress) {
+
         if (userRepository.existsByUsername(username)) {
             throw new AuthException(AuthError.USERNAME_ALREADY_IN_USE);
         }

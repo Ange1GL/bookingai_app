@@ -1,7 +1,9 @@
 package com.github.angellariosacosta.bookingapp.domain.exception;
 
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
+import lombok.Getter;
 
+@Getter
 public class AuthException extends RuntimeException {
 
     private final AuthError error;
@@ -11,7 +13,4 @@ public class AuthException extends RuntimeException {
         this.error = error;
     }
 
-    public AuthError getError() {
-        return error;
-    }
 }

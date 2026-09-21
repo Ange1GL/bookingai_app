@@ -1,7 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
 import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenRevocationRepositoryPort;
-import com.github.angellariosacosta.bookingapp.application.port.out.DecodedToken;
+import com.github.angellariosacosta.bookingapp.application.result.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;

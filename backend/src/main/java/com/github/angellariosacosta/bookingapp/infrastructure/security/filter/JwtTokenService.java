@@ -1,7 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
 
-import com.github.angellariosacosta.bookingapp.application.port.out.DecodedToken;
+import com.github.angellariosacosta.bookingapp.application.result.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtAuthenticationException;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtErrorCode;

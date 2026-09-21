@@ -2,7 +2,7 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenRevocationRepositoryPort;
-import com.github.angellariosacosta.bookingapp.application.port.out.DecodedToken;
+import com.github.angellariosacosta.bookingapp.application.result.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenGenerator;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;

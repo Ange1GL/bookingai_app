@@ -57,6 +57,10 @@ security:
       interval-minutes: 5                    # cada cuanto corre el job de limpieza de revoked_access_token
       clock-skew-safety-margin-minutes: 5     # debe ser mayor que la tolerancia de reloj del JwtDecoder (~60s)
 
+  account-lock:
+    reset-cleanup:
+      interval-minutes: 5   # cada cuanto corre el job que desbloquea cuentas cuyo tiempo de bloqueo ya expiro
+
   cookie:
     http-only: true
     same-site: Lax              # Strict bloquea el envio cross-port en dev (localhost:4200 -> localhost:8082)
