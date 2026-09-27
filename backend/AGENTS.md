@@ -31,15 +31,16 @@ src/main/java/com/empresa/proyecto/
 ├── domain/
 │   ├── model/              # Entidades de dominio (POJOs puros, sin anotaciones de JPA/Spring)
 │   ├── exception/           # Excepciones propias del dominio
-│   └── port/
-│       ├── in/               # Puertos de entrada (casos de uso, interfaces)
-│       └── out/              # Puertos de salida (repositorios, gateways, interfaces)
+│   
 │
 ├── application/
 │   ├── command/              # Entradas a casos de uso (ej. BookAppointmentCommand)
 │   ├── result/               # Salidas de casos de uso (ej. AuthTokenResult)
 │   └── service/              # Implementación de los casos de uso (implementan port.in)
 │                              # Orquestan lógica de negocio usando los port.out
+    └── port/
+│       ├── in/               # Puertos de entrada (casos de uso, interfaces)
+│       └── out/              # Puertos de salida (repositorios, gateways, interfaces)
 │
 └── infrastructure/
     ├── adapter/

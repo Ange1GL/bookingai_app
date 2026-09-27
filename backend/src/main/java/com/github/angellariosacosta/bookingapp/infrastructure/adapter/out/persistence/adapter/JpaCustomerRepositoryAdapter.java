@@ -9,15 +9,15 @@ import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.CustomerEntity;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.mapper.CustomerMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.CustomerJpaRepository;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.JpaCustomerJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
+public class JpaCustomerRepositoryAdapter implements CustomerRepositoryPort {
 
-	private final CustomerJpaRepository jpaRepository;
+	private final JpaCustomerJpaRepository jpaRepository;
 	private final CustomerMapper mapper;
 
 	@Override

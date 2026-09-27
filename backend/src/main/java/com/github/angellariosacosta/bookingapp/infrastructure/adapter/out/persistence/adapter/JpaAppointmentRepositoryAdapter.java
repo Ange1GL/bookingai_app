@@ -12,15 +12,15 @@ import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.StatusAppointment;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.AppointmentEntity;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.mapper.AppointmentMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.AppointmentJpaRepository;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.JpaAppointmentJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class AppointmentRepositoryAdapter implements AppointmentRepositoryPort {
+public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPort {
 
-	private final AppointmentJpaRepository jpaRepository;
+	private final JpaAppointmentJpaRepository jpaRepository;
 	private final AppointmentMapper mapper;
 
 	@Override

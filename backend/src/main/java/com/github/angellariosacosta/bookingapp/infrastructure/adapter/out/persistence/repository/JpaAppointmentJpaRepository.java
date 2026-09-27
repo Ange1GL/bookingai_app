@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.AppointmentEntity;
 
 @Repository
-public interface AppointmentJpaRepository extends JpaRepository<AppointmentEntity, Long> {
+public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEntity, Long> {
 
 	// Scoping por userId a nivel de query: un id que existe pero pertenece a otro
 	// usuario simplemente no aparece, en vez de tener que compararlo manualmente
