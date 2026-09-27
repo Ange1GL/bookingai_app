@@ -13,6 +13,7 @@ import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final AuthTokenIssuer authTokenIssuer;
     private final AccountBlockedRepository accountBlockedRepository;
 
+    @Transactional
     @Override
     public AuthTokenResult authenticate(String username, String rawPassword, String userAgent, String ipAddress) {
         log.info("Login attempt user={}", username);
@@ -34,17 +36,17 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
 
         Optional<AccountBlocked> accountBlocked = accountBlockedRepository.findByUserId(user.getId());
 
-        accountBlocked.ifPresent(AccountBlocked::isBlocked);
-
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            log.warn("Login failed user={} reason=invalid_credentials", username);
-            manageAccountLocked(accountBlocked, user.getId());
-            throw new AuthException(AuthError.INVALID_CREDENTIALS);
-        }
+        accountBlocked.ifPresent(AccountBlocked::ensureNotBlocked);
 
         if (!user.isActive()) {
             log.warn("Login failed user={} reason=user_disabled", username);
             throw new AuthException(AuthError.USER_DISABLED);
+        }
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            log.warn("Login failed user={} reason=invalid_credentials", username);
+            registerFailedAttempt(user.getId());
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
         }
 
         accountBlocked.ifPresent(accountBlockedRepository::resetAttempts);
@@ -53,9 +55,11 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
         return authTokenIssuer.issue(user, userAgent, ipAddress).result();
     }
 
-
-    private  void manageAccountLocked(Optional<AccountBlocked> accountBlocked, Long userId) {
-        accountBlocked.ifPresentOrElse(
+    // Relee con lock pesimista (en vez de reusar el Optional cargado al inicio
+    // de authenticate()) para que el read-modify-write del contador sea atómico
+    // frente a intentos fallidos concurrentes del mismo usuario.
+    private void registerFailedAttempt(Long userId) {
+        accountBlockedRepository.findByUserIdForUpdate(userId).ifPresentOrElse(
                 blocked -> {
                     blocked.incrementNumberOfAttempts();
                     accountBlockedRepository.updateNumberOfAttempts(blocked);

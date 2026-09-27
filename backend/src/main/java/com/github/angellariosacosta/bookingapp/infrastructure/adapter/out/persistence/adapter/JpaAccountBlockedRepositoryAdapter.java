@@ -33,6 +33,12 @@ public class JpaAccountBlockedRepositoryAdapter implements AccountBlockedReposit
 
     @Transactional
     @Override
+    public Optional<AccountBlocked> findByUserIdForUpdate(Long userId) {
+        return jpaRepositoryAccountBlocked.findByUserIdForUpdate(userId).map(accountBlockedMapper::toDomain);
+    }
+
+    @Transactional
+    @Override
     public void updateNumberOfAttempts(AccountBlocked accountBlocked) {
         jpaRepositoryAccountBlocked.updateNumberOfAttempts(accountBlocked.getNumberOfAttempts(), accountBlocked.getUserId());
     }

@@ -2,7 +2,9 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.AccountBlockedEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +18,13 @@ public interface JpaRepositoryAccountBlocked
 extends JpaRepository<AccountBlockedEntity, Long>
 {
     Optional<AccountBlockedEntity> findByUserId(Long userId);
+
+    // Toma un lock exclusivo de fila (SELECT ... FOR UPDATE) para que el
+    // read-modify-write del contador de intentos fallidos sea atómico frente
+    // a requests concurrentes sobre el mismo usuario. Requiere transacción activa.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM AccountBlockedEntity a WHERE a.userId = :userId")
+    Optional<AccountBlockedEntity> findByUserIdForUpdate(@Param("userId") Long userId);
 
     @Modifying
     @Query("UPDATE AccountBlockedEntity a SET a.numberOfAttempts = :numberOfAttempts  WHERE a.userId = :userId")
