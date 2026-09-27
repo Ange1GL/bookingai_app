@@ -5,11 +5,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.angellariosacosta.bookingapp.application.command.BookAppointmentCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.BookAppointmentUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,8 +17,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BookAppointmentService implements BookAppointmentUseCase {
 
-	private final CustomerRepository customerRepository;
-	private final AppointmentRepository appointmentRepository;
+	private final CustomerRepositoryPort customerRepository;
+	private final AppointmentRepositoryPort appointmentRepository;
 
 	@Override
 	@Transactional

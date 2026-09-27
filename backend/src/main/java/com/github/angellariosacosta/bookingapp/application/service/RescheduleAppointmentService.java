@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.angellariosacosta.bookingapp.application.command.RescheduleAppointmentCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.RescheduleAppointmentUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RescheduleAppointmentService implements RescheduleAppointmentUseCase {
 
-	private final AppointmentRepository appointmentRepository;
+	private final AppointmentRepositoryPort appointmentRepository;
 
 	@Override
 	@Transactional

@@ -12,11 +12,11 @@ import org.springframework.stereotype.Repository;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.AppointmentEntity;
 
 @Repository
-public interface AppointmentRepositoryJpa extends JpaRepository<AppointmentEntity, Long> {
+public interface AppointmentJpaRepository extends JpaRepository<AppointmentEntity, Long> {
 
 	// Scoping por userId a nivel de query: un id que existe pero pertenece a otro
 	// usuario simplemente no aparece, en vez de tener que compararlo manualmente
-	// después de un findById sin filtrar (mismo patrón que CustomerRepositoryJpa).
+	// después de un findById sin filtrar (mismo patrón que CustomerJpaRepository).
 	Optional<AppointmentEntity> findByIdAndUserId(Long id, Long userId);
 
 	// Verifica si existe alguna cita que se solape con el intervalo [startTime, endTime].

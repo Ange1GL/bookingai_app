@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.StatusAppointment;
 
-public interface AppointmentRepository {
+public interface AppointmentRepositoryPort {
 	Appointment save(Appointment save);
 	Optional<Appointment> findById(Long id, Long userId);
 	boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime);

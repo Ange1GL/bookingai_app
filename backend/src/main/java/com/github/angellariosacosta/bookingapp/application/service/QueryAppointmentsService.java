@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class QueryAppointmentsService implements QueryAppointmentsUseCase {
 
-	private final AppointmentRepository appointmentRepository;
+	private final AppointmentRepositoryPort appointmentRepository;
 
 	@Override
 	@Transactional(readOnly = true)

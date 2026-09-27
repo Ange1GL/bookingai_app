@@ -5,12 +5,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.angellariosacosta.bookingapp.application.command.CreateAppointmentCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
 import com.github.angellariosacosta.bookingapp.domain.exception.CustomerNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateAppointmentService implements CreateAppointmentUseCase {
 
-	private final AppointmentRepository appointmentRepository;
-	private final CustomerRepository customerRepository;
+	private final AppointmentRepositoryPort appointmentRepository;
+	private final CustomerRepositoryPort customerRepository;
 
 	@Override
 	@Transactional

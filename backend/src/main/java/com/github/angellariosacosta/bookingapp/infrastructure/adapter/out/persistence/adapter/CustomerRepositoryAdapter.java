@@ -6,18 +6,18 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.CustomerEntity;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.mapper.CustomerMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.CustomerRepositoryJpa;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.CustomerJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class CustomerRepositoryAdapter implements CustomerRepository {
+public class CustomerRepositoryAdapter implements CustomerRepositoryPort {
 
-	private final CustomerRepositoryJpa jpaRepository;
+	private final CustomerJpaRepository jpaRepository;
 	private final CustomerMapper mapper;
 
 	@Override

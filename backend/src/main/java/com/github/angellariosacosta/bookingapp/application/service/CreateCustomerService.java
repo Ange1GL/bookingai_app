@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.angellariosacosta.bookingapp.application.command.CreateCustomerCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
-import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateCustomerService implements CreateCustomerUseCase {
 
-	private final CustomerRepository customerRepository;
+	private final CustomerRepositoryPort customerRepository;
 
 	@Override
 	@Transactional

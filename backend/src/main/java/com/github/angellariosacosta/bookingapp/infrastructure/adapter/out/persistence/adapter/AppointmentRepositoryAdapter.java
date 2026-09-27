@@ -6,21 +6,21 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.StatusAppointment;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.AppointmentEntity;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.mapper.AppointmentMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.AppointmentRepositoryJpa;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.AppointmentJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class AppointmentRepositoryAdapter implements AppointmentRepository {
+public class AppointmentRepositoryAdapter implements AppointmentRepositoryPort {
 
-	private final AppointmentRepositoryJpa jpaRepository;
+	private final AppointmentJpaRepository jpaRepository;
 	private final AppointmentMapper mapper;
 
 	@Override
