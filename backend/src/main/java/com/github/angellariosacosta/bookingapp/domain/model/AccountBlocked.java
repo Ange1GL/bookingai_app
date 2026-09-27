@@ -38,6 +38,7 @@ public class AccountBlocked {
         incrementNumberOfAttempts();
     }
 
+    //evitar una instancia de la clase
     private AccountBlocked() {
     }
 
