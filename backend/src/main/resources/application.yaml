@@ -74,6 +74,14 @@ security:
       path: /api/v1/auth/refresh
       max-age: 2592000           # segundos = 30 dias, debe coincidir con jwt.refresh-expiration
 
+  rate-limit:
+    enabled: true
+    capacity: 60        # peticiones permitidas por ventana, por IP
+    window: 1m           # ventana de refill del bucket (token bucket, refill greedy)
+    cache:
+      expire-after-access: 5m   # debe ser >= window; libera buckets de IPs inactivas
+      maximum-size: 10000        # techo duro de entradas en memoria (evita fuga si hay muchas IPs)
+
   # security.csrf.enabled tampoco se define aqui: ver application-dev.yaml / application-qa.yaml y docs/csrf-decision.md
 
 cors:
@@ -90,6 +98,8 @@ cors:
     - "*"
   exposed-headers:
     - Authorization
+    - X-RateLimit-Remaining
+    - Retry-After
   allow-credentials: true
   max-age: 3600
 
