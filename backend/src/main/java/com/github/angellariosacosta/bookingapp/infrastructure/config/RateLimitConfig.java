@@ -8,12 +8,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// Separada de SecurityConfig a propósito: RateLimitFilter (bean @Component) depende del Cache
-// declarado aquí. Si ese Cache fuera un @Bean de instancia dentro de SecurityConfig (que a su vez
-// depende de RateLimitFilter como campo final), Spring necesitaría una instancia de SecurityConfig
-// ya construida para invocar ese método — y para construir esa instancia necesitaría a RateLimitFilter
-// primero: ciclo irresoluble (BeanCurrentlyInCreationException). Al vivir en una clase que no depende
-// de RateLimitFilter, el ciclo deja de ser posible sin depender de que el método se quede "static".
+
 @Configuration
 public class RateLimitConfig {
 
