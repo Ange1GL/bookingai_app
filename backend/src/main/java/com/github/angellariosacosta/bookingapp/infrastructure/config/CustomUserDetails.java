@@ -1,6 +1,5 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.config;
 
-
 import com.github.angellariosacosta.bookingapp.domain.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

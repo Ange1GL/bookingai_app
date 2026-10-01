@@ -92,6 +92,23 @@ security:
 > (`-----BEGIN RSA PRIVATE KEY-----`) hará fallar el arranque. La pública debe ser X.509
 > (`-----BEGIN PUBLIC KEY-----`).
 
+### 4. Rate limiting
+
+Cada IP tiene un límite de peticiones por minuto (token bucket vía Bucket4j + Caffeine), configurable en `application.yaml`:
+
+```yaml
+security:
+  rate-limit:
+    enabled: true
+    capacity: 60        # peticiones permitidas por ventana, por IP
+    window: 1m
+    cache:
+      expire-after-access: 5m
+      maximum-size: 10000
+```
+
+Al exceder el límite, la API responde `429` con el mismo formato de error que el resto de la API y un header `Retry-After`. Detalle completo en [docs/rate-limiting.md](docs/rate-limiting.md).
+
 #### Paso 1 — Instalar OpenSSL en Windows
 
 Instalar con winget:
@@ -232,6 +249,8 @@ En qa/producción exporta `SPRING_PROFILES_ACTIVE=qa`; si no se sobreescribe, la
 
 - [CLAUDE.md](CLAUDE.md) — arquitectura hexagonal, convenciones de código y checklist para agentes AI
 - [docs/jwt-spring-security-guide.md](docs/jwt-spring-security-guide.md) — implementación de JWT + Spring Security
+- [docs/security-config.md](docs/security-config.md) — guía de `SecurityConfig` (filtros, CORS, CSRF, beans)
+- [docs/rate-limiting.md](docs/rate-limiting.md) — rate limiting por IP con Bucket4j + Caffeine
 - [docs/flyway-migrations.md](docs/flyway-migrations.md) — cómo escribir migraciones
 - [docs/agent-flows.md](docs/agent-flows.md) — flujos del agente de IA
 - [docs/customer-multi-tenancy.md](docs/customer-multi-tenancy.md) — multi-tenancy por cliente

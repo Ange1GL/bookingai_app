@@ -31,26 +31,19 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     @Override
     public AuthTokenResult authenticate(String username, String rawPassword, String userAgent, String ipAddress) {
         log.info("Login attempt user={}", username);
-
         User user = loadUserByUsernamePort.loadByUsername(username);
-
         Optional<AccountBlocked> accountBlocked = accountBlockedRepository.findByUserId(user.getId());
-
         accountBlocked.ifPresent(AccountBlocked::ensureNotBlocked);
-
         if (!user.isActive()) {
             log.warn("Login failed user={} reason=user_disabled", username);
             throw new AuthException(AuthError.USER_DISABLED);
         }
-
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.warn("Login failed user={} reason=invalid_credentials", username);
             registerFailedAttempt(user.getId());
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
         }
-
         accountBlocked.ifPresent(accountBlockedRepository::resetAttempts);
-
         log.info("Login success user={}", username);
         return authTokenIssuer.issue(user, userAgent, ipAddress).result();
     }

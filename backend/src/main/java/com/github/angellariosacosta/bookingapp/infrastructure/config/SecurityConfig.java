@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.config;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.CsrfCookieFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.JwtAuthenticationFilter;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -34,6 +35,7 @@ public class SecurityConfig {
     private final CsrfProperties csrfProperties;
     private final SecurityEntryPoint securityEntryPoint;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
 
     // JwtAuthenticationFilter ya es un bean, así que Spring Boot lo auto-registraría también
     // como filtro de servlet a nivel de contenedor (Tomcat), aplicado a todas las rutas ("/*")
@@ -51,6 +53,11 @@ public class SecurityConfig {
         registration.setEnabled(false);
         return registration;
     }
+
+    // El Cache<String, Bucket> y el FilterRegistrationBean<RateLimitFilter> viven en RateLimitConfig
+    // (clase aparte), no aquí: RateLimitFilter depende de ese Cache, y si el bean que lo construye
+    // fuera un método de instancia de esta clase, SecurityConfig (que depende de RateLimitFilter como
+    // campo final) formaría un ciclo irresoluble al arrancar. Ver RateLimitConfig y docs/rate-limiting.md.
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -87,7 +94,19 @@ public class SecurityConfig {
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(securityEntryPoint)
                 )
+                // jwtAuthenticationFilter debe registrarse primero: addFilterBefore(rateLimitFilter,
+                // JwtAuthenticationFilter.class) necesita que JwtAuthenticationFilter YA tenga una
+                // posición conocida en la cadena (asignada por la línea de abajo); si se invierte el
+                // orden de estas dos llamadas, Spring Security lanza "does not have a registered order".
+                //
+                // RateLimitFilter va antes que JwtAuthenticationFilter a propósito: así una IP que ya
+                // agotó su cupo no paga el costo de decodificar el JWT ni de consultar la revocación en
+                // BD/cache, y /api/v1/auth/login (que no requiere JWT) también queda protegido contra
+                // fuerza bruta. Corre después de CorsFilter/CsrfFilter (posición fija de Spring Security
+                // anterior a UsernamePasswordAuthenticationFilter), así que un 429 sale con los headers
+                // CORS ya aplicados. Ver docs/rate-limiting.md.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/login", "/error").permitAll()
                         .anyRequest().authenticated()

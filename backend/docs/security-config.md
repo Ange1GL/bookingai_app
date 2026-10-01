@@ -201,6 +201,10 @@ Se registra en `securityFilterChain` vía `.exceptionHandling(ex -> ex.authentic
 
 Se inserta con `.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)`: es decir, **antes** del filtro que Spring Security usaría para un login por formulario tradicional. Como no usamos `formLogin`, ese filtro de referencia (`UsernamePasswordAuthenticationFilter`) casi no hace nada por sí mismo aquí — se usa solo como "marcador de posición" en la cadena para indicar el orden relativo donde debe ir la validación de JWT.
 
+### 8.1 `RateLimitFilter` — un paso antes
+
+Desde la incorporación del rate limiting, la cadena queda `RateLimitFilter → JwtAuthenticationFilter → UsernamePasswordAuthenticationFilter`. `RateLimitFilter` corre primero para no gastar el costo de decodificar el JWT (ni la consulta de revocación en BD/cache) en una IP que ya agotó su cupo, y para cubrir también `/api/v1/auth/login` (que `JwtAuthenticationFilter` deja pasar sin hacer nada, al no traer token). Detalle completo, algoritmo (token bucket) y la config de Caffeine en `docs/rate-limiting.md`.
+
 ---
 
 ## 9. ¿Dónde vive todo esto respecto a Spring MVC / `DispatcherServlet`?
@@ -251,3 +255,5 @@ En resumen: `DispatcherServlet` (Spring MVC) responde *qué controlador* atiende
 | `corsConfigurationSource()` | Política CORS leída de `CorsProperties`/`application.yaml`, aplicada a `/**`. |
 | `passwordEncoder()` | `BCryptPasswordEncoder` con factor de coste 12, usado para hashear/verificar contraseñas. |
 | `authenticationManager(AuthenticationConfiguration)` | Publica el `AuthenticationManager` interno de Spring como bean inyectable, para casos de uso de login. |
+
+Los beans de `Cache<String, Bucket>` y `FilterRegistrationBean<RateLimitFilter>` para el rate limiting **no** viven aquí — están en `RateLimitConfig` (clase separada), justamente para que `RateLimitFilter` no dependa de un bean declarado en esta misma clase (`SecurityConfig` ya depende de `RateLimitFilter` como campo final; si el `Cache` fuera un método de instancia aquí, se cerraría un ciclo). Ver `docs/rate-limiting.md`.
