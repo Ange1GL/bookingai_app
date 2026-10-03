@@ -29,16 +29,20 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	@Query("""
 			SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
 			FROM AppointmentEntity a
-			WHERE a.startTime < :endTime
-			  AND a.endTime > :startTime
-			  AND a.statusId <> 2
+			WHERE 
+			a.userId = :userId				
+			AND a.startTime < :endTime
+		 	AND a.endTime > :startTime
+			AND a.statusId <> :cancelledStatusId
 			""")
-	boolean existsOverlapping(
+	boolean isOverlapping(
+			@Param("userId") Long userId,
 			@Param("startTime") LocalDateTime startTime,
-			@Param("endTime") LocalDateTime endTime
+			@Param("endTime") LocalDateTime endTime,
+			@Param("cancelledStatusId") Integer cancelledStatusId
 	);
 
-	// Igual que existsOverlapping, pero excluyendo la propia cita del chequeo.
+	// Igual que isOverlapping, pero excluyendo la propia cita del chequeo.
 	// Necesario para reagendar: al momento de validar el nuevo horario, la cita
 	// todavía existe en la BD con su horario ANTERIOR, así que sin este exclude
 	// cualquier reagendado que toque su propio slot actual se detectaría como
@@ -46,15 +50,19 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	@Query("""
 			SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
 			FROM AppointmentEntity a
-			WHERE a.startTime < :endTime
+			WHERE 
+			a.userId = :userId 
+			  AND	a.startTime < :endTime
 			  AND a.endTime > :startTime
-			  AND a.statusId <> 2
+			  AND a.statusId <> :cancelledStatusId
 			  AND a.id <> :excludeId
 			""")
-	boolean existsOverlappingExcludingId(
+	boolean isOverlappingExcludingId(
+			@Param("userId")  Long userId,
 			@Param("startTime") LocalDateTime startTime,
 			@Param("endTime") LocalDateTime endTime,
-			@Param("excludeId") Long excludeId
+			@Param("excludeId") Long excludeId,
+			@Param("cancelledStatusId") Integer cancelledStatusId
 	);
 
 	// Spring Data deriva el SQL completo del nombre del método:
@@ -77,12 +85,15 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	@Query("""
 			SELECT a FROM AppointmentEntity a
 			JOIN FETCH a.customer
-			WHERE a.startTime <= :to
-			  AND a.endTime >= :from
-			  AND a.statusId <> 2
+			WHERE a.userId = :userId
+			AND a.startTime <= :to
+		  	AND a.endTime >= :from
+		  	AND a.statusId <> :cancelledStatusId
 			""")
 	List<AppointmentEntity> findByTimeSlot(
+			@Param("userId") Long userId,
 			@Param("from") LocalDateTime from,
-			@Param("to") LocalDateTime to
+			@Param("to") LocalDateTime to,
+			@Param("cancelledStatusId") Integer cancelledStatusId
 	);
 }
