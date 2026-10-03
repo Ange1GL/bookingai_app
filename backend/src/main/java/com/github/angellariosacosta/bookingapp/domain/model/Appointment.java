@@ -15,6 +15,9 @@ import lombok.Setter;
 @Getter
 public class Appointment {
 
+	// Tolerancia para no rechazar una cita "de ahora mismo" que llega con unos segundos de retraso.
+	private static final Duration PAST_TOLERANCE = Duration.ofMinutes(5);
+
 	@Setter
 	private Long id;
 	private LocalDateTime startTime;
@@ -31,18 +34,33 @@ public class Appointment {
 			Customer customer,
 			Long userId
 			) {
-		return new Appointment(startTime, endTime, customer, StatusAppointment.RESERVED, userId);
+		validateTimeRange(startTime, endTime);
+		return new Appointment(null, startTime, endTime, customer, StatusAppointment.RESERVED, userId);
 	}
 
-
-	public Appointment(
+	// Reconstruye una cita ya guardada (uso del adaptador de persistencia). No aplica reglas de
+	// creacion: los datos se validaron cuando la cita se creo y aqui solo se rehidratan.
+	public static Appointment reconstitute(
+			Long id,
 			LocalDateTime startTime,
 			LocalDateTime endTime,
 			Customer customer,
 			StatusAppointment status,
 			Long userId
 			) {
-		validateTimeRange(startTime, endTime);
+		return new Appointment(id, startTime, endTime, customer, status, userId);
+	}
+
+
+	private Appointment(
+			Long id,
+			LocalDateTime startTime,
+			LocalDateTime endTime,
+			Customer customer,
+			StatusAppointment status,
+			Long userId
+			) {
+		this.id = id;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.customer = customer;
@@ -58,9 +76,6 @@ public class Appointment {
 					"Appointment %d is %s; only RESERVED appointments can be modified".formatted(id, status));
 		}
 	}
-
-	// Tolerancia para no rechazar una cita "de ahora mismo" que llega con unos segundos de retraso.
-	private static final Duration PAST_TOLERANCE = Duration.ofMinutes(5);
 
 	// "now" debe venir de la hora del negocio (Clock configurado), nunca de la zona de la JVM.
 	public static void validateNotInPast(LocalDateTime startTime, LocalDateTime now) {

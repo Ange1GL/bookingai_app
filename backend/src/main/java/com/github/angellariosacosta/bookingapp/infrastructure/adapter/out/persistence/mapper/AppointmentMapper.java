@@ -31,15 +31,14 @@ public class AppointmentMapper {
 	public Appointment toDomain(AppointmentEntity entity) {
 		StatusAppointment status = StatusAppointment.fromId(entity.getStatusId());
 		Customer customer = customerMapper.toDomain(entity.getCustomer());
-		Appointment domain = new Appointment(
+		return Appointment.reconstitute(
+				entity.getId(),
 				entity.getStartTime(),
 				entity.getEndTime(),
 				customer,
 				status,
 				entity.getUserId()
 		);
-		domain.setId(entity.getId());
-		return domain;
 	}
 
 }
