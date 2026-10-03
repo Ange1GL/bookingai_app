@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
 	}
 
+	@ExceptionHandler(AppointmentInPastException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleAppointmentInPast(AppointmentInPastException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {

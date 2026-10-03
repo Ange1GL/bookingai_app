@@ -84,6 +84,11 @@ security:
 
   # security.csrf.enabled tampoco se define aqui: ver application-dev.yaml / application-qa.yaml y docs/csrf-decision.md
 
+app:
+  # Zona horaria del negocio: las fechas de las citas son hora local en esta zona (sin offset en la API).
+  # Es la unica referencia de "ahora" para validaciones, jobs y la IA (ver ClockConfig).
+  timezone: America/Mexico_City
+
 cors:
   allowed-origins:
     - http://localhost:4200

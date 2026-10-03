@@ -1,8 +1,11 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import java.util.List;
 
 import org.springframework.ai.tool.annotation.Tool;
@@ -35,6 +38,17 @@ public class BookingTools {
 	private final RescheduleAppointmentUseCase rescheduleAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
 	private final CurrentUserPort currentUserPort;
+	private final Clock clock;
+
+	private static final Locale TOOL_LOCALE = Locale.of("es", "MX");
+
+	@Tool(description = "Devuelve la fecha y hora actuales del negocio y el día de la semana. "
+			+ "Úsala siempre que el usuario mencione fechas relativas (hoy, mañana, el viernes, en 2 horas).")
+	public String getCurrentDateTime() {
+		LocalDateTime now = LocalDateTime.now(clock);
+		return "%s (%s, zona %s)".formatted(
+				now.withNano(0), now.getDayOfWeek().getDisplayName(TextStyle.FULL, TOOL_LOCALE), clock.getZone());
+	}
 
 	@Tool(description = "Busca clientes por nombre. Devuelve lista de coincidencias parciales.")
 	public List<CustomerSummary> searchCustomersByName(String name) {

@@ -22,6 +22,8 @@ public class AiConfig {
 			Cuando el cliente no existe, solicita su número de teléfono para crearlo antes de agendar la cita.
 			Antes de eliminar o mover una cita, confirma la acción con el usuario.
 			Si el horario solicitado no está disponible, sugiere la siguiente opción más cercana.
+			Si el usuario usa fechas o horas relativas (hoy, mañana, el viernes), llama primero a la herramienta de fecha y hora actual.
+			No registres citas en el pasado.
 			Responde de forma breve y directa.
 			""";
 

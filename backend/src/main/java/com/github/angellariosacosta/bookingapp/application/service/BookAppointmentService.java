@@ -1,5 +1,8 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +22,13 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 
 	private final CustomerRepositoryPort customerRepository;
 	private final AppointmentRepositoryPort appointmentRepository;
+	private final Clock clock;
 
 	@Override
 	@Transactional
 	public Appointment book(BookAppointmentCommand command) {
+		Appointment.validateNotInPast(command.startTime(), LocalDateTime.now(clock));
+
 		Customer customer = customerRepository.findByPhone(command.phone(), command.userId())
 				.orElseGet(() -> customerRepository.save(
 						Customer.builder()

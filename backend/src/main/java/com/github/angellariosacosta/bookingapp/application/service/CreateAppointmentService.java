@@ -1,5 +1,8 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +23,13 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 
 	private final AppointmentRepositoryPort appointmentRepository;
 	private final CustomerRepositoryPort customerRepository;
+	private final Clock clock;
 
 	@Override
 	@Transactional
 	public Appointment create(CreateAppointmentCommand command) {
+		Appointment.validateNotInPast(command.startTime(), LocalDateTime.now(clock));
+
 		Customer customer = customerRepository.findById(command.customerId(), command.userId())
 				.orElseThrow(() -> new CustomerNotFoundException(
 						"Customer not found with id: " + command.customerId()));

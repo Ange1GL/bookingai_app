@@ -1,8 +1,10 @@
 package com.github.angellariosacosta.bookingapp.domain.model;
 
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
+import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentInPastException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
 
 import lombok.Getter;
@@ -47,6 +49,16 @@ public class Appointment {
 		this.userId = userId;
 	}
 
+
+	// Tolerancia para no rechazar una cita "de ahora mismo" que llega con unos segundos de retraso.
+	private static final Duration PAST_TOLERANCE = Duration.ofMinutes(5);
+
+	// "now" debe venir de la hora del negocio (Clock configurado), nunca de la zona de la JVM.
+	public static void validateNotInPast(LocalDateTime startTime, LocalDateTime now) {
+		if (startTime.isBefore(now.minus(PAST_TOLERANCE))) {
+			throw new AppointmentInPastException("startTime cannot be in the past");
+		}
+	}
 
 	public static void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
 		if (!startTime.isBefore(endTime)) {

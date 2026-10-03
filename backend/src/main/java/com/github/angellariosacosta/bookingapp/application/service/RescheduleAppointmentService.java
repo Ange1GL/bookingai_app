@@ -1,5 +1,8 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class RescheduleAppointmentService implements RescheduleAppointmentUseCase {
 
 	private final AppointmentRepositoryPort appointmentRepository;
+	private final Clock clock;
 
 	@Override
 	@Transactional
@@ -26,6 +30,7 @@ public class RescheduleAppointmentService implements RescheduleAppointmentUseCas
 						"Appointment not found with id: " + command.appointmentId()));
 
 		Appointment.validateTimeRange(command.newStart(), command.newEnd());
+		Appointment.validateNotInPast(command.newStart(), LocalDateTime.now(clock));
 
 		if (appointmentRepository.isOverlapping(
 				command.userId(), command.newStart(), command.newEnd(), command.appointmentId())) {
