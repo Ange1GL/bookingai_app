@@ -28,7 +28,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 				.orElseThrow(() -> new CustomerNotFoundException(
 						"Customer not found with id: " + command.customerId()));
 
-		boolean isOverlapping = appointmentRepository.isOverlapping(command.startTime(), command.endTime());
+		boolean isOverlapping = appointmentRepository.isOverlapping(command.userId(), command.startTime(), command.endTime());
 		if (isOverlapping) {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}

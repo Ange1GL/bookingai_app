@@ -27,7 +27,8 @@ public class RescheduleAppointmentService implements RescheduleAppointmentUseCas
 
 		Appointment.validateTimeRange(command.newStart(), command.newEnd());
 
-		if (appointmentRepository.isOverlapping(command.newStart(), command.newEnd(), command.appointmentId())) {
+		if (appointmentRepository.isOverlapping(
+				command.userId(), command.newStart(), command.newEnd(), command.appointmentId())) {
 			throw new AppointmentOverlapException(
 				"The time slot %s – %s is already taken".formatted(command.newStart(), command.newEnd())
 			);

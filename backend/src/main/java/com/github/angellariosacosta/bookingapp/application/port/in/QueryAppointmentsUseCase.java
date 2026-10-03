@@ -8,5 +8,5 @@ import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 
 public interface QueryAppointmentsUseCase {
 	List<Appointment> findByCustomer(Long customerId, Long userId);
-	List<Appointment> findByTimeSlot(LocalDate date, LocalTime hour);
+	List<Appointment> findByTimeSlot(Long userId, LocalDate date, LocalTime hour);
 }

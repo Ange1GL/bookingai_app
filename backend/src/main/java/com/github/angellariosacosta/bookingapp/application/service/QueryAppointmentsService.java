@@ -28,9 +28,9 @@ public class QueryAppointmentsService implements QueryAppointmentsUseCase {
 
 	@Override
 	@Transactional(readOnly = true)
-	public List<Appointment> findByTimeSlot(LocalDate date, LocalTime hour) {
+	public List<Appointment> findByTimeSlot(Long userId, LocalDate date, LocalTime hour) {
 		LocalDateTime from = date.atTime(hour);
 		LocalDateTime to = from.plusMinutes(1);
-		return appointmentRepository.findByTimeSlot(from, to);
+		return appointmentRepository.findByTimeSlot(userId, from, to);
 	}
 }

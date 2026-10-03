@@ -81,7 +81,7 @@ public class BookingTools {
 	public List<AppointmentSummary> getAppointmentsByTimeSlot(String date, String hour) {
 		LocalDate localDate = LocalDate.parse(date);
 		LocalTime localTime = LocalTime.parse(hour);
-		return queryAppointments.findByTimeSlot(localDate, localTime).stream()
+		return queryAppointments.findByTimeSlot(currentUserPort.getCurrentUserId(), localDate, localTime).stream()
 				.map(AppointmentSummary::from)
 				.toList();
 	}

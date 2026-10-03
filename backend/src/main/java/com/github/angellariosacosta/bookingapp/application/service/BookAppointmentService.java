@@ -32,7 +32,7 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 								.build()
 				));
 
-		if (appointmentRepository.isOverlapping(command.startTime(), command.endTime())) {
+		if (appointmentRepository.isOverlapping(command.userId(),command.startTime(), command.endTime())) {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 

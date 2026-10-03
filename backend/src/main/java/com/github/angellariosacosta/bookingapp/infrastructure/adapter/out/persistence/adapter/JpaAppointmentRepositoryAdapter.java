@@ -23,6 +23,8 @@ public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPor
 	private final JpaAppointmentJpaRepository jpaRepository;
 	private final AppointmentMapper mapper;
 
+	private static final Integer CANCELLED_STATUS_ID = StatusAppointment.CANCELLED.getId();
+
 	@Override
 	public Appointment save(Appointment appointment) {
 		AppointmentEntity entity = mapper.toEntity(appointment);
@@ -37,26 +39,26 @@ public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPor
 	}
 
 	@Override
-	public boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime) {
-		return jpaRepository.existsOverlapping(startTime, endTime);
+	public boolean isOverlapping(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
+		return jpaRepository.isOverlapping(userId, startTime, endTime, CANCELLED_STATUS_ID);
 	}
 
 	@Override
-	public boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime, Long excludeAppointmentId) {
-		return jpaRepository.existsOverlappingExcludingId(startTime, endTime, excludeAppointmentId);
+	public boolean isOverlapping(Long userId, LocalDateTime startTime, LocalDateTime endTime, Long excludeAppointmentId) {
+		return jpaRepository.isOverlappingExcludingId(userId, startTime, endTime, excludeAppointmentId, CANCELLED_STATUS_ID);
 	}
 
 	@Override
 	public List<Appointment> findByCustomerId(Long customerId, Long userId) {
-		return jpaRepository.findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(customerId, userId, 2)
+		return jpaRepository.findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(customerId, userId, CANCELLED_STATUS_ID)
 				.stream()
 				.map(mapper::toDomain)
 				.toList();
 	}
 
 	@Override
-	public List<Appointment> findByTimeSlot(LocalDateTime from, LocalDateTime to) {
-		return jpaRepository.findByTimeSlot(from, to)
+	public List<Appointment> findByTimeSlot(Long userId, LocalDateTime from, LocalDateTime to) {
+		return jpaRepository.findByTimeSlot(userId, from, to, CANCELLED_STATUS_ID)
 				.stream()
 				.map(mapper::toDomain)
 				.toList();

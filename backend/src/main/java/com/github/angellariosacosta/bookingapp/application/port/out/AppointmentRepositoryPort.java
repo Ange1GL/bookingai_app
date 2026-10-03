@@ -10,12 +10,11 @@ import com.github.angellariosacosta.bookingapp.domain.model.StatusAppointment;
 public interface AppointmentRepositoryPort {
 	Appointment save(Appointment save);
 	Optional<Appointment> findById(Long id, Long userId);
-	boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime);
-	boolean isOverlapping(LocalDateTime startTime, LocalDateTime endTime, Long excludeAppointmentId);
+	boolean isOverlapping(Long userId, LocalDateTime startTime, LocalDateTime endTime );
+	boolean isOverlapping(Long userId, LocalDateTime startTime, LocalDateTime endTime,  Long excludeAppointmentId);
 	List<Appointment> findByCustomerId(Long customerId, Long userId);
-	// Sin scope por userId a propósito: se usa para chequear disponibilidad de horario
-	// entre TODOS los barberos, no solo el usuario actual.
-	List<Appointment> findByTimeSlot(LocalDateTime from, LocalDateTime to);
+	// Scopeado por userId: solo devuelve las citas activas del dueño actual que tocan [from, to].
+	List<Appointment> findByTimeSlot(Long userId, LocalDateTime from, LocalDateTime to);
 	Appointment updateStatus(Long id, Long userId, StatusAppointment newStatus);
 	Appointment updateTimeSlot(Long id, Long userId, LocalDateTime newStart, LocalDateTime newEnd);
 }
