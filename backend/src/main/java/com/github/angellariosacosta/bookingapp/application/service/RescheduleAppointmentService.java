@@ -25,9 +25,10 @@ public class RescheduleAppointmentService implements RescheduleAppointmentUseCas
 	@Override
 	@Transactional
 	public Appointment reschedule(RescheduleAppointmentCommand command) {
-		appointmentRepository.findById(command.appointmentId(), command.userId())
+		Appointment appointment = appointmentRepository.findById(command.appointmentId(), command.userId())
 				.orElseThrow(() -> new AppointmentNotFoundException(
 						"Appointment not found with id: " + command.appointmentId()));
+		appointment.ensureReserved();
 
 		Appointment.validateTimeRange(command.newStart(), command.newEnd());
 		Appointment.validateNotInPast(command.newStart(), LocalDateTime.now(clock));

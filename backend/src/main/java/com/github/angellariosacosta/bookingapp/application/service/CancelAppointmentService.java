@@ -21,9 +21,10 @@ public class CancelAppointmentService implements CancelAppointmentUseCase {
 	@Override
 	@Transactional
 	public Appointment cancel(CancelAppointmentCommand command) {
-		appointmentRepository.findById(command.appointmentId(), command.userId())
+		Appointment appointment = appointmentRepository.findById(command.appointmentId(), command.userId())
 				.orElseThrow(() -> new AppointmentNotFoundException(
 						"Appointment not found with id: " + command.appointmentId()));
+		appointment.ensureReserved();
 
 		return appointmentRepository.updateStatus(command.appointmentId(), command.userId(), StatusAppointment.CANCELLED);
 	}

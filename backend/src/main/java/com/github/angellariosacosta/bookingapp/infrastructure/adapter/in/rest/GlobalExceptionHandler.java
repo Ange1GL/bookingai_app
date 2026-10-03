@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
 	}
 
+	@ExceptionHandler(InvalidStatusTransitionException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
 	@ExceptionHandler(AppointmentInPastException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleAppointmentInPast(AppointmentInPastException ex) {

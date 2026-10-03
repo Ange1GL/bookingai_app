@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentInPastException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
+import com.github.angellariosacosta.bookingapp.domain.exception.InvalidStatusTransitionException;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +31,7 @@ public class Appointment {
 			Customer customer,
 			Long userId
 			) {
-		return new Appointment(startTime, endTime, customer, StatusAppointment.PENDING, userId);
+		return new Appointment(startTime, endTime, customer, StatusAppointment.RESERVED, userId);
 	}
 
 
@@ -49,6 +50,14 @@ public class Appointment {
 		this.userId = userId;
 	}
 
+
+	// Solo una cita RESERVED puede cancelarse o reagendarse; una CANCELLED ya no admite cambios.
+	public void ensureReserved() {
+		if (status != StatusAppointment.RESERVED) {
+			throw new InvalidStatusTransitionException(
+					"Appointment %d is %s; only RESERVED appointments can be modified".formatted(id, status));
+		}
+	}
 
 	// Tolerancia para no rechazar una cita "de ahora mismo" que llega con unos segundos de retraso.
 	private static final Duration PAST_TOLERANCE = Duration.ofMinutes(5);
