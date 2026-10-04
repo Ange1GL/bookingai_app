@@ -38,7 +38,7 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ## Running unit tests
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+To execute unit tests with the [Vitest](https://vitest.dev) runner (`@angular/build:unit-test`), use the following command:
 
 ```bash
 ng test
@@ -57,3 +57,11 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Security audit
+
+```bash
+npm run audit
+```
+
+Fails on high/critical advisories (override with `AUDIT_LEVEL`). Never run `npm audit fix --force`: it downgrades majors (e.g. Karma 6 to 4) and increases vulnerabilities. See [docs/security-remediation-plan.md](../docs/security-remediation-plan.md).
