@@ -28,8 +28,6 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 	@Override
 	@Transactional
 	public Appointment create(CreateAppointmentCommand command) {
-		Appointment.validateNotInPast(command.startTime(), LocalDateTime.now(clock));
-
 		Customer customer = customerRepository.findById(command.customerId(), command.userId())
 				.orElseThrow(() -> new CustomerNotFoundException(
 						"Customer not found with id: " + command.customerId()));
@@ -39,7 +37,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 
-		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId());
+		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId(), LocalDateTime.now(clock));
 		return appointmentRepository.save(appointment);
 	}
 }

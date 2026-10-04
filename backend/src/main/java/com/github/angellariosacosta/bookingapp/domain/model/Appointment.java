@@ -32,9 +32,11 @@ public class Appointment {
 			LocalDateTime startTime,
 			LocalDateTime endTime,
 			Customer customer,
-			Long userId
+			Long userId,
+			LocalDateTime now
 			) {
 		validateTimeRange(startTime, endTime);
+		validateNotInPast(startTime, now);
 		return new Appointment(null, startTime, endTime, customer, StatusAppointment.RESERVED, userId);
 	}
 

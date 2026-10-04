@@ -27,8 +27,6 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 	@Override
 	@Transactional
 	public Appointment book(BookAppointmentCommand command) {
-		Appointment.validateNotInPast(command.startTime(), LocalDateTime.now(clock));
-
 		Customer customer = customerRepository.findByPhone(command.phone(), command.userId())
 				.orElseGet(() -> customerRepository.save(
 						Customer.builder()
@@ -37,12 +35,11 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 								.userId(command.userId())
 								.build()
 				));
-
 		if (appointmentRepository.isOverlapping(command.userId(),command.startTime(), command.endTime())) {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 
-		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId());
+		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId(), LocalDateTime.now(clock));
 		return appointmentRepository.save(appointment);
 	}
 }
