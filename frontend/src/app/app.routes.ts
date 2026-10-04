@@ -13,6 +13,10 @@ export const routes: Routes = [
     loadComponent: () => import('@/shared/layout/main-layout/main-layout.component').then((m) => m.MainLayoutComponent),
     children: [
       {
+        path: 'appointments',
+        loadChildren: () => import('./feature/appointments/appointments.routes').then((m) => m.APPOINTMENTS_ROUTES),
+      },
+      {
         path: 'home',
         loadChildren: () => import('./feature/home/home.routes').then((m) => m.HOME_ROUTES),
       },

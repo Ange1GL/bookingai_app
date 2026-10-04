@@ -1,0 +1,57 @@
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-4 md:gap-6">
+  <app-calendar-toolbar
+    [title]="title()"
+    [view]="view()"
+    (previous)="shift(-1)"
+    (next)="shift(1)"
+    (today)="goToToday()"
+    (viewChange)="changeView($event)"
+  />
+
+  @if (failed()) {
+    <div
+      class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+      role="alert"
+    >
+      <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudieron cargar las citas.</span>
+      <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="retry()" />
+    </div>
+  }
+
+  <div
+    class="grid gap-4 md:gap-6"
+    [class.md:grid-cols-[minmax(0,1fr)_22rem]]="view() === 'month'"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+  >
+    <div class="rounded-3xl border border-surface bg-surface-0 p-2 shadow-sm md:p-4 dark:bg-surface-900">
+      @if (view() === 'month') {
+        <app-month-grid
+          [days]="monthDays()"
+          [month]="selectedDate()"
+          [selected]="selectedDate()"
+          [groups]="groups()"
+          [loading]="loading()"
+          (daySelected)="selectDay($event)"
+        />
+      } @else {
+        <app-week-strip
+          [days]="weekDays()"
+          [selected]="selectedDate()"
+          [groups]="groups()"
+          [loading]="loading()"
+          (daySelected)="selectDay($event)"
+        />
+      }
+    </div>
+
+    <app-day-agenda
+      [date]="selectedDate()"
+      [appointments]="dayAppointments()"
+      [loading]="loading()"
+      (selected)="openDetail($event)"
+    />
+  </div>
+</div>
+
+<app-appointment-detail [appointment]="detail()" [(visible)]="detailVisible" />
