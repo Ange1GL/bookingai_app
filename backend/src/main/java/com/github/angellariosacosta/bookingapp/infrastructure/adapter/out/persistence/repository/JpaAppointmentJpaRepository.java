@@ -75,20 +75,25 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	List<AppointmentEntity> findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(
 			Long customerId, Long userId, Integer statusId);
 
-	// Devuelve todas las citas activas que tocan el rango [from, to], aunque sea parcialmente.
-	// La condición (startTime <= :to AND endTime >= :from) es la inversa del solapamiento:
-	// trae citas que empiezan antes o en el límite superior Y terminan después o en el límite inferior.
+	// Devuelve las citas activas que ocupan tiempo dentro del rango semiabierto [from, to),
+	// aunque sea parcialmente. La condición (startTime < :to AND endTime > :from) es el mismo
+	// criterio de solapamiento de isOverlapping: las desigualdades son estrictas a propósito,
+	// así una cita que solo "roza" el borde (termina justo en :from o empieza justo en :to)
+	// no se cuenta. Para calendarios: semana = [lunes 00:00, lunes siguiente 00:00),
+	// mes = [día 1 00:00, día 1 del mes siguiente 00:00).
 	// JOIN FETCH a.customer carga el customer en la misma SELECT (un solo JOIN),
 	// eliminando el problema N+1 que ocurriría si se accediera a customer.getX() después
 	// con FetchType.LAZY (cada acceso dispararía una query adicional por cada cita).
-	// Se excluyen canceladas (statusId <> 2) para no mostrar slots ocupados por citas inactivas.
+	// Se excluyen las canceladas para no mostrar slots ocupados por citas inactivas.
+	// ORDER BY lo resuelve la BD: sin él el orden de las filas no está garantizado.
 	@Query("""
 			SELECT a FROM AppointmentEntity a
 			JOIN FETCH a.customer
 			WHERE a.userId = :userId
-			AND a.startTime <= :to
-		  	AND a.endTime >= :from
+			AND a.startTime < :to
+		  	AND a.endTime > :from
 		  	AND a.statusId <> :cancelledStatusId
+			ORDER BY a.startTime ASC
 			""")
 	List<AppointmentEntity> findByTimeSlot(
 			@Param("userId") Long userId,

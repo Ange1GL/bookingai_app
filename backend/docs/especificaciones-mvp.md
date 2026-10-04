@@ -25,7 +25,7 @@ Decisiones de producto para el MVP:
 | Cliente: crear (find-or-create por teléfono + `userId`) y buscar por nombre | Existe (sin REST de búsqueda) | `CreateCustomerService`, `SearchCustomersService` |
 | Cita: crear / agendar con cliente nuevo / reagendar / cancelar | Existe en application | `CreateAppointmentService`, `BookAppointmentService`, `RescheduleAppointmentService`, `CancelAppointmentService` |
 | Consulta de citas | Parcial: por cliente y por minuto exacto | `QueryAppointmentsService` |
-| Estatus de cita | Enum definido, **sin transiciones** | `StatusAppointment` (`PENDING`, `CANCELLED`, `IN_PROGRESS`, `FINALIZED`) |
+| Estatus de cita | Solo `RESERVED` y `CANCELLED` (V8). "En curso"/"terminada" se derivan de la hora | `StatusAppointment` |
 | Endpoints REST de citas | **No existen** (solo `/api/v1/auth` y `/api/v1/agent`) | — |
 | Jobs programados | Existen (limpieza de tokens, desbloqueo) | `SchedulingConfig`, `ResetAccountLockedJob`, `RevokedAccessTokenCleanupJob` |
 | Notificaciones al barbero | **No existen** | — |
@@ -35,7 +35,7 @@ Decisiones de producto para el MVP:
 1. **El frontend no puede consumir citas**: falta el controlador REST de `Appointment`.
 2. **Bug multi-tenant en anti-empalme**: `AppointmentRepositoryPort.isOverlapping(...)` y `findByTimeSlot(...)` **no filtran por `userId`**. Un barbero puede ser bloqueado por la cita de otro barbero. Debe corregirse antes de abrir el MVP a más de un tenant.
 3. **Falta consulta por rango** (día/semana/mes), necesaria para el calendario.
-4. **El estatus no evoluciona**: nada pasa una cita a `IN_PROGRESS` / `FINALIZED`, y `cancel` no valida el estado previo (se puede cancelar una cita ya finalizada o cancelada).
+4. ~~El estatus no evoluciona~~: decidido. Solo se guardan `RESERVED` y `CANCELLED`; cancelar o reagendar exige `RESERVED` (409 si no).
 5. `Appointment` no tiene servicio, notas ni precio.
 6. Se usa `LocalDateTime` sin zona horaria del tenant: afecta recordatorios y calendario.
 7. No hay canal de notificación hacia el barbero.
@@ -51,11 +51,11 @@ Prioridad: **P0** = imprescindible para el MVP, **P1** = deseable si el tiempo a
 Endpoint para que el frontend pinte el calendario (vista día/semana/mes) con el estatus de cada cita.
 
 ```
-GET /api/v1/appointments?from=2026-10-05T00:00:00&to=2026-10-12T00:00:00&status=PENDING
+GET /api/v1/appointments?from=2026-10-05T00:00:00&to=2026-10-12T00:00:00
 Authorization: cookie HttpOnly (JWT)
 ```
 
-- `from` y `to` obligatorios, ISO-8601; `status` opcional (acepta varios).
+- `from` y `to` obligatorios, ISO-8601; Las canceladas no se devuelven; el estatus de cada cita viaja en la respuesta y el front puede filtrar.
 - Siempre filtrado por el usuario autenticado (`@CurrentUserId`); el `userId` nunca viaja en la request.
 - Validar rango máximo (p. ej. 45 días) para evitar consultas enormes.
 - Ordenado por `startTime` ascendente.
@@ -68,13 +68,13 @@ Respuesta (`AppointmentResponse`, `record` en `infrastructure.adapter.in.rest.dt
     "id": 42,
     "startTime": "2026-10-05T15:00:00",
     "endTime": "2026-10-05T15:45:00",
-    "status": "PENDING",
+    "status": "RESERVED",
     "customer": { "id": 7, "name": "Sonia Acosta", "phone": "527714056025" }
   }
 ]
 ```
 
-Sugerencia de colores para el front: `PENDING` azul, `IN_PROGRESS` ámbar, `FINALIZED` verde, `CANCELLED` gris (tachado).
+Sugerencia para el front: `RESERVED` azul; "en curso" (ámbar) y "terminada" (verde) se calculan con `startTime`/`endTime` y la hora actual, sin guardarse en la BD.
 
 **Aceptación:** un barbero nunca recibe citas de otro; el rango es inclusivo en `from` y exclusivo en `to`; el estatus viene en cada cita.
 
@@ -99,27 +99,24 @@ Errores de dominio (`AppointmentOverlapException`, `AppointmentNotFoundException
 - `findByTimeSlot` debe filtrar por `userId` salvo que se documente el uso global.
 - Considerar bloqueo de concurrencia (dos requests simultáneas al mismo hueco): validar en transacción y, si es posible, restricción a nivel BD.
 
-### F4 — Ciclo de vida del estatus (P0)
+### F4 — Estatus de la cita (P0, simplificado)
 
-Transiciones válidas (la regla vive en el dominio, p. ej. `Appointment.changeStatus(...)` o `StatusAppointment.canTransitionTo(...)`):
+Solo se persisten dos estatus (migración V8):
 
 ```
-PENDING ──► IN_PROGRESS ──► FINALIZED
-   └──────► CANCELLED
+RESERVED ──► CANCELLED
 ```
 
-- No se puede cancelar `FINALIZED` ni `CANCELLED`; no se puede reagendar una cita que no esté `PENDING`.
-- Job programado (mismo patrón que `ResetAccountLockedJob`) que cada minuto:
-  - `PENDING` con `startTime <= ahora` → `IN_PROGRESS`.
-  - `IN_PROGRESS` con `endTime <= ahora` → `FINALIZED`.
-- Endpoint manual `PATCH /api/v1/appointments/{id}/finalize` para cerrar antes de tiempo.
-- Excepción de dominio nueva (`InvalidStatusTransitionException`) → 409.
+- `RESERVED` (id 1): cita creada y vigente. `CANCELLED` (id 2): libera el horario en el anti-empalme.
+- "En curso" y "terminada" **no se guardan**: se derivan de `startTime`/`endTime` y la hora actual del negocio (ver `app.timezone`). No hay job de estatus.
+- Solo una cita `RESERVED` puede cancelarse o reagendarse (`Appointment.ensureReserved()`); en otro caso responde 409 (`InvalidStatusTransitionException`).
+- Evolución futura (P1): acción manual del barbero para marcar asistencia (`FINALIZED`/`NO_SHOW`), que sí requeriría guardarse.
 
 ### F5 — Recordatorios al barbero (P0)
 
 Aviso al barbero **5 minutos antes** de su próxima cita: *"En 5 minutos tienes cita con {cliente}"*.
 
-- Job `@Scheduled` cada minuto: busca citas `PENDING` con `startTime` dentro de los próximos *N* minutos y `reminder_sent_at IS NULL`; envía el aviso y marca `reminder_sent_at` (evita duplicados). Requiere migración Flyway (columna nueva en `appointment`).
+- Job `@Scheduled` cada minuto: busca citas `RESERVED` con `startTime` dentro de los próximos *N* minutos y `reminder_sent_at IS NULL`; envía el aviso y marca `reminder_sent_at` (evita duplicados). Requiere migración Flyway (columna nueva en `appointment`).
 - *N* configurable en `application.yaml` (por defecto `5`), sin números mágicos en el código.
 - Se puentea con un puerto de salida `BarberNotificationPort` (hexagonal), para cambiar el canal sin tocar la lógica.
 - **Canal sugerido para el MVP (costo cero):** notificación hacia el frontend abierto (SSE o Web Push). Alternativa gratuita: bot de Telegram del barbero. Decidir antes de implementar (ver sección 6).
@@ -188,4 +185,3 @@ Respetando `AGENTS.md` (arquitectura hexagonal, inyección por constructor, `rec
 - ¿Qué canal usará el recordatorio del barbero: SSE/Web Push en el front, Telegram u otro?
 - ¿Zona horaria única (México) para el MVP o por tenant desde el inicio?
 - ¿Se permite agendar citas en el pasado (registro retroactivo)?
-- ¿Una cita `IN_PROGRESS` puede cancelarse?

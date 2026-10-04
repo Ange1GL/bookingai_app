@@ -259,6 +259,8 @@ INSERT INTO status_appointment (status_id, nombre) VALUES (3, 'IN_PROGRESS') ON 
 INSERT INTO status_appointment (status_id, nombre) VALUES (4, 'FINALIZED')   ON CONFLICT DO NOTHING;
 ```
 
+> Nota histórica: este bloque describe el seed original (V2). La migración V8 renombró `PENDING` a `RESERVED` (id 1) y eliminó `IN_PROGRESS` y `FINALIZED` (ids 3 y 4); hoy el catálogo solo tiene `RESERVED` y `CANCELLED`.
+
 Regla: **cada valor nuevo en el enum lleva su `INSERT` en una migración nueva.** Un valor en el
 enum sin fila en la tabla viola `fk_appointment_status` en cuanto una cita lo use.
 

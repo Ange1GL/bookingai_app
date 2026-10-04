@@ -1,5 +1,8 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 
 	private final AppointmentRepositoryPort appointmentRepository;
 	private final CustomerRepositoryPort customerRepository;
+	private final Clock clock;
 
 	@Override
 	@Transactional
@@ -33,7 +37,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 
-		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId());
+		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId(), LocalDateTime.now(clock));
 		return appointmentRepository.save(appointment);
 	}
 }

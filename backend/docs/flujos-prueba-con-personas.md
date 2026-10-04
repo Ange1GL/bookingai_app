@@ -57,7 +57,7 @@ Ejecutar siempre en orden: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 | 3 | Barbero | Sí, es para ella. |
 | 4 | IA *(esperado)* | Perfecto. Cita guardada para Sonia Acosta el 11 de septiembre de 2026 de 3:00 p.m. a 3:30 p.m. |
 
-**Resultado esperado en BD:** nueva cita `PENDING` para Sonia Acosta, `startTime = 2026-09-11T15:00`, `endTime = 2026-09-11T15:30`.
+**Resultado esperado en BD:** nueva cita `RESERVED` para Sonia Acosta, `startTime = 2026-09-11T15:00`, `endTime = 2026-09-11T15:30`.
 **Keywords a verificar en última respuesta IA:** `sonia`, `guardada`, `agendada`, `3:30`
 
 ---
@@ -78,7 +78,7 @@ Ejecutar siempre en orden: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 | 7 | Barbero | Corte y barba, 45 minutos. |
 | 8 | IA *(esperado)* | Cita guardada para Marisol Acosta el 13 de septiembre de 2026 de 4:00 p.m. a 4:45 p.m. |
 
-**Resultado esperado en BD:** nuevo cliente Marisol Acosta `phone=527717203342` + cita `PENDING` `2026-09-13T16:00–16:45`.
+**Resultado esperado en BD:** nuevo cliente Marisol Acosta `phone=527717203342` + cita `RESERVED` `2026-09-13T16:00–16:45`.
 **Keywords a verificar en última respuesta IA:** `marisol`, `guardada`, `agendada`, `4:45`, `registrada`
 
 ---
@@ -95,7 +95,7 @@ Ejecutar siempre en orden: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 | 3 | Barbero | Es el que termina en 9509. |
 | 4 | IA *(esperado)* | Cita agendada para Carlos Cruz (...9509) el 15 de septiembre de 2026 a las 6:00 p.m. |
 
-**Resultado esperado en BD:** nueva cita `PENDING` para Carlos Cruz, `2026-09-15T18:00–18:30`.
+**Resultado esperado en BD:** nueva cita `RESERVED` para Carlos Cruz, `2026-09-15T18:00–18:30`.
 **Keywords a verificar en última respuesta IA:** `carlos cruz`, `agendada`, `guardada`, `6:00`, `15 de septiembre`
 
 ---
@@ -131,7 +131,7 @@ Ejecutar siempre en orden: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 | 5 | Barbero | Sí. |
 | 6 | IA *(esperado)* | Cita del 14 de septiembre de 2026 a las 5:00 p.m. cancelada. |
 
-**Resultado esperado en BD:** cita de Carlos Cruz Sep 14 pasa a `CANCELLED`. La del Sep 16 permanece `PENDING`.
+**Resultado esperado en BD:** cita de Carlos Cruz Sep 14 pasa a `CANCELLED`. La del Sep 16 permanece `RESERVED`.
 **Keywords a verificar en última respuesta IA:** `cancelad`, `14 de septiembre`, `carlos`
 
 ---
@@ -172,10 +172,10 @@ Ejecutar siempre en orden: 1 → 2 → 3 → 4 → 5 → 6 → 7.
 
 ## Checklist de verificación manual
 
-- [ ] Flujo 1: cita Sonia Sep 11 15:00 existe con `status = PENDING`
-- [ ] Flujo 2: Marisol Acosta creada + cita Sep 13 16:00 con `status = PENDING`
-- [ ] Flujo 3: cita Carlos Cruz Sep 15 18:00 con `status = PENDING`
+- [ ] Flujo 1: cita Sonia Sep 11 15:00 existe con `status = RESERVED`
+- [ ] Flujo 2: Marisol Acosta creada + cita Sep 13 16:00 con `status = RESERVED`
+- [ ] Flujo 3: cita Carlos Cruz Sep 15 18:00 con `status = RESERVED`
 - [ ] Flujo 4: cita Sonia Sep 11 15:00 tiene `status = CANCELLED`
-- [ ] Flujo 5: cita Carlos Cruz Sep 14 17:00 tiene `status = CANCELLED`; Sep 16 sigue `PENDING`
+- [ ] Flujo 5: cita Carlos Cruz Sep 14 17:00 tiene `status = CANCELLED`; Sep 16 sigue `RESERVED`
 - [ ] Flujo 6: cita Luis pasa de Sep 14 a Sep 18 18:00
 - [ ] Flujo 7: cita Marisol pasa a Sep 18 18:30

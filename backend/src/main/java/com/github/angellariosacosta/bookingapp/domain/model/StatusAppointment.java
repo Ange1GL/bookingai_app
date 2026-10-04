@@ -7,17 +7,12 @@ import lombok.Getter;
 @Getter
 public enum StatusAppointment {
 
-    // PENDING -> La cita ha si creada pero no ha pasado
-	PENDING(1, "PENDING"),
+    // RESERVED -> La cita fue creada y esta vigente. "En curso" y "terminada" no se guardan:
+    // se derivan de startTime/endTime y la hora actual.
+	RESERVED(1, "RESERVED"),
 
-    // CANCELLED -> La cita ha sido cancelada
-	CANCELLED(2, "CANCELLED"),
-
-    // IN_PROGRESS -> La cita esta en curso
-	IN_PROGRESS(3, "IN_PROGRESS"),
-
-    // FINALIZED -> La cita ha finalizado
-    FINALIZED(4, "FINALIZED");
+    // CANCELLED -> La cita ha sido cancelada; libera el horario en el anti-empalme
+	CANCELLED(2, "CANCELLED");
 
 
     private final Integer id;
