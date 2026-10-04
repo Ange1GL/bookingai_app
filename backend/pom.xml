@@ -30,7 +30,7 @@
 		<java.version>25</java.version>
 		<bucket4j.version>8.18.0</bucket4j.version>
 		<nimbus-jose-jwt.version>10.0.2</nimbus-jose-jwt.version>
-		<mapstruct.version>1.5.5.Final</mapstruct.version>
+		<mapstruct.version>1.6.3</mapstruct.version>
 	</properties>
 
 	<dependencyManagement>
