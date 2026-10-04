@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { API_ENDPOINTS } from '@/core/constants/api-endpoints';
+import { environment } from '../../../../environments/environment';
 import { AuthUserDto } from '@/core/model/auth-user.dto';
 import { SessionService } from '@/core/service/session.service';
 import { AuthService } from './auth.service';
@@ -28,7 +28,7 @@ describe('AuthService', () => {
   it('stores the user in the session after login', () => {
     service.login({ username: 'ana', password: 'secret' }).subscribe();
 
-    const req = http.expectOne(API_ENDPOINTS.auth.login);
+    const req = http.expectOne(`${environment.apiBaseUrl}/api/v1/auth/login`);
     expect(req.request.method).toBe('POST');
     req.flush(USER);
 
@@ -39,7 +39,7 @@ describe('AuthService', () => {
   it('stores the user in the session after register', () => {
     service.register({ username: 'ana', email: 'ana@test.com', password: 'secret123', name: 'Ana' }).subscribe();
 
-    http.expectOne(API_ENDPOINTS.auth.register).flush(USER);
+    http.expectOne(`${environment.apiBaseUrl}/api/v1/auth/register`).flush(USER);
 
     expect(session.user()).toEqual(USER);
   });

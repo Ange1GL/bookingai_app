@@ -2,11 +2,13 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { API_ENDPOINTS } from '../constants/api-endpoints';
+import { environment } from '../../../environments/environment';
 import { SessionService } from '../service/session.service';
 import { refreshInterceptor } from './refresh.interceptor';
 
-const DATA_URL = '/api/v1/appointments';
+const DATA_URL = `${environment.apiBaseUrl}/api/v1/appointments`;
+const REFRESH_URL = `${environment.apiBaseUrl}/api/v1/auth/refresh`;
+const LOGIN_URL = `${environment.apiBaseUrl}/api/v1/auth/login`;
 const USER = { userId: 1, username: 'ana', email: 'ana@test.com', roles: [] };
 const UNAUTHORIZED = { status: 401, statusText: 'Unauthorized' };
 
@@ -31,7 +33,7 @@ describe('refreshInterceptor', () => {
     client.get(DATA_URL).subscribe((value) => (body = value));
 
     http.expectOne(DATA_URL).flush(null, UNAUTHORIZED);
-    http.expectOne(API_ENDPOINTS.auth.refresh).flush(USER);
+    http.expectOne(REFRESH_URL).flush(USER);
     http.expectOne(DATA_URL).flush({ ok: true });
 
     expect(body).toEqual({ ok: true });
@@ -44,7 +46,7 @@ describe('refreshInterceptor', () => {
     client.get(DATA_URL).subscribe({ error: () => (failed = true) });
 
     http.expectOne(DATA_URL).flush(null, UNAUTHORIZED);
-    http.expectOne(API_ENDPOINTS.auth.refresh).flush(null, UNAUTHORIZED);
+    http.expectOne(REFRESH_URL).flush(null, UNAUTHORIZED);
 
     expect(failed).toBe(true);
     expect(expire).toHaveBeenCalledOnce();
@@ -52,9 +54,9 @@ describe('refreshInterceptor', () => {
 
   it('does not try to refresh when an auth endpoint returns 401', () => {
     let failed = false;
-    client.post(API_ENDPOINTS.auth.login, {}).subscribe({ error: () => (failed = true) });
+    client.post(LOGIN_URL, {}).subscribe({ error: () => (failed = true) });
 
-    http.expectOne(API_ENDPOINTS.auth.login).flush(null, UNAUTHORIZED);
+    http.expectOne(LOGIN_URL).flush(null, UNAUTHORIZED);
 
     expect(failed).toBe(true);
   });

@@ -12,7 +12,7 @@ To start a local development server, run:
 npm start
 ```
 
-`/api` is proxied to the backend (`proxy.conf.json`) so HttpOnly auth cookies and CSRF work on the same origin.
+The API host comes from `src/environments/environment.ts` (`http://localhost:8082` in dev). Services write the full path (`${environment.apiBaseUrl}/api/v1/...`).
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 

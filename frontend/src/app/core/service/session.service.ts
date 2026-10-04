@@ -2,8 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize, Observable, shareReplay, tap } from 'rxjs';
-import { API_ENDPOINTS } from '../constants/api-endpoints';
-import { LOGIN_URL } from '../constants/routes';
+import { environment } from '../../../environments/environment';
 import { AuthUserDto } from '../model/auth-user.dto';
 
 /**
@@ -28,7 +27,7 @@ export class SessionService {
   /** Shares a single refresh call between concurrent callers (guard, interceptor). */
   refresh(): Observable<AuthUserDto> {
     if (!this.refreshInFlight$) {
-      this.refreshInFlight$ = this.http.post<AuthUserDto>(API_ENDPOINTS.auth.refresh, null).pipe(
+      this.refreshInFlight$ = this.http.post<AuthUserDto>(`${environment.apiBaseUrl}/api/v1/auth/refresh`, null).pipe(
         tap((user) => this.setUser(user)),
         finalize(() => (this.refreshInFlight$ = null)),
         shareReplay({ bufferSize: 1, refCount: false }),
@@ -38,12 +37,12 @@ export class SessionService {
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>(API_ENDPOINTS.auth.logout, null).pipe(finalize(() => this.expire()));
+    return this.http.post<void>(`${environment.apiBaseUrl}/api/v1/auth/logout`, null).pipe(finalize(() => this.expire()));
   }
 
   /** Clears local state and sends the user to the login page. */
   expire(): void {
     this.userState.set(null);
-    void this.router.navigateByUrl(LOGIN_URL);
+    void this.router.navigateByUrl('/auth/login');
   }
 }

@@ -1,10 +1,9 @@
 import { HttpErrorResponse, HttpInterceptorFn, HttpStatusCode } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { API_ENDPOINTS } from '../constants/api-endpoints';
 import { SessionService } from '../service/session.service';
 
-const AUTH_ENDPOINTS: readonly string[] = Object.values(API_ENDPOINTS.auth);
+const AUTH_PATH = '/api/v1/auth/';
 
 /** On 401, refreshes the session once and retries the original request. */
 export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
@@ -12,7 +11,7 @@ export const refreshInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      const isRecoverable = error.status === HttpStatusCode.Unauthorized && !AUTH_ENDPOINTS.includes(req.url);
+      const isRecoverable = error.status === HttpStatusCode.Unauthorized && !req.url.includes(AUTH_PATH);
       if (!isRecoverable) {
         return throwError(() => error);
       }

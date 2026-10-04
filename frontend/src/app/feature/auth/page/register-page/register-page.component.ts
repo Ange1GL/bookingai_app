@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
-import { APP_ROUTES, HOME_URL } from '@/core/constants/routes';
 import { RegisterFormComponent } from '../../components/register-form/register-form.component';
 import { RegisterRequestDto } from '../../models/register-request.dto';
 import { AuthService } from '../../service/auth.service';
@@ -16,7 +15,7 @@ import { AuthService } from '../../service/auth.service';
       <app-register-form [loading]="loading()" (submitted)="register($event)" />
       <p class="text-center text-sm">
         ¿Ya tienes cuenta?
-        <a [routerLink]="loginLink" class="text-primary">Inicia sesión</a>
+        <a routerLink="/auth/login" class="text-primary">Inicia sesión</a>
       </p>
     </section>
   `,
@@ -26,7 +25,6 @@ export class RegisterPageComponent {
   private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
-  protected readonly loginLink = `/${APP_ROUTES.auth}/${APP_ROUTES.login}`;
 
   protected register(request: RegisterRequestDto): void {
     this.loading.set(true);
@@ -34,7 +32,7 @@ export class RegisterPageComponent {
       .register(request)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: () => void this.router.navigateByUrl(HOME_URL),
+        next: () => void this.router.navigateByUrl('/home'),
         error: () => undefined, // surfaced by errorInterceptor
       });
   }

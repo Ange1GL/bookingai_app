@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { API_ENDPOINTS } from '@/core/constants/api-endpoints';
+import { environment } from '../../../../environments/environment';
 import { AuthUserDto } from '@/core/model/auth-user.dto';
 import { SessionService } from '@/core/service/session.service';
 import { LoginRequestDto } from '../models/login-request.dto';
@@ -14,13 +14,13 @@ export class AuthService {
 
   login(request: LoginRequestDto): Observable<AuthUserDto> {
     return this.http
-      .post<AuthUserDto>(API_ENDPOINTS.auth.login, request)
+      .post<AuthUserDto>(`${environment.apiBaseUrl}/api/v1/auth/login`, request)
       .pipe(tap((user) => this.session.setUser(user)));
   }
 
   register(request: RegisterRequestDto): Observable<AuthUserDto> {
     return this.http
-      .post<AuthUserDto>(API_ENDPOINTS.auth.register, request)
+      .post<AuthUserDto>(`${environment.apiBaseUrl}/api/v1/auth/register`, request)
       .pipe(tap((user) => this.session.setUser(user)));
   }
 }
