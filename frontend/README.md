@@ -1,14 +1,18 @@
-# Diamond NG
+# BookingApp — Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.5.
+Angular 21 + PrimeNG 21 + Tailwind 4, organized by feature (`core / shared / feature`). See [docs/frontend-structure.md](../docs/frontend-structure.md).
+
+**Prerequisites:** Node 22+, backend running on `http://localhost:8082` (dev profile).
 
 ## Development server
 
 To start a local development server, run:
 
 ```bash
-ng serve
+npm start
 ```
+
+The API host comes from `src/environments/environment.ts` (`http://localhost:8082` in dev). Services write the full path (`${environment.apiBaseUrl}/api/v1/...`).
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
