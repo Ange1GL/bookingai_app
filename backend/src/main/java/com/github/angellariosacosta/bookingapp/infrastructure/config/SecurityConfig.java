@@ -108,7 +108,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login", "/error").permitAll()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/csrf", "/error").permitAll()
                         .anyRequest().authenticated()
                 );
 

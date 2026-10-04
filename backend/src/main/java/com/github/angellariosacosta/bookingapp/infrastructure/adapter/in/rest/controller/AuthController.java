@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.c
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +41,13 @@ public class AuthController {
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
     private final AuthRestMapper authRestMapper;
+
+    // Endpoint vacío: su único propósito es que la respuesta lleve la cookie XSRF-TOKEN (escrita por
+    // CsrfCookieFilter) para que el frontend pueda hacer el doble envío en su primer POST.
+    @GetMapping("/csrf")
+    public ResponseEntity<Void> csrf() {
+        return ResponseEntity.noContent().build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthSuccessResponse> login(
