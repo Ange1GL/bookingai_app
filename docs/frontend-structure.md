@@ -14,7 +14,7 @@ frontend/src/
       model/{api-error,auth-user}.dto.ts
       service/{session,loader,error-handler}.service.ts
     shared/                                  # UI reutilizable sin lógica de negocio
-      components/loader-screen/
+      components/{loader-screen,brand-logo,auth-card}/   # marca bookingAI y contenedor degradado de auth
       layout/main-layout/
     feature/<name>/                          # un directorio por feature
       <name>.routes.ts                       # rutas lazy
@@ -25,6 +25,12 @@ frontend/src/
 ```
 
 Features actuales: `auth` (login, registro) y `home` (página protegida mínima).
+
+## Tema y tipografía
+- Preset PrimeNG: `VioletPreset` (Aura con `semantic.primary` → paleta `violet`) en `app.config.ts`; modo oscuro con `.app-dark`.
+- Fuente: Montserrat (Google Fonts en `index.html`), expuesta como `--font-sans` en `styles.css`; los componentes PrimeNG la heredan del `body`.
+- Clases Tailwind de color: `primary-[50-950]` (vía `tailwindcss-primeui`).
+- Login: el usuario se valida como `required` + sin espacios (`USERNAME_PATTERN`); el backend no impone formato de username, y el email solo existe en el registro.
 
 ## Regla de dependencias
 `feature → core | shared`. `shared → core`. **Nunca** `feature → feature` ni `core → feature`.

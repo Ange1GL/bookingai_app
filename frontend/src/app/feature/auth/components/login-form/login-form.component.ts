@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { LoginRequestDto } from '../../models/login-request.dto';
+import { LoginRequestDto, USERNAME_PATTERN } from '../../models/login-request.dto';
 
 @Component({
   selector: 'app-login-form',
-  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule],
+  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, IconFieldModule, InputIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './login-form.component.html',
 })
@@ -16,7 +18,7 @@ export class LoginFormComponent {
   readonly submitted = output<LoginRequestDto>();
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
-    username: ['', Validators.required],
+    username: ['', [Validators.required, Validators.pattern(USERNAME_PATTERN)]],
     password: ['', Validators.required],
   });
 

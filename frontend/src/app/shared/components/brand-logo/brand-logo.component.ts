@@ -1,0 +1,21 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+@Component({
+  selector: 'app-brand-logo',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="flex flex-col items-center gap-3">
+      <span
+        class="flex size-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary-400 to-primary-700 text-white shadow-lg shadow-primary-500/30"
+        aria-hidden="true"
+      >
+        <i class="pi pi-calendar-clock text-3xl"></i>
+      </span>
+      <div class="text-center">
+        <h1 class="m-0 text-3xl font-bold tracking-tight">booking<span class="text-primary">AI</span></h1>
+        <p class="m-0 mt-1 text-sm text-muted-color">Gestiona tus citas</p>
+      </div>
+    </div>
+  `,
+})
+export class BrandLogoComponent {}

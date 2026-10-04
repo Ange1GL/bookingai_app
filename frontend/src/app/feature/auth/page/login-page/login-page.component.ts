@@ -1,23 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { AuthCardComponent } from '@/shared/components/auth-card/auth-card.component';
 import { LoginFormComponent } from '../../components/login-form/login-form.component';
 import { LoginRequestDto } from '../../models/login-request.dto';
 import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-login-page',
-  imports: [LoginFormComponent, RouterLink],
+  imports: [AuthCardComponent, LoginFormComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="mx-auto mt-24 flex w-full max-w-sm flex-col gap-6 p-4">
-      <h1 class="text-2xl font-semibold">Iniciar sesión</h1>
+    <app-auth-card>
+      <h2 class="m-0 text-center text-xl font-semibold">Iniciar sesión</h2>
       <app-login-form [loading]="loading()" (submitted)="login($event)" />
-      <p class="text-center text-sm">
+      <p class="m-0 text-center text-sm">
         ¿No tienes cuenta?
-        <a routerLink="/auth/register" class="text-primary">Regístrate</a>
+        <a routerLink="/auth/register" class="font-medium text-primary">Regístrate</a>
       </p>
-    </section>
+    </app-auth-card>
   `,
 })
 export class LoginPageComponent {

@@ -4,8 +4,13 @@
 
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
+@theme {
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+}
+
 body {
   margin: 0;
+  font-family: var(--font-sans);
   background: var(--p-surface-0);
   color: var(--p-text-color);
 }
