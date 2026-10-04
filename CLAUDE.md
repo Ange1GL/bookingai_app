@@ -11,7 +11,7 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - Dependency rule: `feature → core|shared`, never feature → feature or core → feature
 - Alias `@/*` → `src/app/*`
 - Standalone components, signals, `OnPush`, functional interceptors/guards
-- Auth uses HttpOnly cookies (no JWT in JS): `withCredentials`, refresh-on-401, CSRF via Angular XSRF defaults
+- Auth uses HttpOnly cookies (no JWT in JS): `withCredentials`, refresh-on-401, CSRF double-submit via `csrfInterceptor` (Angular's built-in XSRF skips cross-origin requests; it seeds the cookie with `GET /api/v1/auth/csrf`)
 
 ## Conventions
 - Never run `npm audit fix --force`; keep all `@angular/*` runtime packages on the same version (they peer-pin each other)

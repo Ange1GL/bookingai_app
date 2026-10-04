@@ -118,3 +118,10 @@ Cada fase en commit separado y verificable (`build` + `test` verdes) para poder 
 - Fase 2/3 tocan `angular.json` y los specs: probar `ng serve` y `ng build --configuration production`.
 - PrimeNG 21 y Tailwind 4 no dependen de `build-angular`, riesgo bajo.
 - `postcss`/`tailwindcss` ya son directos y están al día.
+
+## CSRF double-submit (cross-origin API)
+
+- Angular's built-in XSRF interceptor does not send `X-XSRF-TOKEN` when the API origin differs from the app origin (`localhost:4200` -> `localhost:8082`), so `core/interceptor/csrf.interceptor.ts` adds the header for mutating requests to `environment.apiBaseUrl`.
+- If the `XSRF-TOKEN` cookie is missing, the interceptor first calls `GET /api/v1/auth/csrf` (public, 204) to obtain it.
+- Verify with the backend profile `qa` (`SPRING_PROFILES_ACTIVE=qa`); the default `dev` profile disables CSRF.
+- Production: the cookie is issued by the API host and is host-only, so JS on a different host cannot read it. Serve front and API under the same origin (reverse proxy `/api`) or set the cookie `Domain` on the CSRF repository.

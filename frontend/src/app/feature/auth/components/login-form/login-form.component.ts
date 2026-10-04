@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
+import { LoginForm } from '../../models/login-form.model';
 import { LoginRequestDto, USERNAME_PATTERN } from '../../models/login-request.dto';
 
 @Component({
@@ -14,12 +15,14 @@ import { LoginRequestDto, USERNAME_PATTERN } from '../../models/login-request.dt
   templateUrl: './login-form.component.html',
 })
 export class LoginFormComponent {
+  private readonly fb = inject(NonNullableFormBuilder);
+
   readonly loading = input(false);
   readonly submitted = output<LoginRequestDto>();
 
-  protected readonly form = inject(FormBuilder).nonNullable.group({
-    username: ['', [Validators.required, Validators.pattern(USERNAME_PATTERN)]],
-    password: ['', Validators.required],
+  protected readonly form: FormGroup<LoginForm> = this.fb.group({
+    username: this.fb.control('', [Validators.required, Validators.pattern(USERNAME_PATTERN)]),
+    password: this.fb.control('', Validators.required),
   });
 
   protected submit(): void {
@@ -27,6 +30,7 @@ export class LoginFormComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.submitted.emit(this.form.getRawValue());
+    const credentials: LoginRequestDto = this.form.getRawValue();
+    this.submitted.emit(credentials);
   }
 }
