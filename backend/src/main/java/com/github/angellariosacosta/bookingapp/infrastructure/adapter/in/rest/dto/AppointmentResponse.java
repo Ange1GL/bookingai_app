@@ -8,6 +8,7 @@ public record AppointmentResponse(
 		LocalDateTime endTime,
 		Long customerId,
 		String customerName,
-		String status
+		String status,
+		Integer statusId
 ) {
 }
