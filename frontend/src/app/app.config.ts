@@ -7,6 +7,7 @@ import Aura from '@primeuix/themes/aura';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { credentialsInterceptor } from './core/interceptor/credentials.interceptor';
+import { csrfInterceptor } from './core/interceptor/csrf.interceptor';
 import { errorInterceptor } from './core/interceptor/error.interceptor';
 import { loaderInterceptor } from './core/interceptor/loader.interceptor';
 import { refreshInterceptor } from './core/interceptor/refresh.interceptor';
@@ -36,7 +37,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
     // Order matters: `refresh` is innermost so recovered 401s never reach `error`.
-    provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor, loaderInterceptor, errorInterceptor, refreshInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor, csrfInterceptor, loaderInterceptor, errorInterceptor, refreshInterceptor])),
     provideAnimationsAsync(),
     providePrimeNG({ theme: { preset: VioletPreset, options: { darkModeSelector: '.app-dark' } } }),
     MessageService,

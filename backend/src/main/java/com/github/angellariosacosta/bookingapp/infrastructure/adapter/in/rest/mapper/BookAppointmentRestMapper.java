@@ -27,7 +27,8 @@ public class BookAppointmentRestMapper {
 				appointment.getEndTime(),
 				appointment.getCustomer().getId(),
 				appointment.getCustomer().getName(),
-				appointment.getStatus().getName()
+				appointment.getStatus().getName(),
+				appointment.getStatus().getId()
 		);
 	}
 }

@@ -24,16 +24,19 @@
 
   <div class="flex flex-col gap-2">
     <label for="password" class="text-sm font-medium">Contraseña</label>
-    <p-password
-      inputId="password"
-      formControlName="password"
-      [feedback]="false"
-      [toggleMask]="true"
-      autocomplete="current-password"
-      placeholder="••••••••"
-      styleClass="w-full"
-      inputStyleClass="w-full"
-    />
+    <p-iconfield>
+      <p-inputicon class="pi pi-lock" />
+      <p-password
+        inputId="password"
+        formControlName="password"
+        [feedback]="false"
+        [toggleMask]="true"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        styleClass="w-full"
+        inputStyleClass="w-full"
+      />
+    </p-iconfield>
     @if (form.controls.password.touched && form.controls.password.hasError('required')) {
       <small class="text-red-500">La contraseña es obligatoria.</small>
     }
