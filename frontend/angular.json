@@ -32,7 +32,7 @@
                             }
                         ],
                         "styles": [
-                            "src/assets/styles.scss"
+                            "src/styles.css"
                         ],
                         "scripts": []
                     },
@@ -50,7 +50,13 @@
                                     "maximumError": "4kb"
                                 }
                             ],
-                            "outputHashing": "all"
+                            "outputHashing": "all",
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                }
+                            ]
                         },
                         "development": {
                             "optimization": false,
@@ -70,7 +76,10 @@
                             "buildTarget": "diamond-ng:build:development"
                         }
                     },
-                    "defaultConfiguration": "development"
+                    "defaultConfiguration": "development",
+                    "options": {
+                        "proxyConfig": "proxy.conf.json"
+                    }
                 },
                 "extract-i18n": {
                     "builder": "@angular/build:extract-i18n"
