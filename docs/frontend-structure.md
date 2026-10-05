@@ -10,7 +10,7 @@ frontend/src/
     app.ts · app.config.ts · app.routes.ts
     core/                                    # singletons transversales
       guard/auth.guard.ts
-      interceptor/{credentials,loader,error,refresh}.interceptor.ts
+      interceptor/{credentials,csrf,loader,error,refresh}.interceptor.ts
       model/{api-error,auth-user}.dto.ts
       service/{session,loader,error-handler}.service.ts
     shared/                                  # UI reutilizable sin lógica de negocio
@@ -24,7 +24,7 @@ frontend/src/
       service/                               # acceso a API de la feature
 ```
 
-Features actuales: `auth` (login, registro) y `home` (página protegida mínima).
+Features actuales: `auth` (login, registro), `home` (accesos directos), `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI", chat de texto). Detalle en `docs/appointments-calendar.md` y `docs/assistant-chat.md`.
 
 ## Tema y tipografía
 - Preset PrimeNG: `VioletPreset` (Aura con `semantic.primary` → paleta `violet`) en `app.config.ts`; modo oscuro con `.app-dark`.
@@ -40,8 +40,8 @@ Alias TypeScript: `@/*` → `src/app/*` (p. ej. `@/core/service/session.service`
 
 ## Autenticación (backend Spring, cookies HttpOnly)
 - No hay JWT en JavaScript: `credentialsInterceptor` añade `withCredentials` a `/api/v1/**`.
-- CSRF `csrf.spa()`: Angular reenvía `XSRF-TOKEN` como `X-XSRF-TOKEN` (**solo aplica a mismo origen**: Angular no lo envía a URLs absolutas de otro origen; en dev el backend lo tiene deshabilitado, para prod habrá que servir SPA y API bajo el mismo host o enviar el header manualmente).
-- Orden de interceptores: `credentials → loader → error → refresh`. `refresh` es el más interno: ante 401 llama una sola vez a `/auth/refresh` (compartido entre peticiones concurrentes) y reintenta; si falla, `SessionService.expire()` redirige a login. `error` solo muestra toasts de errores no recuperados.
+- CSRF `csrf.spa()` (doble envío): Angular **no** envía `X-XSRF-TOKEN` a otro origen, por eso `csrfInterceptor` lo añade a las peticiones mutantes hacia `apiBaseUrl` y siembra la cookie con `GET /api/v1/auth/csrf` si falta. Ver `docs/security-remediation-plan.md`.
+- Orden de interceptores: `credentials → csrf → loader → error → refresh`. Las llamadas que pintan su propio estado de carga usan `SKIP_LOADER` (contexto HTTP) para no mostrar el overlay global. `refresh` es el más interno: ante 401 llama una sola vez a `/auth/refresh` (compartido entre peticiones concurrentes) y reintenta; si falla, `SessionService.expire()` redirige a login. `error` solo muestra toasts de errores no recuperados.
 - Tras recargar la página no hay estado: `authGuard` restaura la sesión con `/auth/refresh` (devuelve el usuario).
 
 ## Cómo añadir una feature

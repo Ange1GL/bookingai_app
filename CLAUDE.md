@@ -13,6 +13,9 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - Standalone components, signals, `OnPush`, functional interceptors/guards
 - Auth uses HttpOnly cookies (no JWT in JS): `withCredentials`, refresh-on-401, CSRF double-submit via `csrfInterceptor` (Angular's built-in XSRF skips cross-origin requests; it seeds the cookie with `GET /api/v1/auth/csrf`)
 
+## Features
+- `auth`, `home`, `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI": chat de texto para agendar citas; la voz quedó pospuesta, ver `docs/assistant-chat.md`)
+
 ## Conventions
 - Never run `npm audit fix --force`; keep all `@angular/*` runtime packages on the same version (they peer-pin each other)
 - `overrides` in `package.json` are temporary security patches; document them in `docs/security-remediation-plan.md`
@@ -21,4 +24,4 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - Utility scripts are Node `.mjs` files (cross-platform)
 
 ## Docs
-- `docs/security-remediation-plan.md`, `docs/frontend-structure.md`
+- `docs/security-remediation-plan.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`

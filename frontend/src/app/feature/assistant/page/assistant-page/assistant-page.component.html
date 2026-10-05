@@ -1,0 +1,76 @@
+<div
+  class="mx-auto flex h-[calc(100dvh-10.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-surface bg-surface-0 shadow-sm md:h-[calc(100dvh-7rem)] dark:bg-surface-900"
+>
+  <header
+    class="flex items-center gap-3 bg-linear-to-r from-primary-500 via-primary-600 to-primary-700 px-4 py-3 text-white"
+  >
+    <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl backdrop-blur" aria-hidden="true">
+      <i class="pi pi-sparkles"></i>
+    </span>
+    <div class="min-w-0 flex-1">
+      <h1 class="m-0 truncate text-base font-semibold leading-tight">Asistente de AI</h1>
+      <p class="m-0 flex items-center gap-1.5 text-xs text-white/80">
+        <span class="size-2 rounded-full bg-emerald-300" aria-hidden="true"></span>
+        En línea
+      </p>
+    </div>
+    <button
+      type="button"
+      class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-white/90 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+      aria-label="Nueva conversación"
+      title="Nueva conversación"
+      [disabled]="store.messages().length === 0 || store.sending()"
+      (click)="store.reset()"
+    >
+      <i class="pi pi-plus" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <div
+    #messageList
+    class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-surface-50 p-4 dark:bg-surface-950"
+    aria-live="polite"
+  >
+    @if (store.messages().length === 0) {
+      <div class="m-auto flex w-full max-w-sm flex-col items-center gap-4 py-2 text-center">
+        <app-assistant-avatar [large]="true" />
+        <div>
+          <p class="m-0 text-xl font-bold tracking-tight">¿En qué te ayudo hoy?</p>
+          <p class="m-0 mt-1 text-sm text-muted-color">Agenda, mueve o cancela citas escribiéndome como a una persona.</p>
+        </div>
+        <app-quick-actions [actions]="quickActions" (chosen)="run($event)" />
+        <p class="m-0 flex items-center gap-1.5 text-xs text-muted-color">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          Revisa siempre los datos de la cita antes de confirmar.
+        </p>
+      </div>
+    } @else {
+      <div class="flex justify-center">
+        <span class="rounded-full bg-surface-200/70 px-3 py-1 text-xs font-medium text-muted-color dark:bg-surface-800">Hoy</span>
+      </div>
+      @for (message of store.messages(); track message.id) {
+        <app-message-bubble [message]="message" (retry)="store.retry($event)" />
+      }
+      @if (store.sending()) {
+        <div class="flex items-end gap-2" role="status" aria-label="El asistente está escribiendo">
+          <app-assistant-avatar />
+          <div class="flex items-center gap-1.5 rounded-2xl rounded-bl-md bg-surface-100 px-4 py-3.5 dark:bg-surface-800">
+            <span class="size-2 animate-bounce rounded-full bg-primary-400"></span>
+            <span class="size-2 animate-bounce rounded-full bg-primary-400 [animation-delay:150ms]"></span>
+            <span class="size-2 animate-bounce rounded-full bg-primary-400 [animation-delay:300ms]"></span>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <footer class="flex flex-col gap-2 border-t border-surface bg-surface-0 p-3 dark:bg-surface-900">
+    @if (store.messages().length > 0) {
+      <app-suggestion-chips [suggestions]="replyChips" [disabled]="store.sending()" (chosen)="run($event)" />
+    }
+    <app-chat-composer
+      [disabled]="store.sending()"
+      (sent)="store.send($event)"
+    />
+  </footer>
+</div>
