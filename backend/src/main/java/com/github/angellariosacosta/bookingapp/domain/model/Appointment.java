@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentInPastException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
+import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidStatusTransitionException;
 
 import lombok.Getter;
@@ -26,6 +27,7 @@ public class Appointment {
 	Customer customer;
 	private StatusAppointment status;
 	private Long userId;
+	private PriceCatalog priceCatalog;
 
 
 	public static Appointment createNew(
@@ -33,11 +35,12 @@ public class Appointment {
 			LocalDateTime endTime,
 			Customer customer,
 			Long userId,
+			PriceCatalog priceCatalog,
 			LocalDateTime now
 			) {
 		validateTimeRange(startTime, endTime);
 		validateNotInPast(startTime, now);
-		return new Appointment(null, startTime, endTime, customer, StatusAppointment.RESERVED, userId);
+		return new Appointment(null, startTime, endTime, customer, StatusAppointment.RESERVED, userId, priceCatalog);
 	}
 
 	// Reconstruye una cita ya guardada (uso del adaptador de persistencia). No aplica reglas de
@@ -48,9 +51,10 @@ public class Appointment {
 			LocalDateTime endTime,
 			Customer customer,
 			StatusAppointment status,
-			Long userId
+			Long userId,
+			PriceCatalog priceCatalog
 			) {
-		return new Appointment(id, startTime, endTime, customer, status, userId);
+		return new Appointment(id, startTime, endTime, customer, status, userId, priceCatalog);
 	}
 
 
@@ -60,14 +64,19 @@ public class Appointment {
 			LocalDateTime endTime,
 			Customer customer,
 			StatusAppointment status,
-			Long userId
+			Long userId,
+			PriceCatalog priceCatalog
 			) {
+		if (priceCatalog == null) {
+			throw new InvalidFieldException("priceCatalog", "must not be null");
+		}
 		this.id = id;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.customer = customer;
 		this.status = status;
 		this.userId = userId;
+		this.priceCatalog = priceCatalog;
 	}
 
 

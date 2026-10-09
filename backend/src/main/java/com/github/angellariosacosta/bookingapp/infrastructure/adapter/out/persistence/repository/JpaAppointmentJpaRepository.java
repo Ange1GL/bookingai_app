@@ -89,6 +89,7 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	@Query("""
 			SELECT a FROM AppointmentEntity a
 			JOIN FETCH a.customer
+			JOIN FETCH a.priceCatalog
 			WHERE a.userId = :userId
 			AND a.startTime < :to
 		  	AND a.endTime > :from

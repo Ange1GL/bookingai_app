@@ -6,6 +6,7 @@ public record CreateAppointmentCommand(
 		LocalDateTime startTime,
 		LocalDateTime endTime,
 		Long customerId,
-		Long userId
+		Long userId,
+		Integer priceCatalogId
 ) {
 }

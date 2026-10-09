@@ -9,6 +9,9 @@ public record AppointmentResponse(
 		Long customerId,
 		String customerName,
 		String status,
-		Integer statusId
+		Integer statusId,
+		Integer priceCatalogId,
+		String serviceLabel,
+		Long price
 ) {
 }
