@@ -16,6 +16,9 @@ public interface AppointmentRepositoryPort {
 	// Scopeado por userId: solo devuelve las citas activas del dueño actual que tocan [from, to].
 	List<Appointment> findByTimeSlot(Long userId, LocalDateTime from, LocalDateTime to);
 	Appointment updateStatus(Long id, Long userId, StatusAppointment newStatus);
+	// Cancela en una sola sentencia las citas RESERVED del cliente que empiezan en o despues de "from";
+	// devuelve cuantas se cancelaron.
+	int cancelReservedFrom(Long customerId, Long userId, LocalDateTime from);
 	Appointment updateTimeSlot(Long id, Long userId, LocalDateTime newStart, LocalDateTime newEnd);
 }
 

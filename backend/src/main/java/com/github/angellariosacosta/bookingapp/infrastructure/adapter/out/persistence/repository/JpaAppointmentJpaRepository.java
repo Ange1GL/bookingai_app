@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -74,6 +75,25 @@ public interface JpaAppointmentJpaRepository extends JpaRepository<AppointmentEn
 	// en el arranque de la aplicación, no en cada llamada.
 	List<AppointmentEntity> findByCustomerIdAndUserIdAndStatusIdNotOrderByStartTimeAsc(
 			Long customerId, Long userId, Integer statusId);
+
+	// Cancelacion masiva (UPDATE directo, sin cargar entidades) de las citas RESERVED futuras de un
+	// cliente. clearAutomatically evita que el contexto de persistencia conserve citas ya canceladas.
+	@Modifying(clearAutomatically = true)
+	@Query("""
+			UPDATE AppointmentEntity a
+			SET a.statusId = :cancelledStatusId
+			WHERE a.customerId = :customerId
+			AND a.userId = :userId
+			AND a.statusId = :reservedStatusId
+			AND a.startTime >= :from
+			""")
+	int cancelReservedFrom(
+			@Param("customerId") Long customerId,
+			@Param("userId") Long userId,
+			@Param("from") LocalDateTime from,
+			@Param("reservedStatusId") Integer reservedStatusId,
+			@Param("cancelledStatusId") Integer cancelledStatusId
+	);
 
 	// Devuelve las citas activas que ocupan tiempo dentro del rango semiabierto [from, to),
 	// aunque sea parcialmente. La condición (startTime < :to AND endTime > :from) es el mismo
