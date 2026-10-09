@@ -8,6 +8,7 @@ import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentInPas
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidStatusTransitionException;
+import com.github.angellariosacosta.bookingapp.domain.exception.NoShowNotAllowedException;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -85,6 +86,19 @@ public class Appointment {
 		if (status != StatusAppointment.RESERVED) {
 			throw new InvalidStatusTransitionException(
 					"Appointment %d is %s; only RESERVED appointments can be modified".formatted(id, status));
+		}
+	}
+
+	// Un no-show solo aplica a una cita vigente (RESERVED) cuyo horario ya comenzo: no se puede
+	// marcar inasistencia de una cita cancelada ni de una que todavia no llega.
+	public void ensureNoShowRegistrable(LocalDateTime now) {
+		if (status != StatusAppointment.RESERVED) {
+			throw new NoShowNotAllowedException(
+					"Appointment %d is %s; only RESERVED appointments can be marked as no-show".formatted(id, status));
+		}
+		if (startTime.isAfter(now)) {
+			throw new NoShowNotAllowedException(
+					"Appointment %d has not started yet; it cannot be marked as no-show".formatted(id));
 		}
 	}
 
