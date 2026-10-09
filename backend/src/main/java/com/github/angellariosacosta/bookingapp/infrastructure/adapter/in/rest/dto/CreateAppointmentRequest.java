@@ -12,6 +12,9 @@ public record CreateAppointmentRequest(
 		LocalDateTime startTime,
 
 		@NotNull(message = "La hora de fin es obligatoria")
-		LocalDateTime endTime
+		LocalDateTime endTime,
+
+		@NotNull(message = "El servicio del catálogo es obligatorio")
+		Integer priceCatalogId
 ) {
 }

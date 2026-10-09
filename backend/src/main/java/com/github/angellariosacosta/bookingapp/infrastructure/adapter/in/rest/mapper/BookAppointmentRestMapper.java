@@ -16,7 +16,8 @@ public class BookAppointmentRestMapper {
 				request.phone(),
 				request.startTime(),
 				request.endTime(),
-				userId
+				userId,
+				request.priceCatalogId()
 		);
 	}
 
@@ -28,7 +29,10 @@ public class BookAppointmentRestMapper {
 				appointment.getCustomer().getId(),
 				appointment.getCustomer().getName(),
 				appointment.getStatus().getName(),
-				appointment.getStatus().getId()
+				appointment.getStatus().getId(),
+				appointment.getPriceCatalog().getId(),
+				appointment.getPriceCatalog().getLabel(),
+				appointment.getPriceCatalog().getPrice()
 		);
 	}
 }

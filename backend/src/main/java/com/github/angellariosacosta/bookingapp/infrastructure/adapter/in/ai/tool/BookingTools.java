@@ -18,12 +18,14 @@ import com.github.angellariosacosta.bookingapp.application.command.RescheduleApp
 import com.github.angellariosacosta.bookingapp.application.port.in.BookAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CancelAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.ListPriceCatalogUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RescheduleAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.SearchCustomersUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.CurrentUserPort;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
+import com.github.angellariosacosta.bookingapp.domain.model.PriceCatalog;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,6 +39,7 @@ public class BookingTools {
 	private final CancelAppointmentUseCase cancelAppointment;
 	private final RescheduleAppointmentUseCase rescheduleAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
+	private final ListPriceCatalogUseCase listPriceCatalog;
 	private final CurrentUserPort currentUserPort;
 	private final Clock clock;
 
@@ -57,17 +60,25 @@ public class BookingTools {
 				.toList();
 	}
 
-	@Tool(description = "Registra una cita y crea al cliente si no existe. Busca al cliente por teléfono primero.")
-	public AppointmentSummary bookAppointmentForCustomer(String name, String phone, String startTime, String endTime) {
+	@Tool(description = "Lista los servicios del catálogo de precios (id, nombre y precio). "
+			+ "Llámala antes de agendar para preguntar al usuario qué servicio aplicar.")
+	public List<PriceCatalogSummary> listPriceCatalog() {
+		return listPriceCatalog.list(currentUserPort.getCurrentUserId()).stream()
+				.map(PriceCatalogSummary::from)
+				.toList();
+	}
+
+	@Tool(description = "Registra una cita con un servicio del catálogo y crea al cliente si no existe. Busca al cliente por teléfono primero.")
+	public AppointmentSummary bookAppointmentForCustomer(String name, String phone, String startTime, String endTime, Integer priceCatalogId) {
 		BookAppointmentCommand command = new BookAppointmentCommand(
-				name, phone, parseDateTime(startTime), parseDateTime(endTime), currentUserPort.getCurrentUserId());
+				name, phone, parseDateTime(startTime), parseDateTime(endTime), currentUserPort.getCurrentUserId(), priceCatalogId);
 		return AppointmentSummary.from(bookAppointment.book(command));
 	}
 
-	@Tool(description = "Registra una cita para un cliente existente dado su id.")
-	public AppointmentSummary createAppointmentForExistingCustomer(Long customerId, String startTime, String endTime) {
+	@Tool(description = "Registra una cita con un servicio del catálogo para un cliente existente dado su id.")
+	public AppointmentSummary createAppointmentForExistingCustomer(Long customerId, String startTime, String endTime, Integer priceCatalogId) {
 		CreateAppointmentCommand command = new CreateAppointmentCommand(
-				parseDateTime(startTime), parseDateTime(endTime), customerId, currentUserPort.getCurrentUserId());
+				parseDateTime(startTime), parseDateTime(endTime), customerId, currentUserPort.getCurrentUserId(), priceCatalogId);
 		return AppointmentSummary.from(createAppointment.create(command));
 	}
 
@@ -110,7 +121,14 @@ public class BookingTools {
 		}
 	}
 
-	public record AppointmentSummary(Long id, String startTime, String endTime, String status, Long customerId, String customerName, Long userId) {
+	public record PriceCatalogSummary(Integer id, String label, Long price) {
+		static PriceCatalogSummary from(PriceCatalog p) {
+			return new PriceCatalogSummary(p.getId(), p.getLabel(), p.getPrice());
+		}
+	}
+
+	public record AppointmentSummary(Long id, String startTime, String endTime, String status, Long customerId, String customerName, Long userId,
+			Integer priceCatalogId, String serviceLabel, Long price) {
 		static AppointmentSummary from(Appointment a) {
 			return new AppointmentSummary(
 					a.getId(),
@@ -119,7 +137,10 @@ public class BookingTools {
 					a.getStatus().getName(),
 					a.getCustomer().getId(),
 					a.getCustomer().getName(),
-					a.getUserId()
+						a.getUserId(),
+						a.getPriceCatalog().getId(),
+						a.getPriceCatalog().getLabel(),
+						a.getPriceCatalog().getPrice()
 			);
 		}
 	}

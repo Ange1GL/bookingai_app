@@ -15,6 +15,7 @@ public class AppointmentMapper {
 
 
 	private final CustomerMapper customerMapper;
+	private final PriceCatalogMapper priceCatalogMapper;
 
 
 	public AppointmentEntity toEntity(Appointment domain) {
@@ -24,6 +25,7 @@ public class AppointmentMapper {
 		entity.setCustomerId(domain.getCustomer().getId());
 		entity.setStatusId(domain.getStatus().getId());
 		entity.setUserId(domain.getUserId());
+		entity.setPriceCatalogId(domain.getPriceCatalog().getId());
 		return entity;
 	}
 
@@ -37,7 +39,8 @@ public class AppointmentMapper {
 				entity.getEndTime(),
 				customer,
 				status,
-				entity.getUserId()
+				entity.getUserId(),
+				priceCatalogMapper.toDomain(entity.getPriceCatalog())
 		);
 	}
 

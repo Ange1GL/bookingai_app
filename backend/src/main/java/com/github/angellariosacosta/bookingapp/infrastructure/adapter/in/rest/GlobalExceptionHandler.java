@@ -33,6 +33,24 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
+	@ExceptionHandler(DuplicatePriceCatalogLabelException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleDuplicatePriceCatalogLabel(DuplicatePriceCatalogLabelException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(PriceCatalogNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handlePriceCatalogNotFound(PriceCatalogNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidFieldException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleInvalidField(InvalidFieldException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(AppointmentNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErrorResponse handleAppointmentNotFound(AppointmentNotFoundException ex) {

@@ -60,6 +60,19 @@ public class AppointmentEntity {
 	)
 	private StatusAppointmentEntity status;
 
+	@Column(name = "price_catalog_id")
+	private Integer priceCatalogId;
+
+	@ManyToOne
+	@JoinColumn(
+			name = "price_catalog_id",
+			referencedColumnName = "price_catalog_id",
+			updatable = false,
+			insertable = false,
+			foreignKey = @ForeignKey(name = "fk_appointment_price_catalog")
+	)
+	private PriceCatalogEntity priceCatalog;
+
 	@Column(name = "user_id")
 	private Long userId;
 

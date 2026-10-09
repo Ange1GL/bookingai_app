@@ -15,7 +15,8 @@ public class AppointmentRestMapper {
 				request.startTime(),
 				request.endTime(),
 				request.customerId(),
-				userId
+				userId,
+				request.priceCatalogId()
 		);
 	}
 
@@ -27,7 +28,10 @@ public class AppointmentRestMapper {
 				appointment.getCustomer().getId(),
 				appointment.getCustomer().getName(),
 				appointment.getStatus().getName(),
-				appointment.getStatus().getId()
+				appointment.getStatus().getId(),
+				appointment.getPriceCatalog().getId(),
+				appointment.getPriceCatalog().getLabel(),
+				appointment.getPriceCatalog().getPrice()
 		);
 	}
 }

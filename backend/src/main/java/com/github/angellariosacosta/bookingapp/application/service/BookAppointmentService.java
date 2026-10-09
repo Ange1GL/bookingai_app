@@ -10,7 +10,10 @@ import com.github.angellariosacosta.bookingapp.application.command.BookAppointme
 import com.github.angellariosacosta.bookingapp.application.port.in.BookAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
 import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentOverlapException;
+import com.github.angellariosacosta.bookingapp.application.port.out.PriceCatalogRepositoryPort;
+import com.github.angellariosacosta.bookingapp.domain.exception.PriceCatalogNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
+import com.github.angellariosacosta.bookingapp.domain.model.PriceCatalog;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.application.port.out.CustomerRepositoryPort;
 
@@ -22,6 +25,7 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 
 	private final CustomerRepositoryPort customerRepository;
 	private final AppointmentRepositoryPort appointmentRepository;
+	private final PriceCatalogRepositoryPort priceCatalogRepository;
 	private final Clock clock;
 
 	@Override
@@ -39,7 +43,11 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}
 
-		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId(), LocalDateTime.now(clock));
+		PriceCatalog priceCatalog = priceCatalogRepository.findById(command.priceCatalogId(), command.userId())
+				.orElseThrow(() -> new PriceCatalogNotFoundException(
+						"Price catalog not found with id: " + command.priceCatalogId()));
+
+		Appointment appointment = Appointment.createNew(command.startTime(), command.endTime(), customer, command.userId(), priceCatalog, LocalDateTime.now(clock));
 		return appointmentRepository.save(appointment);
 	}
 }

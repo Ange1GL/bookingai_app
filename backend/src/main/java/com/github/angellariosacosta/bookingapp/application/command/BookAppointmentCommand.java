@@ -7,5 +7,6 @@ public record BookAppointmentCommand(
 		String phone,
 		LocalDateTime startTime,
 		LocalDateTime endTime,
-		Long userId
+			Long userId,
+			Integer priceCatalogId
 ) {}
