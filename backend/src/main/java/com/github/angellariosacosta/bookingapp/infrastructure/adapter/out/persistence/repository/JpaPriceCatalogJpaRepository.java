@@ -18,17 +18,9 @@ public interface JpaPriceCatalogJpaRepository extends JpaRepository<PriceCatalog
 	@Query("SELECT p FROM PriceCatalogEntity p WHERE p.active = true AND p.userId = :userId ORDER BY p.id ASC")
 	List<PriceCatalogEntity> findAllOwned(@Param("userId") Long userId);
 
-	// excludeId = 0 cuando no hay que excluir ninguno (los ids reales son > 0).
-	@Query("""
-			SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END
-			FROM PriceCatalogEntity p
-			WHERE p.userId = :userId
-			AND p.active = true
-			AND LOWER(p.label) = LOWER(:label)
-			AND p.id <> :excludeId
-			""")
-	boolean existsActiveByLabel(
-			@Param("label") String label,
-			@Param("userId") Long userId,
-			@Param("excludeId") Integer excludeId);
+	// Al crear: no hay registro propio que ignorar.
+	boolean existsByUserIdAndActiveTrueAndLabelIgnoreCase(Long userId, String label);
+
+	// Al editar: se ignora el propio registro para que no choque consigo mismo.
+	boolean existsByUserIdAndActiveTrueAndLabelIgnoreCaseAndIdNot(Long userId, String label, Integer id);
 }

@@ -33,12 +33,6 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
-	@ExceptionHandler(PriceCatalogNotEditableException.class)
-	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public ErrorResponse handlePriceCatalogNotEditable(PriceCatalogNotEditableException ex) {
-		return errorBody(HttpStatus.FORBIDDEN, ex.getMessage());
-	}
-
 	@ExceptionHandler(DuplicatePriceCatalogLabelException.class)
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public ErrorResponse handleDuplicatePriceCatalogLabel(DuplicatePriceCatalogLabelException ex) {

@@ -32,7 +32,7 @@ public class PriceCatalogEntity {
 	@Column(nullable = false)
 	private Long price;
 
-	@Column(name = "user_id")
+	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
 	@Column(nullable = false)

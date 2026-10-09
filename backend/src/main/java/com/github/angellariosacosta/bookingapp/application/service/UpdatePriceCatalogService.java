@@ -23,7 +23,6 @@ public class UpdatePriceCatalogService implements UpdatePriceCatalogUseCase {
 	public PriceCatalog update(UpdatePriceCatalogCommand command) {
 		PriceCatalog current = priceCatalogRepository.findById(command.id(), command.userId())
 				.orElseThrow(() -> new PriceCatalogNotFoundException("Price catalog not found with id: " + command.id()));
-		current.ensureOwnedBy(command.userId());
 
 		PriceCatalog updated = current.update(command.label(), command.price());
 		if (priceCatalogRepository.existsActiveByLabel(command.label(), command.userId(), command.id())) {

@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JpaPriceCatalogRepositoryAdapter implements PriceCatalogRepositoryPort {
 
-	private static final int NO_EXCLUDED_ID = 0;
 	private static final String UNIQUE_LABEL_INDEX = "uk_price_catalog_user_label_active";
 
 	private final JpaPriceCatalogJpaRepository jpaRepository;
@@ -56,6 +55,9 @@ public class JpaPriceCatalogRepositoryAdapter implements PriceCatalogRepositoryP
 
 	@Override
 	public boolean existsActiveByLabel(String label, Long userId, Integer excludeId) {
-		return jpaRepository.existsActiveByLabel(label, userId, excludeId == null ? NO_EXCLUDED_ID : excludeId);
+		if (excludeId == null) {
+			return jpaRepository.existsByUserIdAndActiveTrueAndLabelIgnoreCase(userId, label);
+		}
+		return jpaRepository.existsByUserIdAndActiveTrueAndLabelIgnoreCaseAndIdNot(userId, label, excludeId);
 	}
 }

@@ -1,7 +1,6 @@
 package com.github.angellariosacosta.bookingapp.domain.model;
 
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldException;
-import com.github.angellariosacosta.bookingapp.domain.exception.PriceCatalogNotEditableException;
 import lombok.Getter;
 
 @Getter
@@ -45,12 +44,5 @@ public class PriceCatalog {
 
     public PriceCatalog deactivate() {
         return new PriceCatalog(id, price, label, userId, false);
-    }
-
-    // Los servicios de otros usuarios no se pueden modificar.
-    public void ensureOwnedBy(Long requesterId) {
-        if (userId == null || !userId.equals(requesterId)) {
-            throw new PriceCatalogNotEditableException("Price catalog " + id + " cannot be modified");
-        }
     }
 }

@@ -23,7 +23,6 @@ public class DeletePriceCatalogService implements DeletePriceCatalogUseCase {
 	public void delete(DeletePriceCatalogCommand command) {
 		PriceCatalog current = priceCatalogRepository.findById(command.id(), command.userId())
 				.orElseThrow(() -> new PriceCatalogNotFoundException("Price catalog not found with id: " + command.id()));
-		current.ensureOwnedBy(command.userId());
 		priceCatalogRepository.save(current.deactivate());
 	}
 }

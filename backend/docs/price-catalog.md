@@ -8,7 +8,7 @@ Cada cita referencia un servicio del catálogo (`appointment.price_catalog_id`, 
 - `Appointment` exige un `PriceCatalog` en `createNew`/`reconstitute`.
 
 ## Migraciones
-- `V9` crea `price_catalog`; `V10` siembra "Corte básico" = 60 (global); `V11` agrega `appointment.price_catalog_id` (backfill a "Corte básico", luego NOT NULL); `V12` agrega `active` y un índice único (usuario, label sin mayúsculas) entre activos; `V13` asigna al usuario 1 el "Corte básico" sembrado (era solo para probar un flujo), dejando de existir filas con `user_id = NULL`.
+- `V9` crea `price_catalog`; `V10` siembra "Corte básico" = 60 (global); `V11` agrega `appointment.price_catalog_id` (backfill a "Corte básico", luego NOT NULL); `V12` agrega `active` y un índice único (usuario, label sin mayúsculas) entre activos; `V13` asigna al usuario 1 el "Corte básico" sembrado (era solo para probar un flujo), dejando de existir filas con `user_id = NULL`; `V14` hace `user_id` NOT NULL (reasigna al usuario 1 cualquier huérfana) y recrea el índice único sin `coalesce`.
 
 ## API (`/api/v1/price-catalog`, requiere sesión + CSRF)
 | Método | Ruta | Descripción |
@@ -21,7 +21,7 @@ Cada cita referencia un servicio del catálogo (`appointment.price_catalog_id`, 
 Request (POST/PUT): `{ "label": "Corte + barba", "price": 90 }`
 Response: `{ "id": 2, "label": "Corte + barba", "price": 90 }`
 
-Errores: 400 validación (`label` vacío, `price <= 0`), 403 intento de modificar un servicio ajeno (`PriceCatalogNotEditableException`, defensa en el dominio), 404 no existe/inactivo/de otro usuario, 409 nombre duplicado entre activos (`DuplicatePriceCatalogLabelException`).
+Errores: 400 validación (`label` vacío, `price <= 0`), 404 no existe/inactivo/de otro usuario, 409 nombre duplicado entre activos (`DuplicatePriceCatalogLabelException`).
 
 ## Reglas
 - "Eliminar" es baja lógica porque las citas tienen FK al servicio. Un servicio inactivo no se lista ni se puede asignar a citas nuevas, pero las citas existentes lo siguen mostrando.
