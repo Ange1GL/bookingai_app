@@ -10,6 +10,7 @@ El `userId` sale siempre de `@CurrentUserId` (ver `customer-multi-tenancy.md`); 
 |-------------|---------|--------------------------------------------------------------|
 | `name`      | —       | Opcional. Contiene, sin distinguir mayúsculas. Máx. 100.     |
 | `phone`     | —       | Opcional. Contiene. Máx. 20.                                 |
+| `blacklisted` | —     | Opcional. `true` = solo en lista negra, `false` = solo los que no. Ver `customer-blacklist.md`. |
 | `page`      | `0`     | `>= 0`.                                                      |
 | `size`      | `20`    | `1..50`.                                                     |
 | `sortBy`    | `NAME`  | `NAME` \| `CREATED_AT` (lista blanca).                       |
@@ -23,7 +24,7 @@ Valores fuera de rango o enums desconocidos responden `400` con el `ErrorRespons
 
 ```json
 {
-  "content": [{ "id": 1, "name": "Ana López", "phone": "5551234567" }],
+  "content": [{ "id": 1, "name": "Ana López", "phone": "5551234567", "blacklisted": false }],
   "page": 0,
   "size": 20,
   "totalElements": 1,
@@ -37,6 +38,7 @@ Valores fuera de rango o enums desconocidos responden `400` con el `ErrorRespons
 - `PageResult<T>` y `ListCustomersQuery` viven en `application/`: Spring Data `Page`/`Pageable` no sale de la capa de persistencia.
 - El adapter traduce `sortBy` a la propiedad de la entidad y añade `id` como desempate para que el orden entre páginas sea estable.
 - **Sin `Specification`**: solo hay dos filtros opcionales, así que basta un `@Query` JPQL (`JpaCustomerJpaRepository.findPage`). `LikePatterns` construye los patrones (`%` si no hay filtro) para no enviar parámetros `null` que Postgres no pueda tipar. Pasar a `Specification` si aparecen 4+ filtros, rangos u orden dinámico.
+- El flag `blacklisted` de cada ítem sale de **una sola consulta `IN`** sobre los ids de la página (`CustomerBlacklistRepositoryPort.findBlacklistedIds`), sin N+1. El filtro `blacklisted` usa un parámetro entero (nunca `null`) con `EXISTS` sobre `customer_blacklist`.
 - Migración `V15`: índice `(user_id, created_at)`. El `LIKE '%x%'` no usa btree; si el volumen crece, añadir `pg_trgm` + GIN sobre `lower(full_name)` y `phone`.
 
 ## Pendiente

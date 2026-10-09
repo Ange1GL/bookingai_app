@@ -25,5 +25,6 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 
 ## Docs
 - `docs/security-remediation-plan.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`
+- Backend: `backend/docs/customer-blacklist.md` (lista negra por no-shows: `PUT/DELETE /customers/{id}/blacklist`, `POST /appointments/{id}/no-show`; un cliente bloqueado no puede reservar y sus citas futuras se cancelan; umbral `booking.blacklist.no-show-threshold`)
 - Backend: `backend/docs/customer-list.md` (`GET /api/v1/customers` paginado por tenant, filtros `name`/`phone`, `size` máx. 50)
 - Backend: `backend/docs/price-catalog.md` (cada cita referencia un servicio del catálogo de precios; el frontend debe enviar `priceCatalogId` al crear citas)

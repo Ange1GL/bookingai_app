@@ -61,5 +61,45 @@ GET {{baseUrl}}/api/v1/customers?page=-1
 ### 12. Error 400: campo de orden fuera de la lista blanca
 GET {{baseUrl}}/api/v1/customers?sortBy=password
 
-### 13. Sin sesión (otro cliente sin cookies) debería ser 401; ejecuta el logout y vuelve a lanzar el 2
+### 13. Solo clientes en lista negra / solo los que no lo están
+GET {{baseUrl}}/api/v1/customers?blacklisted=true
+
+###
+GET {{baseUrl}}/api/v1/customers?blacklisted=false
+
+### ---------------- Lista negra (ver docs/customer-blacklist.md) ----------------
+### Sustituye {{customerId}} / {{appointmentId}} por ids reales (GET /customers y GET /appointments).
+
+### 14. Poner a un cliente en la lista negra (motivo opcional; cancela sus citas futuras RESERVED)
+PUT {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
+Content-Type: application/json
+
+{
+  "reason": "No se presentó a dos citas"
+}
+
+### 15. Sin cuerpo también vale (idempotente: si ya estaba, conserva la entrada original)
+PUT {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
+
+### 16. Quitar de la lista negra (204; 404 si no estaba)
+DELETE {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
+
+### 17. Marcar una cita ya iniciada como no-show (al llegar a 3 vigentes bloquea solo)
+POST {{baseUrl}}/api/v1/appointments/{{appointmentId}}/no-show
+
+### 18. Historial de inasistencias del cliente
+GET {{baseUrl}}/api/v1/customers/{{customerId}}/no-shows
+
+### 19. Reservar con un cliente bloqueado -> 409
+POST {{baseUrl}}/api/v1/appointments
+Content-Type: application/json
+
+{
+  "startTime": "2030-01-01T10:00:00",
+  "endTime": "2030-01-01T10:30:00",
+  "customerId": {{customerId}},
+  "priceCatalogId": 1
+}
+
+### 20. Sin sesión (otro cliente sin cookies) debería ser 401; ejecuta el logout y vuelve a lanzar el 2
 POST {{baseUrl}}/api/v1/auth/logout
