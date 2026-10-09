@@ -5,10 +5,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.github.angellariosacosta.bookingapp.domain.exception.*;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -92,6 +94,18 @@ public class GlobalExceptionHandler {
 	public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
 		String message = ex.getBindingResult().getFieldErrors().stream()
 				.map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+				.collect(Collectors.joining(", "));
+		return errorBody(HttpStatus.BAD_REQUEST, message);
+	}
+
+	// Validación de @RequestParam/@PathVariable con constraints (ej. size fuera de rango en listados).
+	@ExceptionHandler(HandlerMethodValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleMethodValidation(HandlerMethodValidationException ex) {
+		String message = ex.getParameterValidationResults().stream()
+				.flatMap(result -> result.getResolvableErrors().stream())
+				.map(MessageSourceResolvable::getDefaultMessage)
+				.filter(Objects::nonNull)
 				.collect(Collectors.joining(", "));
 		return errorBody(HttpStatus.BAD_REQUEST, message);
 	}
