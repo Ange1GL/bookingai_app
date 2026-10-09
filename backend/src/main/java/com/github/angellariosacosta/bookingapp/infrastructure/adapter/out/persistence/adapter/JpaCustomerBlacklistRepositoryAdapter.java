@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -28,6 +29,11 @@ public class JpaCustomerBlacklistRepositoryAdapter implements CustomerBlacklistR
 	@Override
 	public boolean existsByCustomerId(Long customerId, Long userId) {
 		return jpaRepository.existsByCustomerIdAndUserId(customerId, userId);
+	}
+
+	@Override
+	public Optional<CustomerBlacklist> findByCustomerId(Long customerId, Long userId) {
+		return jpaRepository.findByCustomerIdAndUserId(customerId, userId).map(mapper::toDomain);
 	}
 
 	@Override

@@ -60,6 +60,7 @@ public class JpaCustomerRepositoryAdapter implements CustomerRepositoryPort {
 				query.userId(),
 				LikePatterns.containsIgnoreCase(query.name()),
 				LikePatterns.contains(query.phone()),
+				toBlacklistFilter(query.blacklisted()),
 				PageRequest.of(query.page(), query.size(), toSort(query)));
 		return new PageResult<>(
 				page.getContent().stream().map(mapper::toDomain).toList(),
@@ -67,6 +68,15 @@ public class JpaCustomerRepositoryAdapter implements CustomerRepositoryPort {
 				page.getSize(),
 				page.getTotalElements(),
 				page.getTotalPages());
+	}
+
+	private int toBlacklistFilter(Boolean blacklisted) {
+		if (blacklisted == null) {
+			return JpaCustomerJpaRepository.BLACKLIST_FILTER_ANY;
+		}
+		return blacklisted
+				? JpaCustomerJpaRepository.BLACKLIST_FILTER_ONLY_BLACKLISTED
+				: JpaCustomerJpaRepository.BLACKLIST_FILTER_EXCLUDING_BLACKLISTED;
 	}
 
 	// El id como desempate hace estable el orden entre páginas cuando el campo principal se repite.

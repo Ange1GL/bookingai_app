@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,6 +14,8 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 public interface JpaCustomerBlacklistJpaRepository extends JpaRepository<CustomerBlacklistEntity, Long> {
 
 	boolean existsByCustomerIdAndUserId(Long customerId, Long userId);
+
+	Optional<CustomerBlacklistEntity> findByCustomerIdAndUserId(Long customerId, Long userId);
 
 	@Modifying
 	@Query("delete from CustomerBlacklistEntity b where b.customerId = :customerId and b.userId = :userId")

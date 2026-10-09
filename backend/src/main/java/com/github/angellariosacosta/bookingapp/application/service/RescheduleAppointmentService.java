@@ -29,6 +29,8 @@ public class RescheduleAppointmentService implements RescheduleAppointmentUseCas
 				.orElseThrow(() -> new AppointmentNotFoundException(
 						"Appointment not found with id: " + command.appointmentId()));
 		appointment.ensureReserved();
+		// Sin guarda de lista negra: al bloquear a un cliente se cancelan sus citas RESERVED futuras,
+		// así que un cliente bloqueado no tiene citas que reagendar.
 
 		Appointment.validateTimeRange(command.newStart(), command.newEnd());
 		Appointment.validateNotInPast(command.newStart(), LocalDateTime.now(clock));

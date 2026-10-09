@@ -3,7 +3,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.d
 import java.util.List;
 
 public record CustomerPageResponse(
-		List<CustomerResponse> content,
+		List<CustomerListItemResponse> content,
 		int page,
 		int size,
 		long totalElements,
