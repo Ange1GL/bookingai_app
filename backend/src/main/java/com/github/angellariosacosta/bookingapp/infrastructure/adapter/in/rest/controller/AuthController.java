@@ -22,6 +22,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AuthRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.util.AuthCookieFactory;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.util.ClientIpResolver;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.util.CookieUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ public class AuthController {
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
     private final AuthRestMapper authRestMapper;
+    private final ClientIpResolver clientIpResolver;
 
     // Endpoint vacío: su único propósito es que la respuesta lleve la cookie XSRF-TOKEN (escrita por
     // CsrfCookieFilter) para que el frontend pueda hacer el doble envío en su primer POST.
@@ -55,7 +57,7 @@ public class AuthController {
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
         AuthTokenResult result = authenticateUserUseCase.authenticate(
-                request.username(), request.password(), httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
+                request.username(), request.password(), httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest));
         writeAuthCookies(httpResponse, result);
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
@@ -79,7 +81,7 @@ public class AuthController {
         String rawRefreshToken = CookieUtils.readCookie(httpRequest, cookieProperties.getRefresh().getName())
                 .orElseThrow(() -> new AuthException(AuthError.REFRESH_TOKEN_INVALID));
         AuthTokenResult result = refreshAccessTokenUseCase.refresh(
-                rawRefreshToken, httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
+                rawRefreshToken, httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest));
         writeAuthCookies(httpResponse, result);
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }

@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api.bookingapp.example.com', // TODO: replace with the real production host
+  // Empty on purpose: CloudFront serves the SPA (S3) and proxies /api/* to API Gateway on the same
+  // origin, so services call `/api/v1/...` relatively. See docs/aws-deployment.md.
+  apiBaseUrl: '',
 };

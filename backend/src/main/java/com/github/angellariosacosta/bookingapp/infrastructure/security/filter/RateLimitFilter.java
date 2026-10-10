@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ErrorResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.RateLimitProperties;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.util.ClientIpResolver;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -36,6 +37,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final RateLimitProperties rateLimitProperties;
     private final Cache<String, Bucket> bucketCache;
     private final JsonMapper jsonMapper;
+    private final ClientIpResolver clientIpResolver;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -53,7 +55,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         // Token bucket, un balde por IP: bucketCache.get busca el Bucket de esa IP o lo crea (newBucket)
         // si es la primera vez que se ve. Cada IP tiene su propio cupo independiente del resto.
-        Bucket bucket = bucketCache.get(request.getRemoteAddr(), this::newBucket);
+        String clientIp = clientIpResolver.resolve(request);
+        Bucket bucket = bucketCache.get(clientIp, this::newBucket);
         // Intenta consumir 1 token del balde. Esta línea ES el algoritmo: si hay tokens, resta uno y
         // deja pasar (isConsumed=true); si el balde está vacío, no resta nada y rechaza. ConsumptionProbe
         // además informa cuántos tokens quedan y cuánto falta para el próximo refill.
@@ -69,7 +72,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         // dado el refill "greedy" (ver newBucket) — se convierte a segundos para el header Retry-After.
         long retryAfterSeconds = Math.max(1, Math.ceilDiv(probe.getNanosToWaitForRefill(), 1_000_000_000L));
         log.warn("Rate limit excedido para ip={} en {} {}",
-                request.getRemoteAddr(), request.getMethod(), request.getRequestURI());
+                clientIp, request.getMethod(), request.getRequestURI());
 
         ErrorResponse body = new ErrorResponse(
                 Instant.now().toString(),

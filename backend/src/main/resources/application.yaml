@@ -82,6 +82,11 @@ security:
       expire-after-access: 5m   # debe ser >= window; libera buckets de IPs inactivas
       maximum-size: 10000        # techo duro de entradas en memoria (evita fuga si hay muchas IPs)
 
+  client-ip:
+    # Proxies de confianza que agregan su entrada a X-Forwarded-For delante de la app. 0 = conexion directa
+    # (dev). Con CloudFront -> API Gateway -> VPC Link, 1 (env SECURITY_CLIENT_IP_TRUSTED_PROXY_HOPS=1).
+    trusted-proxy-hops: 0
+
   # security.csrf.enabled tampoco se define aqui: ver application-dev.yaml / application-qa.yaml y docs/csrf-decision.md
 
 app:
