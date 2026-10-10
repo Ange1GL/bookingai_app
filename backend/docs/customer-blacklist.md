@@ -65,9 +65,14 @@ Reservar con un cliente bloqueado (`POST /api/v1/appointments`, `409`):
 - Aplicación: `BlacklistCustomerService`, `RemoveCustomerFromBlacklistService`; `BlacklistCustomerAction` (guardar + cancelar futuras) y `CustomerBlacklistGuard`.
 - Infraestructura: `JpaCustomerBlacklistRepositoryAdapter`, UPDATE masivo `JpaAppointmentJpaRepository.cancelReservedFrom`, `CustomerController`.
 
+## Asistente de AI
+
+- `searchCustomersByName` devuelve `blacklisted` por cliente (`SearchCustomersService` lo resuelve con una sola consulta `findBlacklistedIds`).
+- Tools `blacklistCustomerById(customerId, reason)` y `removeCustomerFromBlacklistById(customerId)` reutilizan los casos de uso del REST.
+- Flujo del prompt (`AiConfig`): si el cliente buscado está bloqueado, el asistente **no agenda**, avisa y pregunta si se quita de la lista negra o se mantiene; solo desbloquea si el usuario lo acepta. Para bloquear: buscar, confirmar (avisando que se cancelan sus citas futuras) y pedir motivo opcional sin inventarlo. La guarda sigue siendo la red de seguridad si el modelo ignora el aviso.
+
 ## Pendiente (siguiente iteración)
 
-- Refactor de reglas/prompt de AI: exponer `blacklisted` en `CustomerSummary` de `BookingTools` y ajustar las instrucciones del modelo. Hoy la guarda ya corta la reserva, pero el modelo solo ve el error.
 - `POST /api/v1/customers` (idempotente por teléfono) no informa `blacklisted` en su respuesta; el listado sí.
 - Carrera en bloqueo simultáneo del mismo cliente: el `UNIQUE (customer_id)` la protege, pero respondería 500 en vez de tratarla como "ya estaba".
 - Sin test de integración contra Postgres (el proyecto no tiene H2/Testcontainers); la migración `V18` no se ha ejecutado contra una base real.

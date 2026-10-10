@@ -11,18 +11,23 @@ import java.util.List;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
+import com.github.angellariosacosta.bookingapp.application.command.BlacklistCustomerCommand;
 import com.github.angellariosacosta.bookingapp.application.command.BookAppointmentCommand;
 import com.github.angellariosacosta.bookingapp.application.command.CancelAppointmentCommand;
 import com.github.angellariosacosta.bookingapp.application.command.CreateAppointmentCommand;
+import com.github.angellariosacosta.bookingapp.application.command.RemoveCustomerFromBlacklistCommand;
 import com.github.angellariosacosta.bookingapp.application.command.RescheduleAppointmentCommand;
+import com.github.angellariosacosta.bookingapp.application.port.in.BlacklistCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.BookAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CancelAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListPriceCatalogUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.RemoveCustomerFromBlacklistUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RescheduleAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.SearchCustomersUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.CurrentUserPort;
+import com.github.angellariosacosta.bookingapp.application.result.CustomerListItem;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.domain.model.PriceCatalog;
@@ -34,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 public class BookingTools {
 
 	private final SearchCustomersUseCase searchCustomers;
+	private final BlacklistCustomerUseCase blacklistCustomer;
+	private final RemoveCustomerFromBlacklistUseCase removeCustomerFromBlacklist;
 	private final BookAppointmentUseCase bookAppointment;
 	private final CreateAppointmentUseCase createAppointment;
 	private final CancelAppointmentUseCase cancelAppointment;
@@ -53,11 +60,26 @@ public class BookingTools {
 				now.withNano(0), now.getDayOfWeek().getDisplayName(TextStyle.FULL, TOOL_LOCALE), clock.getZone());
 	}
 
-	@Tool(description = "Busca clientes por nombre. Devuelve lista de coincidencias parciales.")
+	@Tool(description = "Busca clientes por nombre. Devuelve lista de coincidencias parciales e indica en 'blacklisted' "
+			+ "si el cliente está en la lista negra (no puede reservar).")
 	public List<CustomerSummary> searchCustomersByName(String name) {
 		return searchCustomers.search(name, currentUserPort.getCurrentUserId()).stream()
 				.map(CustomerSummary::from)
 				.toList();
+	}
+
+	@Tool(description = "Agrega un cliente a la lista negra por su id. Cancela sus citas futuras y le impide reservar. "
+			+ "Úsala solo tras confirmar con el usuario. El motivo es opcional (máximo 250 caracteres).")
+	public BlacklistStatus blacklistCustomerById(Long customerId, String reason) {
+		blacklistCustomer.blacklist(new BlacklistCustomerCommand(customerId, currentUserPort.getCurrentUserId(), reason));
+		return new BlacklistStatus(customerId, true);
+	}
+
+	@Tool(description = "Quita a un cliente de la lista negra por su id para que pueda volver a reservar. "
+			+ "Úsala solo si el usuario lo pidió o lo aceptó explícitamente.")
+	public BlacklistStatus removeCustomerFromBlacklistById(Long customerId) {
+		removeCustomerFromBlacklist.remove(new RemoveCustomerFromBlacklistCommand(customerId, currentUserPort.getCurrentUserId()));
+		return new BlacklistStatus(customerId, false);
 	}
 
 	@Tool(description = "Lista los servicios del catálogo de precios (id, nombre y precio). "
@@ -115,10 +137,14 @@ public class BookingTools {
 		return LocalDateTime.parse(isoDateTime);
 	}
 
-	public record CustomerSummary(Long id, String name, String phone) {
-		static CustomerSummary from(Customer c) {
-			return new CustomerSummary(c.getId(), c.getName(), c.getPhone());
+	public record CustomerSummary(Long id, String name, String phone, boolean blacklisted) {
+		static CustomerSummary from(CustomerListItem item) {
+			Customer c = item.customer();
+			return new CustomerSummary(c.getId(), c.getName(), c.getPhone(), item.blacklisted());
 		}
+	}
+
+	public record BlacklistStatus(Long customerId, boolean blacklisted) {
 	}
 
 	public record PriceCatalogSummary(Integer id, String label, Long price) {
