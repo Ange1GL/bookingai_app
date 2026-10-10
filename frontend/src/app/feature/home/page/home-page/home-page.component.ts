@@ -24,6 +24,12 @@ const SHORTCUTS: Shortcut[] = [
     path: '/appointments',
   },
   {
+    label: 'Clientes',
+    description: 'Busca, agrega y administra la lista negra de tus clientes.',
+    icon: 'pi-users',
+    path: '/customers',
+  },
+  {
     label: 'Asistente de AI',
     description: 'Agenda, mueve o cancela citas conversando.',
     icon: 'pi-sparkles',
@@ -32,7 +38,6 @@ const SHORTCUTS: Shortcut[] = [
 ];
 
 const UPCOMING_SHORTCUTS: UpcomingShortcut[] = [
-  { label: 'Clientes', icon: 'pi-users' },
   { label: 'Nueva cita', icon: 'pi-plus-circle' },
   { label: 'Ajustes', icon: 'pi-cog' },
 ];
