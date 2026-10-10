@@ -60,17 +60,17 @@ public class AuthController {
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthSuccessResponse> register(
-            @Valid @RequestBody RegisterRequest request,
-            HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse) {
-        AuthTokenResult result = registerUserCase.register(
-                request.username(), request.email(), request.password(), request.name(),
-                httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
-        writeAuthCookies(httpResponse, result);
-        return ResponseEntity.status(HttpStatus.CREATED).body(authRestMapper.toResponse(result));
-    }
+//    @PostMapping("/register")
+//    public ResponseEntity<AuthSuccessResponse> register(
+//            @Valid @RequestBody RegisterRequest request,
+//            HttpServletRequest httpRequest,
+//            HttpServletResponse httpResponse) {
+//        AuthTokenResult result = registerUserCase.register(
+//                request.username(), request.email(), request.password(), request.name(),
+//                httpRequest.getHeader("User-Agent"), httpRequest.getRemoteAddr());
+//        writeAuthCookies(httpResponse, result);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(authRestMapper.toResponse(result));
+//    }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthSuccessResponse> refresh(
