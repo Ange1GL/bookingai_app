@@ -4,6 +4,8 @@ Vista de solo lectura de las citas del usuario: mes y semana, mobile-first, con 
 
 ## Contrato con el backend
 `GET /api/v1/appointments?from=&to=` (`AppointmentController.findByDateRange`) → `AppointmentResponse[]`.
+
+`GET /api/v1/appointments/{id}` (`AppointmentController.findById`) → `AppointmentResponse`; 404 si la cita no existe o es de otro tenant. Cada `AppointmentResponse` incluye el catálogo de precio de la cita: `priceCatalogId`, `serviceLabel` (nombre del servicio) y `price`.
 - Rango **semiabierto** `[from, to)`: `to` es la medianoche posterior al último día visible.
 - `from`/`to` van como `YYYY-MM-DDTHH:mm:ss` en **hora local sin `Z`** (`toLocalIso`); nunca `toISOString()`, que convertiría a UTC y desplazaría el rango. La API trabaja con `LocalDateTime` en la zona del negocio (`app.timezone`).
 - Una sola consulta por periodo visible; cambiar de día dentro del mismo periodo no vuelve a pedir datos.

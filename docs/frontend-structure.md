@@ -14,7 +14,7 @@ frontend/src/
       model/{api-error,auth-user}.dto.ts
       service/{session,loader,error-handler}.service.ts
     shared/                                  # UI reutilizable sin lógica de negocio
-      components/{loader-screen,brand-logo,auth-card}/   # marca bookingAI y contenedor degradado de auth
+      components/{loader-screen,brand-logo,auth-card,search-input,confirm-dialog,pager}/   # marca, auth, búsqueda con debounce y modal de confirmación
       layout/main-layout/
     feature/<name>/                          # un directorio por feature
       <name>.routes.ts                       # rutas lazy
@@ -24,7 +24,7 @@ frontend/src/
       service/                               # acceso a API de la feature
 ```
 
-Features actuales: `auth` (login, registro), `home` (accesos directos), `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI", chat de texto). Detalle en `docs/appointments-calendar.md` y `docs/assistant-chat.md`.
+Features actuales: `auth` (login, registro), `home` (accesos directos), `customers` (clientes y lista negra), `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI", chat de texto). Detalle en `docs/appointments-calendar.md`, `docs/assistant-chat.md` y `docs/customers-management.md`.
 
 ## Tema y tipografía
 - Preset PrimeNG: `VioletPreset` (Aura con `semantic.primary` → paleta `violet`) en `app.config.ts`; modo oscuro con `.app-dark`.
