@@ -13,13 +13,12 @@ public class CustomerBlacklistMapper {
 		entity.setCustomerId(entry.getCustomerId());
 		entity.setUserId(entry.getUserId());
 		entity.setReason(entry.getReason());
-		entity.setSource(entry.getSource());
 		entity.setCreatedAt(entry.getCreatedAt());
 		return entity;
 	}
 
 	public CustomerBlacklist toDomain(CustomerBlacklistEntity entity) {
 		return CustomerBlacklist.reconstitute(
-				entity.getCustomerId(), entity.getUserId(), entity.getReason(), entity.getSource(), entity.getCreatedAt());
+				entity.getCustomerId(), entity.getUserId(), entity.getReason(), entity.getCreatedAt());
 	}
 }

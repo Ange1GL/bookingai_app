@@ -47,13 +47,13 @@ public class RegisterNoShowService implements RegisterNoShowUseCase {
 
 		Long customerId = appointment.getCustomer().getId();
 		NoShow saved = noShowRepository.save(
-				NoShow.register(customerId, command.appointmentId(), command.userId(), clock.instant()));
+				NoShow.register(customerId, command.appointmentId(), command.userId(), command.reason(), clock.instant()));
 		long activeNoShows = noShowRepository.countActiveByCustomerId(customerId, command.userId());
 
 		boolean blacklisted = blacklistRepository.existsByCustomerId(customerId, command.userId());
 		if (!blacklisted && blacklistPolicy.isReached(activeNoShows)) {
 			blacklistAction.apply(
-					CustomerBlacklist.autoNoShow(customerId, command.userId(), activeNoShows, clock.instant()));
+					CustomerBlacklist.forNoShows(customerId, command.userId(), activeNoShows, clock.instant()));
 			blacklisted = true;
 		}
 		return new RegisterNoShowResult(saved, activeNoShows, blacklisted);

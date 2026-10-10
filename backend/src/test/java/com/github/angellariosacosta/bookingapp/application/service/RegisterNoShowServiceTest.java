@@ -32,7 +32,6 @@ import com.github.angellariosacosta.bookingapp.domain.exception.NoShowAlreadyReg
 import com.github.angellariosacosta.bookingapp.domain.exception.NoShowNotAllowedException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.BlacklistPolicy;
-import com.github.angellariosacosta.bookingapp.domain.model.BlacklistSource;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.domain.model.CustomerBlacklist;
 import com.github.angellariosacosta.bookingapp.domain.model.NoShow;
@@ -45,6 +44,7 @@ class RegisterNoShowServiceTest {
 	private static final Long CUSTOMER_ID = 3L;
 	private static final Long APPOINTMENT_ID = 100L;
 	private static final int THRESHOLD = 3;
+	private static final String REASON = "no llego";
 	private static final Instant NOW = Instant.parse("2026-10-09T18:00:00Z");
 	private static final ZoneId ZONE = ZoneOffset.UTC;
 
@@ -61,7 +61,7 @@ class RegisterNoShowServiceTest {
 				appointmentRepository, noShowRepository, blacklistRepository, action, new BlacklistPolicy(THRESHOLD), clock);
 		when(noShowRepository.save(any())).thenAnswer(invocation -> {
 			NoShow noShow = invocation.getArgument(0);
-			return NoShow.reconstitute(1L, noShow.getCustomerId(), noShow.getAppointmentId(), noShow.getUserId(), noShow.getCreatedAt());
+			return NoShow.reconstitute(1L, noShow.getCustomerId(), noShow.getAppointmentId(), noShow.getUserId(), noShow.getReason(), noShow.getCreatedAt());
 		});
 		when(blacklistRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 	}
@@ -73,9 +73,10 @@ class RegisterNoShowServiceTest {
 		when(noShowRepository.countActiveByCustomerId(CUSTOMER_ID, USER_ID)).thenReturn(2L);
 		when(blacklistRepository.existsByCustomerId(CUSTOMER_ID, USER_ID)).thenReturn(false);
 
-		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID));
+		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON));
 
 		assertEquals(2, result.activeNoShows());
+		assertEquals(REASON, result.noShow().getReason());
 		assertFalse(result.customerBlacklisted());
 		verify(blacklistRepository, never()).save(any());
 	}
@@ -87,12 +88,12 @@ class RegisterNoShowServiceTest {
 		when(blacklistRepository.existsByCustomerId(CUSTOMER_ID, USER_ID)).thenReturn(false);
 		when(appointmentRepository.cancelReservedFrom(anyLong(), anyLong(), any())).thenReturn(2);
 
-		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID));
+		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON));
 
 		assertTrue(result.customerBlacklisted());
 		ArgumentCaptor<CustomerBlacklist> entry = ArgumentCaptor.forClass(CustomerBlacklist.class);
 		verify(blacklistRepository).save(entry.capture());
-		assertEquals(BlacklistSource.AUTO_NO_SHOW, entry.getValue().getSource());
+		assertEquals("Auto: 3 inasistencias", entry.getValue().getReason());
 		assertEquals(CUSTOMER_ID, entry.getValue().getCustomerId());
 		verify(appointmentRepository).cancelReservedFrom(CUSTOMER_ID, USER_ID, LocalDateTime.ofInstant(NOW, ZONE));
 	}
@@ -103,7 +104,7 @@ class RegisterNoShowServiceTest {
 		when(noShowRepository.countActiveByCustomerId(CUSTOMER_ID, USER_ID)).thenReturn(5L);
 		when(blacklistRepository.existsByCustomerId(CUSTOMER_ID, USER_ID)).thenReturn(true);
 
-		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID));
+		RegisterNoShowResult result = service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON));
 
 		assertTrue(result.customerBlacklisted());
 		verify(blacklistRepository, never()).save(any());
@@ -115,7 +116,7 @@ class RegisterNoShowServiceTest {
 		when(appointmentRepository.findById(APPOINTMENT_ID, USER_ID)).thenReturn(Optional.empty());
 
 		assertThrows(AppointmentNotFoundException.class,
-				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID)));
+				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON)));
 		verify(noShowRepository, never()).save(any());
 	}
 
@@ -124,7 +125,7 @@ class RegisterNoShowServiceTest {
 		givenAppointment(StatusAppointment.RESERVED, minutesFromNow(60));
 
 		assertThrows(NoShowNotAllowedException.class,
-				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID)));
+				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON)));
 		verify(noShowRepository, never()).save(any());
 	}
 
@@ -133,7 +134,7 @@ class RegisterNoShowServiceTest {
 		givenAppointment(StatusAppointment.CANCELLED, minutesFromNow(-60));
 
 		assertThrows(NoShowNotAllowedException.class,
-				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID)));
+				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON)));
 	}
 
 	@Test
@@ -142,7 +143,7 @@ class RegisterNoShowServiceTest {
 		when(noShowRepository.existsByAppointmentId(APPOINTMENT_ID, USER_ID)).thenReturn(true);
 
 		assertThrows(NoShowAlreadyRegisteredException.class,
-				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID)));
+				() -> service.register(new RegisterNoShowCommand(APPOINTMENT_ID, USER_ID, REASON)));
 		verify(noShowRepository, never()).save(any());
 	}
 

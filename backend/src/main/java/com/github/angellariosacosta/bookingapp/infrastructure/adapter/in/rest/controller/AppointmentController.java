@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.github.angellariosacosta.bookingapp.application.command.RegisterNoShowCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterNoShowUseCase;
@@ -23,6 +22,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.an
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AppointmentResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateAppointmentRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.NoShowResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterNoShowRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AppointmentRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.NoShowRestMapper;
 
@@ -55,9 +55,12 @@ public class AppointmentController {
 	// Marca la cita como inasistencia del cliente. Puede mandar al cliente a la lista negra al
 	// alcanzar el umbral configurado (booking.blacklist.no-show-threshold).
 	@PostMapping("/{id}/no-show")
-	public ResponseEntity<NoShowResponse> registerNoShow(@PathVariable Long id, @CurrentUserId Long userId) {
+	public ResponseEntity<NoShowResponse> registerNoShow(
+			@PathVariable Long id,
+			@Valid @RequestBody(required = false) RegisterNoShowRequest request,
+			@CurrentUserId Long userId) {
 		return ResponseEntity.ok(noShowMapper.toResponse(
-				registerNoShow.register(new RegisterNoShowCommand(id, userId))));
+				registerNoShow.register(noShowMapper.toCommand(id, request, userId))));
 	}
 
 	// Una sola consulta sirve a la vista semanal y mensual del calendario: el front manda el

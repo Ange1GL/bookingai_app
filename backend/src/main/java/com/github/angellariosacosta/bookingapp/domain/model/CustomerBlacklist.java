@@ -6,54 +6,36 @@ import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldExce
 
 import lombok.Getter;
 
+/** Cliente en lista negra de un tenant. Solo se crea al alcanzar el umbral de inasistencias. */
 @Getter
 public class CustomerBlacklist {
 
-	public static final int MAX_REASON_LENGTH = 255;
-	private static final String AUTO_REASON = "Auto: %d inasistencias";
+	private static final String NO_SHOWS_REASON = "Auto: %d inasistencias";
 
 	private final Long customerId;
 	private final Long userId;
 	private final String reason;
-	private final BlacklistSource source;
 	private final Instant createdAt;
 
-	private CustomerBlacklist(Long customerId, Long userId, String reason, BlacklistSource source, Instant createdAt) {
+	private CustomerBlacklist(Long customerId, Long userId, String reason, Instant createdAt) {
 		if (customerId == null) {
 			throw new InvalidFieldException("customerId", "must not be null");
 		}
 		if (userId == null) {
 			throw new InvalidFieldException("userId", "must not be null");
 		}
-		if (reason != null && reason.length() > MAX_REASON_LENGTH) {
-			throw new InvalidFieldException("reason", "must not exceed " + MAX_REASON_LENGTH + " characters");
-		}
 		this.customerId = customerId;
 		this.userId = userId;
 		this.reason = reason;
-		this.source = source;
 		this.createdAt = createdAt;
 	}
 
-	public static CustomerBlacklist manual(Long customerId, Long userId, String reason, Instant now) {
-		return new CustomerBlacklist(customerId, userId, normalizeReason(reason), BlacklistSource.MANUAL, now);
-	}
-
-	public static CustomerBlacklist autoNoShow(Long customerId, Long userId, long activeNoShows, Instant now) {
-		return new CustomerBlacklist(
-				customerId, userId, AUTO_REASON.formatted(activeNoShows), BlacklistSource.AUTO_NO_SHOW, now);
+	public static CustomerBlacklist forNoShows(Long customerId, Long userId, long activeNoShows, Instant now) {
+		return new CustomerBlacklist(customerId, userId, NO_SHOWS_REASON.formatted(activeNoShows), now);
 	}
 
 	// Restaura el estado guardado sin volver a aplicar reglas de creacion.
-	public static CustomerBlacklist reconstitute(
-			Long customerId, Long userId, String reason, BlacklistSource source, Instant createdAt) {
-		return new CustomerBlacklist(customerId, userId, reason, source, createdAt);
-	}
-
-	private static String normalizeReason(String reason) {
-		if (reason == null || reason.isBlank()) {
-			return null;
-		}
-		return reason.strip();
+	public static CustomerBlacklist reconstitute(Long customerId, Long userId, String reason, Instant createdAt) {
+		return new CustomerBlacklist(customerId, userId, reason, createdAt);
 	}
 }

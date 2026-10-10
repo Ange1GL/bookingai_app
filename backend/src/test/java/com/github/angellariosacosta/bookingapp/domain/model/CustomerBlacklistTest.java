@@ -20,38 +20,47 @@ class CustomerBlacklistTest {
 	private static final LocalDateTime LOCAL_NOW = LocalDateTime.of(2026, 10, 9, 12, 0);
 
 	@Test
-	void manualEntryKeepsStrippedReason() {
-		CustomerBlacklist entry = CustomerBlacklist.manual(1L, 2L, "  no llego  ", NOW);
+	void entryRecordsNoShowCountAsReason() {
+		CustomerBlacklist entry = CustomerBlacklist.forNoShows(1L, 2L, 3, NOW);
 
-		assertEquals("no llego", entry.getReason());
-		assertEquals(BlacklistSource.MANUAL, entry.getSource());
+		assertEquals("Auto: 3 inasistencias", entry.getReason());
 		assertEquals(NOW, entry.getCreatedAt());
 	}
 
 	@Test
-	void blankReasonBecomesNull() {
-		assertNull(CustomerBlacklist.manual(1L, 2L, "   ", NOW).getReason());
-		assertNull(CustomerBlacklist.manual(1L, 2L, null, NOW).getReason());
-	}
-
-	@Test
-	void tooLongReasonIsRejected() {
-		String tooLong = "x".repeat(CustomerBlacklist.MAX_REASON_LENGTH + 1);
-		assertThrows(InvalidFieldException.class, () -> CustomerBlacklist.manual(1L, 2L, tooLong, NOW));
-	}
-
-	@Test
 	void ownersAreRequired() {
-		assertThrows(InvalidFieldException.class, () -> CustomerBlacklist.manual(null, 2L, "x", NOW));
-		assertThrows(InvalidFieldException.class, () -> CustomerBlacklist.manual(1L, null, "x", NOW));
+		assertThrows(InvalidFieldException.class, () -> CustomerBlacklist.forNoShows(null, 2L, 3, NOW));
+		assertThrows(InvalidFieldException.class, () -> CustomerBlacklist.forNoShows(1L, null, 3, NOW));
 	}
 
 	@Test
-	void autoEntryRecordsNoShowCountAsReason() {
-		CustomerBlacklist entry = CustomerBlacklist.autoNoShow(1L, 2L, 3, NOW);
+	void noShowKeepsStrippedReason() {
+		NoShow noShow = NoShow.register(1L, 10L, 2L, "  no llego  ", NOW);
 
-		assertEquals(BlacklistSource.AUTO_NO_SHOW, entry.getSource());
-		assertEquals("Auto: 3 inasistencias", entry.getReason());
+		assertEquals("no llego", noShow.getReason());
+		assertEquals(10L, noShow.getAppointmentId());
+	}
+
+	@Test
+	void noShowBlankReasonBecomesNull() {
+		assertNull(NoShow.register(1L, 10L, 2L, "   ", NOW).getReason());
+		assertNull(NoShow.register(1L, 10L, 2L, null, NOW).getReason());
+	}
+
+	@Test
+	void noShowReasonAcceptsExactlyTheMaximumLength() {
+		String max = "x".repeat(NoShow.MAX_REASON_LENGTH);
+		assertEquals(250, NoShow.register(1L, 10L, 2L, max, NOW).getReason().length());
+
+		String tooLong = "x".repeat(NoShow.MAX_REASON_LENGTH + 1);
+		assertThrows(InvalidFieldException.class, () -> NoShow.register(1L, 10L, 2L, tooLong, NOW));
+	}
+
+	@Test
+	void noShowRequiresOwners() {
+		assertThrows(InvalidFieldException.class, () -> NoShow.register(null, 10L, 2L, null, NOW));
+		assertThrows(InvalidFieldException.class, () -> NoShow.register(1L, null, 2L, null, NOW));
+		assertThrows(InvalidFieldException.class, () -> NoShow.register(1L, 10L, null, null, NOW));
 	}
 
 	@Test

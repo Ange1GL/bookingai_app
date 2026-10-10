@@ -5,6 +5,7 @@ import java.time.Instant;
 public record NoShowItemResponse(
 		Long id,
 		Long appointmentId,
+		String reason,
 		Instant createdAt
 ) {
 }

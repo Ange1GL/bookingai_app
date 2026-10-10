@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -26,9 +24,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import com.github.angellariosacosta.bookingapp.application.command.BlacklistCustomerCommand;
 import com.github.angellariosacosta.bookingapp.application.command.RemoveCustomerFromBlacklistCommand;
-import com.github.angellariosacosta.bookingapp.application.port.in.BlacklistCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomerNoShowsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomersUseCase;
@@ -36,12 +32,10 @@ import com.github.angellariosacosta.bookingapp.application.port.in.RemoveCustome
 import com.github.angellariosacosta.bookingapp.application.query.CustomerSortField;
 import com.github.angellariosacosta.bookingapp.application.query.ListCustomersQuery;
 import com.github.angellariosacosta.bookingapp.application.query.SortDirection;
-import com.github.angellariosacosta.bookingapp.application.result.BlacklistResult;
 import com.github.angellariosacosta.bookingapp.application.result.CustomerListItem;
 import com.github.angellariosacosta.bookingapp.application.result.PageResult;
 import com.github.angellariosacosta.bookingapp.domain.exception.CustomerBlacklistedException;
 import com.github.angellariosacosta.bookingapp.domain.exception.CustomerNotFoundException;
-import com.github.angellariosacosta.bookingapp.domain.model.BlacklistSource;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.domain.model.NoShow;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.GlobalExceptionHandler;
@@ -54,7 +48,6 @@ class CustomerControllerListTest {
 	private static final Long USER_ID = 7L;
 
 	private final ListCustomersUseCase listCustomers = mock(ListCustomersUseCase.class);
-	private final BlacklistCustomerUseCase blacklistCustomer = mock(BlacklistCustomerUseCase.class);
 	private final RemoveCustomerFromBlacklistUseCase removeFromBlacklist = mock(RemoveCustomerFromBlacklistUseCase.class);
 	private final ListCustomerNoShowsUseCase listNoShows = mock(ListCustomerNoShowsUseCase.class);
 	private MockMvc mockMvc;
@@ -62,7 +55,7 @@ class CustomerControllerListTest {
 	@BeforeEach
 	void setUp() {
 		CustomerController controller = new CustomerController(
-				mock(CreateCustomerUseCase.class), listCustomers, blacklistCustomer, removeFromBlacklist,
+				mock(CreateCustomerUseCase.class), listCustomers, removeFromBlacklist,
 				listNoShows, new CustomerRestMapper(), new NoShowRestMapper());
 		mockMvc = MockMvcBuilders.standaloneSetup(controller)
 				.setCustomArgumentResolvers(new FixedUserIdResolver())
@@ -116,47 +109,6 @@ class CustomerControllerListTest {
 	}
 
 	@Test
-	void blacklistWithoutBodyUsesAuthenticatedTenant() throws Exception {
-		when(blacklistCustomer.blacklist(any()))
-				.thenReturn(new BlacklistResult(5L, null, BlacklistSource.MANUAL, 2));
-
-		mockMvc.perform(put("/api/v1/customers/5/blacklist"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.customerId").value(5))
-				.andExpect(jsonPath("$.source").value("MANUAL"))
-				.andExpect(jsonPath("$.cancelledAppointments").value(2));
-
-		ArgumentCaptor<BlacklistCustomerCommand> captor = ArgumentCaptor.forClass(BlacklistCustomerCommand.class);
-		verify(blacklistCustomer).blacklist(captor.capture());
-		assertEquals(new BlacklistCustomerCommand(5L, USER_ID, null), captor.getValue());
-	}
-
-	@Test
-	void blacklistPassesReasonAndRejectsTooLongOne() throws Exception {
-		when(blacklistCustomer.blacklist(any()))
-				.thenReturn(new BlacklistResult(5L, "no llego", BlacklistSource.MANUAL, 0));
-
-		mockMvc.perform(put("/api/v1/customers/5/blacklist")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"reason\":\"no llego\"}"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.reason").value("no llego"));
-
-		mockMvc.perform(put("/api/v1/customers/5/blacklist")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"reason\":\"" + "x".repeat(256) + "\"}"))
-				.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void blacklistOfUnknownCustomerIsNotFound() throws Exception {
-		when(blacklistCustomer.blacklist(any())).thenThrow(new CustomerNotFoundException("Customer not found with id: 9"));
-
-		mockMvc.perform(put("/api/v1/customers/9/blacklist"))
-				.andExpect(status().isNotFound());
-	}
-
-	@Test
 	void removeFromBlacklistReturnsNoContent() throws Exception {
 		mockMvc.perform(delete("/api/v1/customers/5/blacklist"))
 				.andExpect(status().isNoContent());
@@ -176,11 +128,12 @@ class CustomerControllerListTest {
 	@Test
 	void listsNoShowHistory() throws Exception {
 		when(listNoShows.list(5L, USER_ID)).thenReturn(List.of(
-				NoShow.reconstitute(1L, 5L, 100L, USER_ID, java.time.Instant.parse("2026-10-09T12:00:00Z"))));
+				NoShow.reconstitute(1L, 5L, 100L, USER_ID, "no llego", java.time.Instant.parse("2026-10-09T12:00:00Z"))));
 
 		mockMvc.perform(get("/api/v1/customers/5/no-shows"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].appointmentId").value(100));
+				.andExpect(jsonPath("$[0].appointmentId").value(100))
+				.andExpect(jsonPath("$[0].reason").value("no llego"));
 	}
 
 	@Test

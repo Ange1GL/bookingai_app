@@ -33,6 +33,9 @@ public class CustomerNoShowEntity {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
+	@Column(length = 250)
+	private String reason;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 

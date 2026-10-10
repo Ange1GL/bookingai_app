@@ -7,14 +7,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.command.RemoveCustomerFromBlacklistCommand;
-import com.github.angellariosacosta.bookingapp.application.port.in.BlacklistCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomerNoShowsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomersUseCase;
@@ -24,8 +22,6 @@ import com.github.angellariosacosta.bookingapp.application.query.ListCustomersQu
 import com.github.angellariosacosta.bookingapp.application.query.SortDirection;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.BlacklistCustomerRequest;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.BlacklistResultResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateCustomerRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CustomerPageResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CustomerResponse;
@@ -52,7 +48,6 @@ public class CustomerController {
 
 	private final CreateCustomerUseCase createCustomer;
 	private final ListCustomersUseCase listCustomers;
-	private final BlacklistCustomerUseCase blacklistCustomer;
 	private final RemoveCustomerFromBlacklistUseCase removeCustomerFromBlacklist;
 	private final ListCustomerNoShowsUseCase listCustomerNoShows;
 	private final CustomerRestMapper mapper;
@@ -90,16 +85,6 @@ public class CustomerController {
 		ListCustomersQuery query = new ListCustomersQuery(
 				userId, name, phone, blacklisted, page, size, sortBy, direction);
 		return ResponseEntity.ok(mapper.toPageResponse(listCustomers.list(query)));
-	}
-
-	// Idempotente: repetir el PUT sobre un cliente ya bloqueado conserva la entrada original.
-	@PutMapping("/{id}/blacklist")
-	public ResponseEntity<BlacklistResultResponse> blacklist(
-			@PathVariable Long id,
-			@Valid @RequestBody(required = false) BlacklistCustomerRequest request,
-			@CurrentUserId Long userId) {
-		return ResponseEntity.ok(mapper.toBlacklistResponse(
-				blacklistCustomer.blacklist(mapper.toBlacklistCommand(id, request, userId))));
 	}
 
 	@DeleteMapping("/{id}/blacklist")

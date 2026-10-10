@@ -2,12 +2,8 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import java.time.Instant;
 
-import com.github.angellariosacosta.bookingapp.domain.model.BlacklistSource;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,12 +30,8 @@ public class CustomerBlacklistEntity {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
-	@Column
+	@Column(length = 250)
 	private String reason;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private BlacklistSource source;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;

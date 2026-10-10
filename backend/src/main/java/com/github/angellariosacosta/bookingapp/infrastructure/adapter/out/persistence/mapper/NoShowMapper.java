@@ -13,12 +13,14 @@ public class NoShowMapper {
 		entity.setCustomerId(noShow.getCustomerId());
 		entity.setAppointmentId(noShow.getAppointmentId());
 		entity.setUserId(noShow.getUserId());
+		entity.setReason(noShow.getReason());
 		entity.setCreatedAt(noShow.getCreatedAt());
 		return entity;
 	}
 
 	public NoShow toDomain(CustomerNoShowEntity entity) {
 		return NoShow.reconstitute(
-				entity.getId(), entity.getCustomerId(), entity.getAppointmentId(), entity.getUserId(), entity.getCreatedAt());
+				entity.getId(), entity.getCustomerId(), entity.getAppointmentId(), entity.getUserId(),
+				entity.getReason(), entity.getCreatedAt());
 	}
 }
