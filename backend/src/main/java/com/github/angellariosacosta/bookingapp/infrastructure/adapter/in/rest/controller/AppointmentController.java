@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,11 @@ public class AppointmentController {
 		return ResponseEntity
 				.ok((mapper.toResponse(appointment)));
 
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<AppointmentResponse> findById(@PathVariable Long id, @CurrentUserId Long userId) {
+		return ResponseEntity.ok(mapper.toResponse(queryAppointments.findById(id, userId)));
 	}
 
 	// Una sola consulta sirve a la vista semanal y mensual del calendario: el front manda el

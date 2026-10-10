@@ -25,6 +25,7 @@ feature/assistant/
 - `ChatRequest` validado: `sessionId` y `message` obligatorios, `message` ≤ 500 caracteres.
 - La memoria de conversación se indexa por `userId:sessionId` (un `sessionId` ajeno no abre la conversación de otro usuario).
 - Los fallos del modelo devuelven `502` con mensaje genérico.
+- Lista negra: si el cliente está bloqueado el agente no agenda, avisa y pregunta si se quita o se mantiene; también puede bloquear/desbloquear con confirmación (ver `backend/docs/customer-blacklist.md`).
 - Pendiente de decidir: restringir `/agent/raw-chat` fuera de `dev`.
 
 ## Pruebas

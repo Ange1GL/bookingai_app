@@ -72,6 +72,12 @@ public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPor
 	}
 
 	@Override
+	public int cancelReservedFrom(Long customerId, Long userId, LocalDateTime from) {
+		return jpaRepository.cancelReservedFrom(
+				customerId, userId, from, StatusAppointment.RESERVED.getId(), CANCELLED_STATUS_ID);
+	}
+
+	@Override
 	public Appointment updateTimeSlot(Long id, Long userId, LocalDateTime newStart, LocalDateTime newEnd) {
 		AppointmentEntity entity = findEntityByIdAndUserId(id, userId);
 		entity.setStartTime(newStart);

@@ -45,3 +45,5 @@ src/main/resources/certs/private.pem
 
 ### Private / confidential data ###
 docs_confidencial/
+### HTTP Client (IntelliJ): credenciales locales ###
+http-client.private.env.json

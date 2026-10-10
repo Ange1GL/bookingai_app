@@ -26,6 +26,7 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 	private final CustomerRepositoryPort customerRepository;
 	private final AppointmentRepositoryPort appointmentRepository;
 	private final PriceCatalogRepositoryPort priceCatalogRepository;
+	private final CustomerBlacklistGuard blacklistGuard;
 	private final Clock clock;
 
 	@Override
@@ -39,6 +40,7 @@ public class BookAppointmentService implements BookAppointmentUseCase {
 								.userId(command.userId())
 								.build()
 				));
+		blacklistGuard.ensureNotBlacklisted(customer.getId(), command.userId());
 		if (appointmentRepository.isOverlapping(command.userId(),command.startTime(), command.endTime())) {
 			throw new AppointmentOverlapException("There is an appointment previously with same time");
 		}

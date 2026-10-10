@@ -51,3 +51,7 @@ List<Customer> searchByNameContaining(String name, Long userId);
 - **`CreateCustomerService` hace find-or-create por `phone` + `userId`.** Si el barbero autenticado ya tiene un cliente con ese teléfono, se reutiliza en vez de crear un duplicado. Esto es scoped por usuario: dos barberos pueden tener, cada uno, un cliente con el mismo número de teléfono, y quedan como dos registros de `Customer` independientes.
 - **`BookAppointmentService`** sigue el mismo find-or-create por teléfono, ahora scoped por `userId` (antes de este cambio, el `Customer` creado en este flujo ni siquiera quedaba asociado a ningún usuario).
 - **`SearchCustomersUseCase`** quedó actualizado para aceptar `userId`, pero de momento solo lo consume la tool de IA (`BookingTools.searchCustomersByName`) — no hay un endpoint REST de búsqueda todavía.
+
+## Lista negra
+
+La lista negra de clientes también es por tenant y vive en su propia tabla; ver `customer-blacklist.md`.

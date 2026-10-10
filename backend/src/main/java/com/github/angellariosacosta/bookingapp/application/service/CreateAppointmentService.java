@@ -27,6 +27,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 	private final AppointmentRepositoryPort appointmentRepository;
 	private final CustomerRepositoryPort customerRepository;
 	private final PriceCatalogRepositoryPort priceCatalogRepository;
+	private final CustomerBlacklistGuard blacklistGuard;
 	private final Clock clock;
 
 	@Override
@@ -35,6 +36,7 @@ public class CreateAppointmentService implements CreateAppointmentUseCase {
 		Customer customer = customerRepository.findById(command.customerId(), command.userId())
 				.orElseThrow(() -> new CustomerNotFoundException(
 						"Customer not found with id: " + command.customerId()));
+		blacklistGuard.ensureNotBlacklisted(customer.getId(), command.userId());
 
 		boolean isOverlapping = appointmentRepository.isOverlapping(command.userId(), command.startTime(), command.endTime());
 		if (isOverlapping) {
