@@ -30,6 +30,12 @@ const SHORTCUTS: Shortcut[] = [
     path: '/customers',
   },
   {
+    label: 'Catálogo de precios',
+    description: 'Administra los servicios que ofreces y cuánto cobras.',
+    icon: 'pi-tag',
+    path: '/price-catalog',
+  },
+  {
     label: 'Asistente de AI',
     description: 'Agenda, mueve o cancela citas conversando.',
     icon: 'pi-sparkles',

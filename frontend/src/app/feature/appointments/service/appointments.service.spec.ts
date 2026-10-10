@@ -5,6 +5,18 @@ import { environment } from '../../../../environments/environment';
 import { AppointmentsService } from './appointments.service';
 
 describe('AppointmentsService', () => {
+  it('requests one appointment by id', () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    const http = TestBed.inject(HttpTestingController);
+
+    TestBed.inject(AppointmentsService).findById(7).subscribe();
+
+    const req = http.expectOne(`${environment.apiBaseUrl}/api/v1/appointments/7`);
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+    http.verify();
+  });
+
   it('requests the range with local ISO params and no trailing Z', () => {
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
     const http = TestBed.inject(HttpTestingController);

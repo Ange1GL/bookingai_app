@@ -25,7 +25,7 @@ feature/appointments/
 ```
 
 ## Comportamiento móvil
-Objetivos táctiles ≥ 44 px, swipe horizontal para cambiar de periodo, navegación inferior en el layout y detalle como `p-drawer` desde abajo. En `md+` el mes muestra chips de cita y la agenda del día queda en un panel lateral.
+Objetivos táctiles ≥ 44 px, swipe horizontal para cambiar de periodo, navegación inferior en el layout y detalle como `p-drawer` desde abajo. Al abrir el detalle se consulta `GET /api/v1/appointments/{id}` y se muestran el servicio y su precio (MXN); mientras carga hay skeletons y si falla se indica "No disponible". En `md+` el mes muestra chips de cita y la agenda del día queda en un panel lateral.
 
 ## Fuera de alcance (fase 2)
 Crear/cancelar citas desde la UI, arrastrar y soltar, vista por horas.
