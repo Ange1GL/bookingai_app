@@ -17,6 +17,7 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - `auth`, `home`, `customers` (buscar, alta manual y lista negra con confirmación; ver `docs/customers-management.md`), `appointments` (calendario mes/semana, solo lectura), `price-catalog` (CRUD del catálogo de precios con confirmación al eliminar; ver `docs/price-catalog-management.md`) y `assistant` ("Asistente de AI": chat de texto para agendar citas; la voz quedó pospuesta, ver `docs/assistant-chat.md`)
 
 ## Conventions
+- Components never inline their template: use `templateUrl` with a sibling `<name>.component.html` (root: `app.html`)
 - Never run `npm audit fix --force`; keep all `@angular/*` runtime packages on the same version (they peer-pin each other)
 - `overrides` in `package.json` are temporary security patches; document them in `docs/security-remediation-plan.md`
 - `environment.apiBaseUrl` is the full host (scheme+host+port) only; services write the full path `${environment.apiBaseUrl}/api/v1/...`. No `constants` folder

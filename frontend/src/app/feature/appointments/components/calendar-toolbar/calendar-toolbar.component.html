@@ -1,0 +1,41 @@
+<div class="flex flex-col gap-3">
+  <div class="flex items-center justify-between gap-2">
+    <h1 class="m-0 min-w-0 flex-1 truncate text-xl font-bold tracking-tight sm:text-2xl" aria-live="polite">
+      {{ title() }}
+    </h1>
+    <div class="flex shrink-0 items-center gap-1">
+      <button type="button" class="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-muted-color transition hover:bg-surface-100 dark:hover:bg-surface-800" aria-label="Anterior" (click)="previous.emit()">
+        <i class="pi pi-chevron-left" aria-hidden="true"></i>
+      </button>
+      <button
+        type="button"
+        class="h-11 cursor-pointer rounded-full bg-primary-50 px-4 text-sm font-semibold text-primary transition hover:bg-primary-100 dark:bg-primary-500/10"
+        (click)="today.emit()"
+      >
+        Hoy
+      </button>
+      <button type="button" class="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-muted-color transition hover:bg-surface-100 dark:hover:bg-surface-800" aria-label="Siguiente" (click)="next.emit()">
+        <i class="pi pi-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-1 rounded-full bg-surface-100 p-1 dark:bg-surface-800" role="tablist" aria-label="Vista">
+    @for (option of viewOptions; track option.value) {
+      <button
+        type="button"
+        role="tab"
+        class="h-10 cursor-pointer rounded-full text-sm font-medium transition"
+        [class]="
+          view() === option.value
+            ? 'bg-linear-to-r from-primary-500 to-primary-700 text-white shadow'
+            : 'text-muted-color hover:text-color'
+        "
+        [attr.aria-selected]="view() === option.value"
+        (click)="viewChange.emit(option.value)"
+      >
+        {{ option.label }}
+      </button>
+    }
+  </div>
+</div>

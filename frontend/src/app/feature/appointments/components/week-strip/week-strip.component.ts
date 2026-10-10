@@ -20,38 +20,7 @@ interface WeekCell {
 @Component({
   selector: 'app-week-strip',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="grid grid-cols-7 gap-1" role="group" aria-label="Días de la semana" [class.opacity-60]="loading()">
-      @for (cell of cells(); track cell.key) {
-        <button
-          type="button"
-          class="flex min-h-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-2xl py-2 transition"
-          [class]="
-            cell.isSelected
-              ? 'bg-linear-to-b from-primary-500 to-primary-700 text-white shadow-md shadow-primary-500/30'
-              : 'hover:bg-surface-100 dark:hover:bg-surface-800'
-          "
-          [attr.aria-label]="cell.ariaLabel"
-          [attr.aria-pressed]="cell.isSelected"
-          [attr.aria-current]="cell.isToday ? 'date' : null"
-          (click)="daySelected.emit(cell.date)"
-        >
-          <span class="text-xs font-medium" [class.text-muted-color]="!cell.isSelected">{{ cell.weekday }}</span>
-          <span
-            class="flex size-8 items-center justify-center rounded-full text-base font-bold"
-            [class]="cell.isToday && !cell.isSelected ? 'bg-primary text-primary-contrast' : ''"
-          >
-            {{ cell.day }}
-          </span>
-          <span class="flex h-1.5 items-center gap-0.5" aria-hidden="true">
-            @for (item of cell.dots; track item.id) {
-              <span class="size-1.5 rounded-full" [class]="cell.isSelected ? 'bg-white' : dotColor(item)"></span>
-            }
-          </span>
-        </button>
-      }
-    </div>
-  `,
+  templateUrl: './week-strip.component.html',
 })
 export class WeekStripComponent {
   readonly days = input.required<Date[]>();

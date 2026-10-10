@@ -11,32 +11,7 @@ import { BLACKLIST_REASON_MAX_LENGTH, CustomerListItemDto } from '../../models/c
   selector: 'app-blacklist-dialog',
   imports: [ReactiveFormsModule, TextareaModule, ConfirmDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <app-confirm-dialog
-      [(visible)]="visible"
-      header="Agregar a lista negra"
-      icon="pi-ban"
-      severity="danger"
-      confirmLabel="Sí, bloquear"
-      [message]="message()"
-      [busy]="busy()"
-      [confirmDisabled]="reason.invalid"
-      (confirmed)="confirm()"
-    >
-      <div class="flex flex-col gap-2">
-        <label for="blacklist-reason" class="text-sm font-medium">Motivo <span class="text-muted-color">(opcional)</span></label>
-        <textarea
-          pTextarea
-          id="blacklist-reason"
-          rows="3"
-          class="w-full"
-          [formControl]="reason"
-          [attr.maxlength]="maxLength"
-        ></textarea>
-        <small class="self-end tabular-nums text-muted-color">{{ length() }}/{{ maxLength }}</small>
-      </div>
-    </app-confirm-dialog>
-  `,
+  templateUrl: './blacklist-dialog.component.html',
 })
 export class BlacklistDialogComponent {
   readonly customer = input<CustomerListItemDto | null>(null);

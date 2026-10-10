@@ -10,16 +10,7 @@ import { AuthService } from '../../service/auth.service';
   selector: 'app-login-page',
   imports: [AuthCardComponent, LoginFormComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <app-auth-card>
-      <h2 class="m-0 text-center text-xl font-semibold">Iniciar sesión</h2>
-      <app-login-form [loading]="loading()" (submitted)="login($event)" />
-      <p class="m-0 text-center text-sm">
-        ¿No tienes cuenta?
-        <a routerLink="/auth/register" class="font-medium text-primary">Regístrate</a>
-      </p>
-    </app-auth-card>
-  `,
+  templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);

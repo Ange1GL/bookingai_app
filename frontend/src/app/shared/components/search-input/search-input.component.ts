@@ -13,21 +13,7 @@ const DEBOUNCE_MS = 300;
   selector: 'app-search-input',
   imports: [ReactiveFormsModule, InputTextModule, IconFieldModule, InputIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p-iconfield class="w-full">
-      <p-inputicon class="pi pi-search" />
-      <input
-        pInputText
-        type="search"
-        class="w-full"
-        autocomplete="off"
-        [formControl]="control"
-        [placeholder]="placeholder()"
-        [attr.aria-label]="label()"
-        [attr.maxlength]="maxLength()"
-      />
-    </p-iconfield>
-  `,
+  templateUrl: './search-input.component.html',
 })
 export class SearchInputComponent {
   readonly placeholder = input('Buscar…');

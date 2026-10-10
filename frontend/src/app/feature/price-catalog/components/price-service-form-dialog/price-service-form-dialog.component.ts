@@ -12,65 +12,7 @@ import { PriceServiceForm } from '../../models/price-service-form.model';
   selector: 'app-price-service-form-dialog',
   imports: [ReactiveFormsModule, DialogModule, ButtonModule, InputTextModule, InputNumberModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p-dialog
-      [(visible)]="visible"
-      [header]="header()"
-      [modal]="true"
-      [draggable]="false"
-      [closable]="!saving()"
-      [closeOnEscape]="!saving()"
-      [style]="{ width: '26rem', maxWidth: '92vw' }"
-    >
-      <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
-        <div class="flex flex-col gap-2">
-          <label for="service-label" class="text-sm font-medium">Nombre del servicio</label>
-          <input
-            pInputText
-            id="service-label"
-            formControlName="label"
-            autocomplete="off"
-            placeholder="Corte + barba"
-            [attr.maxlength]="labelMaxLength"
-            [attr.aria-invalid]="form.controls.label.touched && form.controls.label.invalid"
-          />
-          @if (form.controls.label.touched && form.controls.label.hasError('required')) {
-            <small class="text-red-500">El nombre es obligatorio.</small>
-          }
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <label for="service-price" class="text-sm font-medium">Precio</label>
-          <p-inputnumber
-            inputId="service-price"
-            formControlName="price"
-            mode="currency"
-            currency="MXN"
-            locale="es-MX"
-            [minFractionDigits]="0"
-            [maxFractionDigits]="0"
-            [min]="priceMin"
-            [max]="priceMax"
-            placeholder="$90"
-            styleClass="w-full"
-            inputStyleClass="w-full"
-          />
-          @if (form.controls.price.touched) {
-            @if (form.controls.price.hasError('required')) {
-              <small class="text-red-500">El precio es obligatorio.</small>
-            } @else if (form.controls.price.hasError('min')) {
-              <small class="text-red-500">El precio debe ser mayor a 0.</small>
-            }
-          }
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2">
-          <p-button label="Cancelar" severity="secondary" [text]="true" [disabled]="saving()" (onClick)="visible.set(false)" />
-          <p-button type="submit" label="Guardar" icon="pi pi-check" [loading]="saving()" />
-        </div>
-      </form>
-    </p-dialog>
-  `,
+  templateUrl: './price-service-form-dialog.component.html',
 })
 export class PriceServiceFormDialogComponent {
   private readonly fb = inject(NonNullableFormBuilder);

@@ -1,0 +1,70 @@
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-4 md:gap-6">
+  <header class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="m-0 text-2xl font-bold tracking-tight">Catálogo de precios</h1>
+      <p class="m-0 text-sm text-muted-color">{{ totalLabel() }}</p>
+    </div>
+    <p-button label="Nuevo" icon="pi pi-plus" [rounded]="true" (onClick)="openCreate()" />
+  </header>
+
+  @if (failed()) {
+    <div
+      class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+      role="alert"
+    >
+      <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudo cargar el catálogo.</span>
+      <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="reload()" />
+    </div>
+  }
+
+  <section aria-label="Servicios del catálogo" [attr.aria-busy]="loading()">
+    @if (services().length === 0) {
+      @if (loading()) {
+        <div class="flex flex-col gap-2">
+          @for (row of skeletonRows; track row) {
+            <p-skeleton height="4.5rem" borderRadius="1rem" />
+          }
+        </div>
+      } @else if (!failed()) {
+        <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-surface px-4 py-10 text-center text-muted-color">
+          <span class="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary dark:bg-primary-500/10">
+            <i class="pi pi-tag text-xl" aria-hidden="true"></i>
+          </span>
+          <p class="m-0 font-medium">Aún no tienes servicios</p>
+          <p class="m-0 text-sm">Crea tu primer servicio con el botón Nuevo para poder agendar citas.</p>
+        </div>
+      }
+    } @else {
+      <ul class="m-0 flex list-none flex-col gap-2 p-0 transition-opacity" [class.opacity-60]="loading()">
+        @for (service of services(); track service.id) {
+          <li>
+            <app-price-service-card
+              [service]="service"
+              [busy]="deletingId() === service.id"
+              (editRequested)="openEdit($event)"
+              (deleteRequested)="askDelete($event)"
+            />
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+<app-price-service-form-dialog
+  [(visible)]="formVisible"
+  [service]="target()"
+  [saving]="saving()"
+  (submitted)="save($event)"
+/>
+
+<app-confirm-dialog
+  [(visible)]="deleteVisible"
+  header="Eliminar servicio"
+  icon="pi-trash"
+  severity="danger"
+  confirmLabel="Sí, eliminar"
+  [message]="deleteMessage()"
+  [busy]="deletingId() !== null"
+  (confirmed)="remove()"
+/>

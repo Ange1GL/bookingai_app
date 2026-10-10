@@ -7,10 +7,6 @@ import { LoaderScreenComponent } from '@/shared/components/loader-screen/loader-
   selector: 'app-root',
   imports: [RouterOutlet, ToastModule, LoaderScreenComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p-toast />
-    <app-loader-screen />
-    <router-outlet />
-  `,
+  templateUrl: './app.html',
 })
 export class App {}

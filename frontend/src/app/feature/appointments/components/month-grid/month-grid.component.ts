@@ -24,52 +24,7 @@ interface MonthCell {
 @Component({
   selector: 'app-month-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="grid grid-cols-7 text-center text-xs font-semibold uppercase tracking-wide text-muted-color" aria-hidden="true">
-      @for (name of weekdays; track $index) {
-        <span class="py-2">{{ name }}</span>
-      }
-    </div>
-
-    <div class="grid grid-cols-7 gap-px md:gap-1" role="grid" [class.opacity-60]="loading()">
-      @for (cell of cells(); track cell.key) {
-        <button
-          type="button"
-          role="gridcell"
-          class="relative flex min-h-12 cursor-pointer flex-col items-center gap-1 rounded-xl p-1 transition md:min-h-28 md:items-stretch md:p-2"
-          [class]="cellClass(cell)"
-          [attr.aria-label]="cell.ariaLabel"
-          [attr.aria-pressed]="cell.isSelected"
-          [attr.aria-current]="cell.isToday ? 'date' : null"
-          (click)="daySelected.emit(cell.date)"
-        >
-          <span
-            class="flex size-7 items-center justify-center rounded-full text-sm font-semibold"
-            [class]="cell.isToday && !cell.isSelected ? 'bg-primary text-primary-contrast' : ''"
-          >
-            {{ cell.day }}
-          </span>
-
-          <span class="flex h-1.5 items-center gap-0.5 md:hidden" aria-hidden="true">
-            @for (item of cell.dots; track item.id) {
-              <span class="size-1.5 rounded-full" [class]="cell.isSelected ? 'bg-white' : dotColor(item)"></span>
-            }
-          </span>
-
-          <span class="hidden w-full flex-col gap-1 md:flex" aria-hidden="true">
-            @for (item of cell.chips; track item.id) {
-              <span class="truncate rounded-md px-1.5 py-0.5 text-left text-xs font-medium" [class]="chipColor(item)">
-                {{ time(item) }} {{ item.customerName }}
-              </span>
-            }
-            @if (cell.extra > 0) {
-              <span class="px-1 text-left text-xs text-muted-color" [class.text-white]="cell.isSelected">+{{ cell.extra }} más</span>
-            }
-          </span>
-        </button>
-      }
-    </div>
-  `,
+  templateUrl: './month-grid.component.html',
 })
 export class MonthGridComponent {
   readonly days = input.required<Date[]>();

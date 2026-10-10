@@ -1,0 +1,30 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="flex items-end gap-2 rounded-3xl border border-surface bg-surface-0 p-1.5 shadow-sm transition focus-within:border-primary focus-within:shadow-md focus-within:shadow-primary-500/10 dark:bg-surface-900"
+  novalidate
+>
+  <label for="assistant-message" class="sr-only">Escribe tu mensaje</label>
+  <textarea
+    id="assistant-message"
+    formControlName="text"
+    rows="1"
+    autocomplete="off"
+    enterkeyhint="send"
+    [attr.maxlength]="maxLength"
+    [placeholder]="placeholder()"
+    class="max-h-32 min-h-11 min-w-0 flex-1 resize-none self-center bg-transparent px-3 py-2.5 text-base leading-snug outline-none field-sizing-content placeholder:text-muted-color"
+    (keydown.enter)="onEnter($event)"
+  ></textarea>
+  @if (showCounter()) {
+    <span class="self-center pr-1 text-xs tabular-nums text-muted-color">{{ length() }}/{{ maxLength }}</span>
+  }
+  <button
+    type="submit"
+    class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-linear-to-br from-primary-500 to-primary-700 text-white shadow-md shadow-primary-500/30 transition active:scale-95 disabled:cursor-not-allowed disabled:from-surface-200 disabled:to-surface-300 disabled:shadow-none disabled:text-muted-color"
+    aria-label="Enviar mensaje"
+    [disabled]="disabled() || form.invalid"
+  >
+    <i class="pi pi-send" aria-hidden="true"></i>
+  </button>
+</form>

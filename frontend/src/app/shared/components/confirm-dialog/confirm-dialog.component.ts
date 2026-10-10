@@ -9,44 +9,7 @@ export type ConfirmSeverity = 'primary' | 'danger';
   selector: 'app-confirm-dialog',
   imports: [DialogModule, ButtonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p-dialog
-      [(visible)]="visible"
-      [header]="header()"
-      [modal]="true"
-      [draggable]="false"
-      [closable]="!busy()"
-      [closeOnEscape]="!busy()"
-      [dismissableMask]="!busy()"
-      [style]="{ width: '26rem', maxWidth: '92vw' }"
-      role="alertdialog"
-    >
-      <div class="flex flex-col gap-4">
-        <div class="flex items-start gap-3">
-          <span
-            class="flex size-10 shrink-0 items-center justify-center rounded-full"
-            [class]="severity() === 'danger' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10' : 'bg-primary-50 text-primary dark:bg-primary-500/10'"
-            aria-hidden="true"
-          >
-            <i class="pi" [class]="icon()"></i>
-          </span>
-          <p class="m-0 text-sm leading-relaxed">{{ message() }}</p>
-        </div>
-        <ng-content />
-      </div>
-
-      <ng-template #footer>
-        <p-button [label]="cancelLabel()" severity="secondary" [text]="true" [disabled]="busy()" (onClick)="visible.set(false)" />
-        <p-button
-          [label]="confirmLabel()"
-          [severity]="severity() === 'danger' ? 'danger' : undefined"
-          [loading]="busy()"
-          [disabled]="confirmDisabled()"
-          (onClick)="confirmed.emit()"
-        />
-      </ng-template>
-    </p-dialog>
-  `,
+  templateUrl: './confirm-dialog.component.html',
 })
 export class ConfirmDialogComponent {
   readonly visible = model(false);

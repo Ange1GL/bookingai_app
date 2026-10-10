@@ -10,16 +10,7 @@ import { AuthService } from '../../service/auth.service';
   selector: 'app-register-page',
   imports: [AuthCardComponent, RegisterFormComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <app-auth-card>
-      <h2 class="m-0 text-center text-xl font-semibold">Crear cuenta</h2>
-      <app-register-form [loading]="loading()" (submitted)="register($event)" />
-      <p class="m-0 text-center text-sm">
-        ¿Ya tienes cuenta?
-        <a routerLink="/auth/login" class="font-medium text-primary">Inicia sesión</a>
-      </p>
-    </app-auth-card>
-  `,
+  templateUrl: './register-page.component.html',
 })
 export class RegisterPageComponent {
   private readonly authService = inject(AuthService);
