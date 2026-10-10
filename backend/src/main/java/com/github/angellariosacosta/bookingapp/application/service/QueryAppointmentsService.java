@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.out.AppointmentRepositoryPort;
+import com.github.angellariosacosta.bookingapp.domain.exception.AppointmentNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidAppointmentTimeRangeException;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 
@@ -24,6 +25,13 @@ public class QueryAppointmentsService implements QueryAppointmentsUseCase {
 	private static final long MAX_RANGE_DAYS = 42;
 
 	private final AppointmentRepositoryPort appointmentRepository;
+
+	@Override
+	@Transactional(readOnly = true)
+	public Appointment findById(Long id, Long userId) {
+		return appointmentRepository.findById(id, userId)
+				.orElseThrow(() -> new AppointmentNotFoundException("Appointment not found with id: " + id));
+	}
 
 	@Override
 	@Transactional(readOnly = true)

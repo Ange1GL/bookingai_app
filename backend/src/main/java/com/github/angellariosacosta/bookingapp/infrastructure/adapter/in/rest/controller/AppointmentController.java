@@ -46,6 +46,11 @@ public class AppointmentController {
 
 	}
 
+	@GetMapping("/{id}")
+	public ResponseEntity<AppointmentResponse> findById(@PathVariable Long id, @CurrentUserId Long userId) {
+		return ResponseEntity.ok(mapper.toResponse(queryAppointments.findById(id, userId)));
+	}
+
 	// Una sola consulta sirve a la vista semanal y mensual del calendario: el front manda el
 	// rango visible [from, to) y el backend no necesita saber qué vista se está pintando.
 	@GetMapping
