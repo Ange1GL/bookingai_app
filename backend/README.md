@@ -251,6 +251,7 @@ En qa/producción exporta `SPRING_PROFILES_ACTIVE=qa`; si no se sobreescribe, la
 - [docs/jwt-spring-security-guide.md](docs/jwt-spring-security-guide.md) — implementación de JWT + Spring Security
 - [docs/security-config.md](docs/security-config.md) — guía de `SecurityConfig` (filtros, CORS, CSRF, beans)
 - [docs/rate-limiting.md](docs/rate-limiting.md) — rate limiting por IP con Bucket4j + Caffeine
+- [docs/actuator-health.md](docs/actuator-health.md) — `GET /actuator/health` (único endpoint de Actuator expuesto) para ECS Fargate/ALB
 - [docs/flyway-migrations.md](docs/flyway-migrations.md) — cómo escribir migraciones
 - [docs/agent-flows.md](docs/agent-flows.md) — flujos del agente de IA
 - [docs/customer-multi-tenancy.md](docs/customer-multi-tenancy.md) — multi-tenancy por cliente

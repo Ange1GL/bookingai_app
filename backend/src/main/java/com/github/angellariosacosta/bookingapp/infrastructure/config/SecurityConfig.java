@@ -113,7 +113,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/csrf",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
-                                "/error"
+                                "/error",
+                                "/actuator/health"   // health check de ECS/ALB: sin credenciales, solo estado
 
                         ).permitAll()
                         .anyRequest().authenticated()

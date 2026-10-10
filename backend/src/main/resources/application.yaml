@@ -110,3 +110,14 @@ cors:
 
 server:
   port: 8082
+
+# Actuator: solo /actuator/health, sin detalle. Es el health check de ECS Fargate / ALB (ver docs/actuator-health.md).
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health      # allowlist: ningun otro endpoint (env, beans, metrics, ...) queda expuesto por HTTP
+  endpoint:
+    health:
+      show-details: never    # solo {"status":"UP"}; no revela estado de la BD ni de otros componentes
+      show-components: never
