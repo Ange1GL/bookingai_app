@@ -1,8 +1,44 @@
 # Perfil "qa": mismo comportamiento que un entorno real (cookies Secure + CSRF completo).
-# Activar con SPRING_PROFILES_ACTIVE=qa o --spring.profiles.active=qa.
+# Se activa con SPRING_PROFILES_ACTIVE=qa (el Dockerfile ya lo fija por defecto).
 # Ver docs/csrf-decision.md.
+
+spring:
+  datasource:
+    hikari:
+      connection-timeout: 10000        # ms; falla rapido si el pool esta agotado en vez de encolar 30 s
+      leak-detection-threshold: 20000  # ms; loguea conexiones retenidas mas de 20 s
+
+  jpa:
+    # false: con true (default de Spring) cada request retiene una conexion de BD hasta terminar,
+    # incluso mientras espera a DeepSeek en el asistente.
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 25             # agrupa INSERT/UPDATE en lotes: menos viajes a la BD
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 20  # carga relaciones lazy por lotes (evita N+1)
+
+  flyway:
+    validate-on-migrate: true
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s  # tiempo para terminar requests en curso cuando ECS reemplaza la tarea
+
+server:
+  shutdown: graceful
+
 security:
   csrf:
     enabled: true
   cookie:
     secure: true
+  client-ip:
+    # CloudFront -> API Gateway -> VPC Link: un proxy de confianza agrega su IP a X-Forwarded-For.
+    trusted-proxy-hops: 1
+
+# Lista separada por comas, con o sin espacios: HOST_CORS=https://d2o913g58ork75.cloudfront.net,https://app.midominio.com
+# Sin valor por defecto a proposito: si falta, la app no arranca en vez de quedar con CORS abierto o roto.
+cors:
+  allowed-origins: ${HOST_CORS}

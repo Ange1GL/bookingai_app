@@ -41,6 +41,9 @@ USER appuser
 # Size the heap from the Fargate task memory limit; override via task definition if needed.
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError"
 
+# Loads application-qa.yaml (CSRF + Secure cookies + tuned JPA/Hikari). Override in the task definition if needed.
+ENV SPRING_PROFILES_ACTIVE=qa
+
 EXPOSE 8082
 
 # Exec form: java is PID 1 and receives SIGTERM from Fargate for graceful shutdown.
