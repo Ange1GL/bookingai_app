@@ -13,6 +13,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Inicio', icon: 'pi-home', path: '/home' },
   { label: 'Calendario', icon: 'pi-calendar', path: '/appointments' },
   { label: 'Clientes', icon: 'pi-users', path: '/customers' },
+  { label: 'Precios', icon: 'pi-tag', path: '/price-catalog' },
   { label: 'Asistente', icon: 'pi-sparkles', path: '/assistant' },
 ];
 
@@ -57,7 +58,7 @@ const NAV_ITEMS: NavItem[] = [
     </main>
 
     <nav
-      class="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-surface bg-surface-0/90 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden dark:bg-surface-950/90"
+      class="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-surface bg-surface-0/90 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden dark:bg-surface-950/90"
       aria-label="Principal"
     >
       @for (item of navItems; track item.path) {

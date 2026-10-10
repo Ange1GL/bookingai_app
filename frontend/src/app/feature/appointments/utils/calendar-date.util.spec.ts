@@ -18,6 +18,9 @@ const dto = (id: number, startTime: string, endTime: string, statusId = 1): Appo
   customerName: 'Ana',
   status: statusId === 1 ? 'RESERVED' : 'CANCELLED',
   statusId,
+  priceCatalogId: 1,
+  serviceLabel: 'Corte básico',
+  price: 60,
 });
 
 describe('calendar-date.util', () => {

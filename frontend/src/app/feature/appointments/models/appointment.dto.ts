@@ -7,6 +7,9 @@ export interface AppointmentDto {
   customerName: string;
   status: string;
   statusId: number;
+  priceCatalogId: number;
+  serviceLabel: string;
+  price: number;
 }
 
 /** Persisted statuses (backend StatusAppointment). */

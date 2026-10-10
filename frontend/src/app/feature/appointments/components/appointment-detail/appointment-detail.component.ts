@@ -1,7 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { DrawerModule } from 'primeng/drawer';
+import { SkeletonModule } from 'primeng/skeleton';
 import { CalendarAppointment } from '../../models/calendar.model';
 import { STATUS_STYLE } from '../../models/status-style.model';
+import { AppointmentsService } from '../../service/appointments.service';
 import { formatLongDay, formatTimeRange } from '../../utils/calendar-format.util';
 
 const MS_PER_MINUTE = 60_000;
@@ -9,7 +13,7 @@ const MINUTES_PER_HOUR = 60;
 
 @Component({
   selector: 'app-appointment-detail',
-  imports: [DrawerModule],
+  imports: [DrawerModule, SkeletonModule, CurrencyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <p-drawer [(visible)]="visible" position="bottom" header="Detalle de la cita" styleClass="h-auto! rounded-t-3xl md:max-w-lg md:mx-auto">
@@ -40,6 +44,26 @@ const MINUTES_PER_HOUR = 60;
             <dd class="m-0 font-medium">{{ range() }}</dd>
             <dt class="flex items-center gap-2 text-muted-color"><i class="pi pi-stopwatch" aria-hidden="true"></i>Duración</dt>
             <dd class="m-0 font-medium">{{ duration() }}</dd>
+            <dt class="flex items-center gap-2 text-muted-color"><i class="pi pi-tag" aria-hidden="true"></i>Servicio</dt>
+            <dd class="m-0 font-medium">
+              @if (full(); as detail) {
+                {{ detail.serviceLabel }}
+              } @else if (loading()) {
+                <p-skeleton width="8rem" height="1rem" />
+              } @else {
+                <span class="text-muted-color">No disponible</span>
+              }
+            </dd>
+            <dt class="flex items-center gap-2 text-muted-color"><i class="pi pi-wallet" aria-hidden="true"></i>Precio</dt>
+            <dd class="m-0 font-semibold tabular-nums text-primary">
+              @if (full(); as detail) {
+                {{ detail.price | currency: 'MXN' : 'symbol-narrow' : '1.0-0' }}
+              } @else if (loading()) {
+                <p-skeleton width="4rem" height="1rem" />
+              } @else {
+                <span class="font-normal text-muted-color">No disponible</span>
+              }
+            </dd>
           </dl>
         </div>
       }
@@ -49,6 +73,20 @@ const MINUTES_PER_HOUR = 60;
 export class AppointmentDetailComponent {
   readonly appointment = input<CalendarAppointment | null>(null);
   readonly visible = model(false);
+
+  private readonly appointmentsService = inject(AppointmentsService);
+
+  /** Fetches the detail endpoint each time the drawer opens, so the price is never stale. */
+  private readonly detailResource = rxResource({
+    params: () => (this.visible() ? this.appointment()?.id : undefined),
+    stream: ({ params }) => this.appointmentsService.findById(params),
+  });
+
+  protected readonly loading = this.detailResource.isLoading;
+  protected readonly full = computed(() => {
+    const detail = this.detailResource.hasValue() ? this.detailResource.value() : undefined;
+    return detail?.id === this.appointment()?.id ? detail : undefined;
+  });
 
   protected readonly style = computed(() => STATUS_STYLE[this.appointment()?.status ?? 'reserved']);
   protected readonly day = computed(() => {
