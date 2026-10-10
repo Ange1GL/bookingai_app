@@ -57,3 +57,13 @@ npm run build
 npx ng test --watch=false
 npm run audit
 ```
+
+## Logo de marca (`brand-logo`)
+- Usa `NgOptimizedImage` con `priority` (es el LCP de las pantallas de auth), `width`/`height` explícitos (evita CLS) y un `IMAGE_LOADER` local que mapea cada ancho a su variante.
+- Variantes WebP en `public/logos/`: `simbolo-96.webp` (1x) y `simbolo-192.webp` (2x), generadas desde `simbolo-color.png` (1024x1024, conservado como fuente).
+- Si cambia el logo, regenerar las variantes con `sharp` (`resize({ width })` + `webp({ quality: 85 })`) y mantener `LOGO_WIDTH`/`LOGO_HEIGHT` según la proporción (símbolo cuadrado: 96x96).
+- Header (`main-layout`): usa el logo horizontal con variantes `logo-horizontal-115.webp` / `-230.webp` (fuente: `logo-horizontal-invertido-con-fondo.png`, 2000x695), mostrado a 115x40.
+- El loader por ancho es compartido: `shared/utils/width-variant-image-loader.ts` (`logo.webp` → `logo-<ancho>.webp`).
+
+## Favicon
+- `public/favicon.ico` (16/32/48 px) y `public/favicon-32x32.png`, generados desde `public/logos/simbolo-96.webp`; referenciados en `src/index.html`.
