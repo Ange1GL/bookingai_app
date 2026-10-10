@@ -54,4 +54,4 @@ List<Customer> searchByNameContaining(String name, Long userId);
 
 ## Lista negra
 
-La lista negra de clientes (no-shows) también es por tenant y vive en su propia tabla; ver `customer-blacklist.md`.
+La lista negra de clientes también es por tenant y vive en su propia tabla; ver `customer-blacklist.md`.

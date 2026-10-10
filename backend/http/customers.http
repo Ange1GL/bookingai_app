@@ -68,13 +68,13 @@ GET {{baseUrl}}/api/v1/customers?blacklisted=true
 GET {{baseUrl}}/api/v1/customers?blacklisted=false
 
 ### ---------------- Lista negra (ver docs/customer-blacklist.md) ----------------
-### Sustituye {{customerId}} / {{appointmentId}} por ids reales (GET /customers y GET /appointments).
+### Sustituye {{customerId}} por un id real (GET /customers).
 
-### 14. Quitar de la lista negra Perdona las inasistencias vigentes (204; 404 si no estaba)
+### 14. Quitar de la lista negra (204; 404 si no estaba)
 DELETE {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
 
-### 15. Marcar una cita ya iniciada como no-show. Motivo opcional (máx. 250); al llegar a 3 vigentes bloquea solo
-POST {{baseUrl}}/api/v1/appointments/{{appointmentId}}/no-show
+### 15. Bloquear al cliente (única vía). Motivo opcional (máx. 250); idempotente; cancela sus citas futuras
+POST {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
 Content-Type: application/json
 
 {
@@ -82,10 +82,7 @@ Content-Type: application/json
 }
 
 ### 16. Sin cuerpo también vale (motivo vacío)
-POST {{baseUrl}}/api/v1/appointments/{{appointmentId}}/no-show
-
-### 17. Historial de inasistencias del cliente
-GET {{baseUrl}}/api/v1/customers/{{customerId}}/no-shows
+POST {{baseUrl}}/api/v1/customers/{{customerId}}/blacklist
 
 ### 18. Reservar con un cliente bloqueado -> 409
 POST {{baseUrl}}/api/v1/appointments

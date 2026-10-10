@@ -6,11 +6,12 @@ import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldExce
 
 import lombok.Getter;
 
-/** Cliente en lista negra de un tenant. Solo se crea al alcanzar el umbral de inasistencias. */
+/** Cliente en lista negra de un tenant. Se crea por bloqueo directo del barbero, con motivo opcional. */
 @Getter
 public class CustomerBlacklist {
 
-	private static final String NO_SHOWS_REASON = "Auto: %d inasistencias";
+	// Debe coincidir con la longitud de customer_blacklist.reason (varchar(250)) en la BD.
+	public static final int MAX_REASON_LENGTH = 250;
 
 	private final Long customerId;
 	private final Long userId;
@@ -24,18 +25,28 @@ public class CustomerBlacklist {
 		if (userId == null) {
 			throw new InvalidFieldException("userId", "must not be null");
 		}
+		if (reason != null && reason.length() > MAX_REASON_LENGTH) {
+			throw new InvalidFieldException("reason", "must not exceed " + MAX_REASON_LENGTH + " characters");
+		}
 		this.customerId = customerId;
 		this.userId = userId;
 		this.reason = reason;
 		this.createdAt = createdAt;
 	}
 
-	public static CustomerBlacklist forNoShows(Long customerId, Long userId, long activeNoShows, Instant now) {
-		return new CustomerBlacklist(customerId, userId, NO_SHOWS_REASON.formatted(activeNoShows), now);
+	public static CustomerBlacklist create(Long customerId, Long userId, String reason, Instant now) {
+		return new CustomerBlacklist(customerId, userId, normalizeReason(reason), now);
 	}
 
 	// Restaura el estado guardado sin volver a aplicar reglas de creacion.
 	public static CustomerBlacklist reconstitute(Long customerId, Long userId, String reason, Instant createdAt) {
 		return new CustomerBlacklist(customerId, userId, reason, createdAt);
+	}
+
+	private static String normalizeReason(String reason) {
+		if (reason == null || reason.isBlank()) {
+			return null;
+		}
+		return reason.strip();
 	}
 }

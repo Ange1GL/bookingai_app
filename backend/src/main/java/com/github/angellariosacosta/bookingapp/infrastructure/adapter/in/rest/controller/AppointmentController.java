@@ -16,15 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.RegisterNoShowUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AppointmentResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateAppointmentRequest;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.NoShowResponse;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterNoShowRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AppointmentRestMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.NoShowRestMapper;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +34,7 @@ public class AppointmentController {
 
 	private final CreateAppointmentUseCase createAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
-	private final RegisterNoShowUseCase registerNoShow;
 	private final AppointmentRestMapper mapper;
-	private final NoShowRestMapper noShowMapper;
 
 	@PostMapping
 	public ResponseEntity<AppointmentResponse> create(
@@ -50,17 +44,6 @@ public class AppointmentController {
 		return ResponseEntity
 				.ok((mapper.toResponse(appointment)));
 
-	}
-
-	// Marca la cita como inasistencia del cliente. Puede mandar al cliente a la lista negra al
-	// alcanzar el umbral configurado (booking.blacklist.no-show-threshold).
-	@PostMapping("/{id}/no-show")
-	public ResponseEntity<NoShowResponse> registerNoShow(
-			@PathVariable Long id,
-			@Valid @RequestBody(required = false) RegisterNoShowRequest request,
-			@CurrentUserId Long userId) {
-		return ResponseEntity.ok(noShowMapper.toResponse(
-				registerNoShow.register(noShowMapper.toCommand(id, request, userId))));
 	}
 
 	// Una sola consulta sirve a la vista semanal y mensual del calendario: el front manda el

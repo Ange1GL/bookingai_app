@@ -110,10 +110,3 @@ cors:
 
 server:
   port: 8082
-
-
-booking:
-  blacklist:
-    # Inasistencias vigentes (no-shows) que mandan automaticamente a un cliente a la lista negra.
-    # 0 desactiva el auto-bloqueo (solo queda el bloqueo manual). Ver docs/customer-blacklist.md.
-    no-show-threshold: 3

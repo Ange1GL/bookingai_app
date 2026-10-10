@@ -41,18 +41,6 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
-	@ExceptionHandler(NoShowNotAllowedException.class)
-	@ResponseStatus(HttpStatus.CONFLICT)
-	public ErrorResponse handleNoShowNotAllowed(NoShowNotAllowedException ex) {
-		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
-	}
-
-	@ExceptionHandler(NoShowAlreadyRegisteredException.class)
-	@ResponseStatus(HttpStatus.CONFLICT)
-	public ErrorResponse handleNoShowAlreadyRegistered(NoShowAlreadyRegisteredException ex) {
-		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
-	}
-
 	@ExceptionHandler(DuplicatePriceCatalogLabelException.class)
 	@ResponseStatus(HttpStatus.CONFLICT)
 	public ErrorResponse handleDuplicatePriceCatalogLabel(DuplicatePriceCatalogLabelException ex) {

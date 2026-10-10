@@ -1,7 +1,5 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.angellariosacosta.bookingapp.application.command.BlacklistCustomerCommand;
 import com.github.angellariosacosta.bookingapp.application.command.RemoveCustomerFromBlacklistCommand;
+import com.github.angellariosacosta.bookingapp.application.port.in.BlacklistCustomerUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateCustomerUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomerNoShowsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListCustomersUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RemoveCustomerFromBlacklistUseCase;
 import com.github.angellariosacosta.bookingapp.application.query.CustomerSortField;
@@ -22,12 +21,11 @@ import com.github.angellariosacosta.bookingapp.application.query.ListCustomersQu
 import com.github.angellariosacosta.bookingapp.application.query.SortDirection;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.BlacklistCustomerRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateCustomerRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CustomerPageResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CustomerResponse;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.NoShowItemResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.CustomerRestMapper;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.NoShowRestMapper;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -48,10 +46,9 @@ public class CustomerController {
 
 	private final CreateCustomerUseCase createCustomer;
 	private final ListCustomersUseCase listCustomers;
+	private final BlacklistCustomerUseCase blacklistCustomer;
 	private final RemoveCustomerFromBlacklistUseCase removeCustomerFromBlacklist;
-	private final ListCustomerNoShowsUseCase listCustomerNoShows;
 	private final CustomerRestMapper mapper;
-	private final NoShowRestMapper noShowMapper;
 
 	// 200 y no 201: el caso de uso es idempotente por teléfono y devuelve el cliente
 	// existente si ya estaba registrado, así que no siempre se crea un recurso nuevo.
@@ -87,14 +84,20 @@ public class CustomerController {
 		return ResponseEntity.ok(mapper.toPageResponse(listCustomers.list(query)));
 	}
 
+	// Única forma de bloquear a un cliente. Idempotente; cancela sus citas RESERVED futuras.
+	@PostMapping("/{id}/blacklist")
+	public ResponseEntity<Void> blacklist(
+			@PathVariable Long id,
+			@Valid @RequestBody(required = false) BlacklistCustomerRequest request,
+			@CurrentUserId Long userId) {
+		String reason = request == null ? null : request.reason();
+		blacklistCustomer.blacklist(new BlacklistCustomerCommand(id, userId, reason));
+		return ResponseEntity.noContent().build();
+	}
+
 	@DeleteMapping("/{id}/blacklist")
 	public ResponseEntity<Void> removeFromBlacklist(@PathVariable Long id, @CurrentUserId Long userId) {
 		removeCustomerFromBlacklist.remove(new RemoveCustomerFromBlacklistCommand(id, userId));
 		return ResponseEntity.noContent().build();
-	}
-
-	@GetMapping("/{id}/no-shows")
-	public ResponseEntity<List<NoShowItemResponse>> listNoShows(@PathVariable Long id, @CurrentUserId Long userId) {
-		return ResponseEntity.ok(noShowMapper.toItemResponses(listCustomerNoShows.list(id, userId)));
 	}
 }
