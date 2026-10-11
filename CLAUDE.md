@@ -30,3 +30,4 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - Backend: `backend/docs/customer-list.md` (`GET /api/v1/customers` paginado por tenant, filtros `name`/`phone`, `size` máx. 50)
 - Backend: `backend/docs/actuator-health.md` (Actuator solo expone `GET /actuator/health` público y sin detalle, para health check de ECS Fargate/ALB; no exponer otros endpoints)
 - Backend: `backend/docs/price-catalog.md` (cada cita referencia un servicio del catálogo de precios; el frontend debe enviar `priceCatalogId` al crear citas)
+- Backend: `backend/docs/jwt-keys.md` (llaves RSA del JWT: en dev archivos `certs/*.pem` (la privada ignorada por git); en QA texto PEM en `JWT_PRIVATE_KEY`/`JWT_PUBLIC_KEY` desde Parameter Store (SecureString); nunca la clave privada en repo ni imagen)

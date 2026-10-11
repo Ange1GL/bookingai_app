@@ -37,6 +37,11 @@ security:
   client-ip:
     # CloudFront -> API Gateway -> VPC Link: un proxy de confianza agrega su IP a X-Forwarded-For.
     trusted-proxy-hops: 1
+  # Llaves RSA del JWT como texto PEM, inyectadas por ECS desde Parameter Store (SecureString).
+  # Sin valor por defecto: si faltan, la app no arranca. Ver docs/jwt-keys.md.
+  jwt:
+    private-key-pem: ${JWT_PRIVATE_KEY}
+    public-key-pem: ${JWT_PUBLIC_KEY}
 
 # Lista separada por comas, con o sin espacios: HOST_CORS=https://d2o913g58ork75.cloudfront.net,https://app.midominio.com
 # Sin valor por defecto a proposito: si falta, la app no arranca en vez de quedar con CORS abierto o roto.

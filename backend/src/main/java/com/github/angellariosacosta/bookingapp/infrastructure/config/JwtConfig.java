@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -25,11 +26,29 @@ import java.util.UUID;
 
 @Configuration
 public class JwtConfig {
+    // Texto PEM (QA: variable de entorno inyectada por ECS desde Parameter Store).
+    // Si esta vacio se usa el recurso del classpath (desarrollo local).
+    @Value("${security.jwt.private-key-pem:}")
+    private String privateKeyPem;
+
+    @Value("${security.jwt.public-key-pem:}")
+    private String publicKeyPem;
+
     @Value("${security.jwt.private-key}")
-    private RSAPrivateKey privateKey;
+    private Resource privateKeyResource;
 
     @Value("${security.jwt.public-key}")
-    private RSAPublicKey publicKey;
+    private Resource publicKeyResource;
+
+    @Bean
+    RSAPrivateKey rsaPrivateKey() {
+        return JwtKeyLoader.privateKey(privateKeyPem, privateKeyResource);
+    }
+
+    @Bean
+    RSAPublicKey rsaPublicKey() {
+        return JwtKeyLoader.publicKey(publicKeyPem, publicKeyResource);
+    }
 
     // issuer = claim "iss" del JWT: identifica quién EMITIÓ el token (en este caso, esta misma
     // aplicación/authorization server). El decoder compara el "iss" que trae el token contra
@@ -47,7 +66,7 @@ public class JwtConfig {
     private String audience;
 
     @Bean
-    JWKSet jwkSet() {
+    JWKSet jwkSet(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
         RSAKey rsaKey = new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
                 .keyID(UUID.randomUUID().toString())
@@ -61,7 +80,7 @@ public class JwtConfig {
     }
 
     @Bean
-    JwtDecoder jwtDecoder() {
+    JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder
                 .withPublicKey(publicKey)
                 .signatureAlgorithm(SignatureAlgorithm.RS256)
