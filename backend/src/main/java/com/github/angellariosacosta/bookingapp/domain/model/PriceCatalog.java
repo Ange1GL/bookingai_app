@@ -24,6 +24,11 @@ public class PriceCatalog {
         if (label == null || label.isBlank()) {
             throw new InvalidFieldException("label", "must not be null or blank");
         }
+
+        if (userId == null || userId <= 0) {
+            throw new InvalidFieldException("userId", "must be greater than 0");
+        }
+
         this.id = id;
         this.price = price;
         this.label = label;
