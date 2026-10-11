@@ -7,7 +7,7 @@ on:
     paths:
       - "backend/**"
       - ".aws/task-definition-backend.json"
-      - ".github/workflows/backend.yml"
+      - ".github/workflows/backend.yaml"
   workflow_dispatch:
 
 permissions:
