@@ -21,11 +21,11 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 - Never run `npm audit fix --force`; keep all `@angular/*` runtime packages on the same version (they peer-pin each other)
 - `overrides` in `package.json` are temporary security patches; document them in `docs/security-remediation-plan.md`
 - `environment.apiBaseUrl` is the full host (scheme+host+port) only; services write the full path `${environment.apiBaseUrl}/api/v1/...`. No `constants` folder
-- CI: `.github/workflows/security-audit.yml`; Dependabot: `.github/dependabot.yml`
+- CI/CD: `.github/workflows/backend.yaml` (ECS) y `frontend.yaml` (S3 + CloudFront); audit: `.github/workflows/security-audit.yml`; Dependabot: `.github/dependabot.yml`
 - Utility scripts are Node `.mjs` files (cross-platform)
 
 ## Docs
-- `docs/security-remediation-plan.md`, `docs/price-catalog-management.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`, `docs/customers-management.md`
+- `docs/aws-deployment.md` (CI/CD del frontend a S3 + CloudFront con invalidación de caché; variable `CLOUDFRONT_DISTRIBUTION_ID`), `docs/security-remediation-plan.md`, `docs/price-catalog-management.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`, `docs/customers-management.md`
 - Backend: `backend/docs/customer-blacklist.md` (lista negra por bloqueo directo, única vía: `POST /customers/{id}/blacklist` con motivo opcional ≤ 250, idempotente; `DELETE /customers/{id}/blacklist` para quitar; un cliente bloqueado no puede reservar y sus citas futuras se cancelan; sin umbrales ni no-shows)
 - Backend: `backend/docs/customer-list.md` (`GET /api/v1/customers` paginado por tenant, filtros `name`/`phone`, `size` máx. 50)
 - Backend: `backend/docs/actuator-health.md` (Actuator solo expone `GET /actuator/health` público y sin detalle, para health check de ECS Fargate/ALB; no exponer otros endpoints)
