@@ -26,6 +26,7 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 
 ## Docs
 - `docs/aws-deployment.md` (CI/CD del frontend a S3 + CloudFront con invalidación de caché; variable `CLOUDFRONT_DISTRIBUTION_ID`), `docs/security-remediation-plan.md`, `docs/price-catalog-management.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`, `docs/customers-management.md`
+- Backend: `backend/docs/voice-transcription.md` (dictado por voz: `POST /api/v1/agent/transcriptions` multipart `audio` ≤ 30 s, OpenAI `gpt-4o-mini-transcribe` vía `SpeechToTextPort`; key `API_OPENAI_KEY`; cuota diaria por usuario + tope mensual global atómicos en PostgreSQL (`voice_usage_*`), sin reintentos, timeout 15 s; el audio no se guarda ni se loguea)
 - Backend: `backend/docs/customer-blacklist.md` (lista negra por bloqueo directo, única vía: `POST /customers/{id}/blacklist` con motivo opcional ≤ 250, idempotente; `DELETE /customers/{id}/blacklist` para quitar; un cliente bloqueado no puede reservar y sus citas futuras se cancelan; sin umbrales ni no-shows)
 - Backend: `backend/docs/customer-list.md` (`GET /api/v1/customers` paginado por tenant, filtros `name`/`phone`, `size` máx. 50)
 - Backend: `backend/docs/actuator-health.md` (Actuator solo expone `GET /actuator/health` público y sin detalle, para health check de ECS Fargate/ALB; no exponer otros endpoints)

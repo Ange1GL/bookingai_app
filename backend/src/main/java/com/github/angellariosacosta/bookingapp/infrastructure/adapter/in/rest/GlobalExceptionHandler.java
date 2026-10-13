@@ -16,6 +16,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ErrorResponse;
@@ -26,6 +28,9 @@ public class GlobalExceptionHandler {
 	private static final String INVALID_PARAMETER_MESSAGE =
 			"El parámetro '%s' tiene un formato inválido (tipo esperado: %s). Las fechas usan el formato yyyy-MM-ddTHH:mm:ss";
 	private static final String MISSING_PARAMETER_MESSAGE = "El parámetro '%s' es obligatorio";
+	private static final String MISSING_PART_MESSAGE = "La parte '%s' es obligatoria";
+	private static final String UPLOAD_TOO_LARGE_MESSAGE = "El archivo supera el tamaño máximo permitido";
+	private static final String SPEECH_TO_TEXT_UNAVAILABLE_MESSAGE = "El dictado no está disponible en este momento";
 	private static final String UNREADABLE_BODY_MESSAGE =
 			"El cuerpo de la petición es inválido: revisa el JSON y el formato de las fechas (yyyy-MM-ddTHH:mm:ss)";
 
@@ -93,6 +98,44 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleAppointmentInPast(AppointmentInPastException ex) {
 		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidVoiceAudioException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleInvalidVoiceAudio(InvalidVoiceAudioException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(EmptyTranscriptionException.class)
+	@ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
+	public ErrorResponse handleEmptyTranscription(EmptyTranscriptionException ex) {
+		return errorBody(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+	}
+
+	@ExceptionHandler(VoiceQuotaExceededException.class)
+	@ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+	public ErrorResponse handleVoiceQuotaExceeded(VoiceQuotaExceededException ex) {
+		return errorBody(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+	}
+
+	// El detalle del proveedor ya quedó en el log del adaptador; al cliente solo un mensaje genérico.
+	@ExceptionHandler(SpeechToTextUnavailableException.class)
+	@ResponseStatus(HttpStatus.BAD_GATEWAY)
+	public ErrorResponse handleSpeechToTextUnavailable(SpeechToTextUnavailableException ex) {
+		return errorBody(HttpStatus.BAD_GATEWAY, SPEECH_TO_TEXT_UNAVAILABLE_MESSAGE);
+	}
+
+	// Tope de spring.servlet.multipart: se corta antes de leer el archivo completo en memoria.
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	@ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
+	public ErrorResponse handleUploadTooLarge(MaxUploadSizeExceededException ex) {
+		return errorBody(HttpStatus.CONTENT_TOO_LARGE, UPLOAD_TOO_LARGE_MESSAGE);
+	}
+
+	@ExceptionHandler(MissingServletRequestPartException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleMissingPart(MissingServletRequestPartException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, MISSING_PART_MESSAGE.formatted(ex.getRequestPartName()));
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

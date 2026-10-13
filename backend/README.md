@@ -31,7 +31,7 @@ La guía completa de capas, convenciones y checklist está en [CLAUDE.md](CLAUDE
 - **Spring Security** + **JWT HS256** (OAuth2 Resource Server, tokens en cookies `HttpOnly`)
 - **JPA / Hibernate** — PostgreSQL
 - **Flyway** — migraciones versionadas del schema
-- **Spring AI** — DeepSeek Flash (agente de reservas por lenguaje natural con tools)
+- **Spring AI** — DeepSeek Flash (agente de reservas por lenguaje natural con tools) y OpenAI `gpt-4o-mini-transcribe` (dictado por voz)
 - **MapStruct** + **Lombok**
 - **Maven**
 
@@ -41,6 +41,7 @@ La guía completa de capas, convenciones y checklist está en [CLAUDE.md](CLAUDE
 - Maven 3.9+ (o el wrapper `mvnw` incluido)
 - PostgreSQL 16+ corriendo localmente (o vía Docker)
 - API key de DeepSeek
+- API key de OpenAI (solo para el dictado por voz)
 
 ## Configuración
 
@@ -64,6 +65,9 @@ DB_USERNAME=postgres
 DB_PASSWORD=tu_password
 
 DEEPSEEK_API_KEY=tu_api_key_deepseek
+
+# Dictado por voz (transcripcion con gpt-4o-mini-transcribe). Ver docs/voice-transcription.md
+API_OPENAI_KEY=tu_api_key_openai
 
 # Secreto HS256 del JWT (base64, >= 32 bytes). Ver la sección 3
 JWT_SECRET=valor_generado
@@ -133,6 +137,7 @@ En qa/producción exporta `SPRING_PROFILES_ACTIVE=qa`; si no se sobreescribe, la
 - [CLAUDE.md](CLAUDE.md) — arquitectura hexagonal, convenciones de código y checklist para agentes AI
 - [docs/jwt-spring-security-guide.md](docs/jwt-spring-security-guide.md) — implementación de JWT + Spring Security
 - [docs/security-config.md](docs/security-config.md) — guía de `SecurityConfig` (filtros, CORS, CSRF, beans)
+- [docs/voice-transcription.md](docs/voice-transcription.md) — dictado por voz del asistente (`POST /api/v1/agent/transcriptions`): cuotas, control de gasto y configuración
 - [docs/jwt-secret.md](docs/jwt-secret.md) — secreto HS256 del JWT (`JWT_SECRET`): generación, carga, Parameter Store y rotación
 - [docs/rate-limiting.md](docs/rate-limiting.md) — rate limiting por IP con Bucket4j + Caffeine
 - [docs/actuator-health.md](docs/actuator-health.md) — `GET /actuator/health` (único endpoint de Actuator expuesto) para ECS Fargate/ALB
