@@ -7,12 +7,33 @@ va en git ni dentro de la imagen Docker.
 
 | Entorno | Fuente | Propiedades |
 |---|---|---|
-| Dev local | Archivos `src/main/resources/certs/private.pem` (ignorado por git) y `public.pem` | `security.jwt.private-key` / `public-key` (por defecto `classpath:certs/*.pem`, sobreescribibles con `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH`) |
+| Dev local | Texto PEM en `JWT_PRIVATE_KEY` / `JWT_PUBLIC_KEY` (en `.env`, variables de Windows o del IDE) | `security.jwt.private-key-pem` / `public-key-pem` en `application.yaml` (vacías por defecto) |
+| Dev local (respaldo) | Si no hay texto: archivos `src/main/resources/certs/private.pem` (ignorado por git) y `public.pem` | `security.jwt.private-key` / `public-key` (por defecto `classpath:certs/*.pem`, sobreescribibles con `JWT_PRIVATE_KEY_PATH` / `JWT_PUBLIC_KEY_PATH`) |
 | QA (ECS Fargate) | Texto PEM en variables de entorno, inyectadas desde Parameter Store | `security.jwt.private-key-pem` = `${JWT_PRIVATE_KEY}`, `security.jwt.public-key-pem` = `${JWT_PUBLIC_KEY}` (en `application-qa.yaml`, sin valor por defecto: si faltan, la app no arranca) |
 
 ECS solo inyecta secrets como **variables de entorno** (texto), no como archivos. Por eso `JwtKeyLoader`
 parsea el texto PEM con `RsaKeyConverters.pkcs8()` / `x509()` de Spring Security; si el texto está vacío usa el
 recurso del classpath.
+
+### Formato del texto PEM (`PemText`)
+
+El decoder de Spring exige saltos de línea reales entre encabezado, cuerpo y pie. Como cada origen entrega el
+texto distinto, `PemText` lo normaliza antes de parsearlo (reconstruye encabezado + base64 en líneas de 64 + pie).
+Acepta:
+
+- Saltos reales (Parameter Store, variables de Windows).
+- `\n` literales en una sola línea (`.env`, plugin EnvFile de IntelliJ, que no los convierte).
+- `\r\n` de Windows, comillas alrededor, todo en una línea separado por espacios o solo el cuerpo base64.
+
+En el `.env` la llave va en una sola línea con `\n`:
+
+```properties
+JWT_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----
+JWT_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMIIB...\n-----END PUBLIC KEY-----
+```
+
+Si el texto no es base64 válido, la app no arranca y el error indica qué llave falló y si venía del texto o del
+archivo de respaldo.
 
 ## Generar el par de claves (QA/producción: uno distinto por entorno)
 

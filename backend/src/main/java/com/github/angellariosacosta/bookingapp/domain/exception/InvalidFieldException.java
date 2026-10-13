@@ -1,7 +1,9 @@
 package com.github.angellariosacosta.bookingapp.domain.exception;
 
-public class InvalidFieldException extends RuntimeException {
+import lombok.Getter;
 
+@Getter
+public class InvalidFieldException extends RuntimeException {
 	private final String field;
 
 	public InvalidFieldException(String field, String reason) {
@@ -9,7 +11,4 @@ public class InvalidFieldException extends RuntimeException {
 		this.field = field;
 	}
 
-	public String getField() {
-		return field;
-	}
 }
