@@ -35,8 +35,8 @@ build/
 ### Secrets ###
 .env
 
-# Llaves privadas / certificados (JWT RSA keys, keystores). Nunca commitear.
-src/main/resources/certs/private.pem
+# Llaves privadas / certificados / keystores. Nunca commitear.
+*.pem
 *.key
 *.p12
 *.pfx

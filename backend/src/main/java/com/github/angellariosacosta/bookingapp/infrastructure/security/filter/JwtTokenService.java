@@ -8,7 +8,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +56,7 @@ public class JwtTokenService implements TokenService {
                 .build();
 
         JwtEncoderParameters params = JwtEncoderParameters.from(
-                JwsHeader.with(SignatureAlgorithm.RS256).build(),
+                JwsHeader.with(MacAlgorithm.HS256).build(),
                 claims
         );
 
