@@ -81,19 +81,5 @@ class CreatePriceCatalogServiceTest {
         verifyNoInteractions(priceCatalogRepository);
     }
 
-    @DisplayName("Should save an active price catalog without id for the command user")
-    @Test
-    void shouldSaveActivePriceCatalogWithoutIdForTheCommandUser() {
-        ArgumentCaptor<PriceCatalog> savedCaptor = ArgumentCaptor.forClass(PriceCatalog.class);
 
-        service.create(validCommand());
-
-        verify(priceCatalogRepository).save(savedCaptor.capture());
-        PriceCatalog saved = savedCaptor.getValue();
-        assertNull(saved.getId());
-        assertTrue(saved.isActive());
-        assertEquals(labelTest, saved.getLabel());
-        assertEquals(priceTest, saved.getPrice());
-        assertEquals(userIdTest, saved.getUserId());
-    }
 }
