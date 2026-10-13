@@ -46,11 +46,9 @@ spring:
       
 security:
   jwt:
-    # Texto PEM (JWT_PRIVATE_KEY / JWT_PUBLIC_KEY, p. ej. desde .env); si esta vacio, JwtKeyLoader usa el recurso de abajo
-    private-key-pem: ${JWT_PRIVATE_KEY:}
-    public-key-pem: ${JWT_PUBLIC_KEY:}
-    private-key: ${JWT_PRIVATE_KEY_PATH:classpath:certs/private.pem}
-    public-key: ${JWT_PUBLIC_KEY_PATH:classpath:certs/public.pem}
+    # Secreto HS256 en base64 (>= 32 bytes decodificados). Dev: .env; QA: Parameter Store via ECS.
+    # Sin valor por defecto a proposito: si falta, la app no arranca. Ver docs/jwt-secret.md.
+    secret: ${JWT_SECRET}
     expiration: 15               # minutos, vida del access token
     refresh-expiration: 43200    # minutos = 30 dias, vida del refresh token
     issuer: bookingapp-api

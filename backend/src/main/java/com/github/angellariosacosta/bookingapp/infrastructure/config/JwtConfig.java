@@ -1,15 +1,12 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.config;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtAudienceValidator;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -19,76 +16,47 @@ import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
+import javax.crypto.SecretKey;
 
-
+/**
+ * Firma y validación del JWT con HS256 (HMAC-SHA256, secreto simétrico). La app es un monolito: el mismo
+ * proceso emite y valida los tokens, así que un único secreto basta. Ver docs/jwt-secret.md.
+ */
 @Configuration
 public class JwtConfig {
-    // Texto PEM (QA: variable de entorno inyectada por ECS desde Parameter Store).
-    // Si esta vacio se usa el recurso del classpath (desarrollo local).
-    @Value("${security.jwt.private-key-pem:}")
-    private String privateKeyPem;
-
-    @Value("${security.jwt.public-key-pem:}")
-    private String publicKeyPem;
-
-    @Value("${security.jwt.private-key}")
-    private Resource privateKeyResource;
-
-    @Value("${security.jwt.public-key}")
-    private Resource publicKeyResource;
 
     @Bean
-    RSAPrivateKey rsaPrivateKey() {
-        return JwtKeyLoader.privateKey(privateKeyPem, privateKeyResource);
+    SecretKey jwtSecretKey(@Value("${security.jwt.secret}") String base64Secret) {
+        return JwtSecretKeys.fromBase64(base64Secret);
     }
 
     @Bean
-    RSAPublicKey rsaPublicKey() {
-        return JwtKeyLoader.publicKey(publicKeyPem, publicKeyResource);
+    JwtEncoder jwtEncoder(SecretKey jwtSecretKey) {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(jwtSecretKey));
     }
 
     // issuer = claim "iss" del JWT: identifica quién EMITIÓ el token (en este caso, esta misma
     // aplicación/authorization server). El decoder compara el "iss" que trae el token contra
     // este valor; si no coincide, lo rechaza. Sirve para que un token firmado por otro emisor
     // (aunque use un algoritmo/llave compatible) no sea aceptado como válido.
-    @Value("${security.jwt.issuer}")
-    private String issuer;
-
+    //
     // audience = claim "aud" del JWT: identifica para QUIÉN está destinado el token (qué
     // API/servicio consumidor debe aceptarlo). El decoder compara el "aud" del token contra este
     // valor; si no coincide, lo rechaza. Sirve para evitar que un token válido, emitido
-    // pensando en otro servicio/cliente, se reutilice aquí (protege contra el escenario en que
-    // varios servicios comparten el mismo emisor/llave pero un token de uno se cuela en otro).
-    @Value("${security.jwt.audience}")
-    private String audience;
-
+    // pensando en otro servicio/cliente, se reutilice aquí.
     @Bean
-    JWKSet jwkSet(RSAPublicKey publicKey, RSAPrivateKey privateKey) {
-        RSAKey rsaKey = new RSAKey.Builder(publicKey)
-                .privateKey(privateKey)
-                .keyID(UUID.randomUUID().toString())
-                .build();
-        return new JWKSet(rsaKey);
-    }
-
-    @Bean
-    JwtEncoder jwtEncoder(JWKSet jwkSet) {
-        return new NimbusJwtEncoder(new ImmutableJWKSet<>(jwkSet));
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder(RSAPublicKey publicKey) {
+    JwtDecoder jwtDecoder(
+            SecretKey jwtSecretKey,
+            @Value("${security.jwt.issuer}") String issuer,
+            @Value("${security.jwt.audience}") String audience
+    ) {
+        // macAlgorithm fija HS256: un token con otro "alg" en el header (none, RS256...) se rechaza.
         NimbusJwtDecoder decoder = NimbusJwtDecoder
-                .withPublicKey(publicKey)
-                .signatureAlgorithm(SignatureAlgorithm.RS256)
+                .withSecretKey(jwtSecretKey)
+                .macAlgorithm(MacAlgorithm.HS256)
                 .build();
 
-        // Validación explícita de exp/iss/aud: antes de esto el decoder solo validaba la firma RS256
-        // y el exp de forma implícita. iss/aud no existían como claims ni se comprobaban, así que
-        // un JWT firmado con esta misma llave pero emitido/pensado para otro consumidor se aceptaba igual.
+        // Validación explícita de exp/iss/aud además de la firma HS256.
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
                 new JwtTimestampValidator(),
                 new JwtIssuerValidator(issuer),
