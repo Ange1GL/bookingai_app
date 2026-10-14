@@ -82,6 +82,12 @@ assistant:
     # Peor caso: 1500 x 30 s = 750 min x 0.003 USD = 2.25 USD/mes. Ver docs/voice-transcription.md
     monthly-limit: 1500
 
+whatsapp:
+  webhook:
+    # Sin valores por defecto a proposito: si faltan, la app no arranca. Ver docs/whatsapp-webhook.md
+    verify-token: ${WHATSAPP_VERIFY_TOKEN}   # el que se pega en el panel de Meta
+    app-secret: ${WHATSAPP_APP_SECRET}       # Meta > Configuracion de la app > Basica; firma los POST
+
 security:
   jwt:
     # Secreto HS256 en base64 (>= 32 bytes decodificados). Dev: .env; QA: Parameter Store via ECS.
