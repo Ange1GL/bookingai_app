@@ -24,7 +24,7 @@ frontend/src/
       service/                               # acceso a API de la feature
 ```
 
-Features actuales: `auth` (login, registro), `home` (accesos directos), `customers` (clientes y lista negra), `price-catalog` (CRUD de servicios y precios; `docs/price-catalog-management.md`), `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI", chat de texto). Detalle en `docs/appointments-calendar.md`, `docs/assistant-chat.md` y `docs/customers-management.md`.
+Features actuales: `landing` (página pública en `/`; solo login, sin registro; logos en `public/logos`; correo de contacto en `landing-page.component.ts`), `auth` (login, registro), `home` (accesos directos), `customers` (clientes y lista negra), `price-catalog` (CRUD de servicios y precios; `docs/price-catalog-management.md`), `appointments` (calendario mes/semana, solo lectura) y `assistant` ("Asistente de AI", chat de texto). Detalle en `docs/appointments-calendar.md`, `docs/assistant-chat.md` y `docs/customers-management.md`.
 
 ## Tema y tipografía
 - Preset PrimeNG: `VioletPreset` (Aura con `semantic.primary` → paleta `violet`) en `app.config.ts`; modo oscuro con `.app-dark`.

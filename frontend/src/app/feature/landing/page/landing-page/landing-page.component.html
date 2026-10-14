@@ -1,0 +1,81 @@
+<div class="flex min-h-screen flex-col bg-surface-0 dark:bg-surface-950">
+  <header class="flex items-center justify-between gap-3 px-4 py-3 md:px-8">
+    <img src="logos/logo-horizontal-230.webp" width="230" height="64" alt="aglacita" class="h-10 w-auto" />
+    <a
+      [routerLink]="loginPath"
+      class="rounded-full border border-primary px-5 py-2 text-sm font-semibold text-primary no-underline transition hover:bg-primary-50 dark:hover:bg-primary-500/10"
+    >
+      Iniciar sesión
+    </a>
+  </header>
+
+  <main class="flex flex-1 flex-col">
+    <section class="mx-auto grid w-full max-w-5xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-20">
+      <div class="flex flex-col items-start gap-5">
+        <h1 class="m-0 text-3xl font-bold tracking-tight md:text-5xl">Tu agenda de citas, en un solo lugar</h1>
+        <p class="m-0 text-lg text-muted-color">
+          aglacita es un software como servicio (SaaS) para negocios que viven de las citas. Organiza tu calendario,
+          tus clientes y tus precios, y deja que un asistente de AI agende por ti.
+        </p>
+        <a
+          [routerLink]="loginPath"
+          class="rounded-full bg-primary px-8 py-3 text-base font-semibold text-primary-contrast no-underline shadow-lg shadow-primary-500/30 transition hover:bg-primary-600 active:scale-[0.98]"
+        >
+          Iniciar sesión
+        </a>
+      </div>
+      <img
+        src="logos/logo-vertical-color.png"
+        width="1600"
+        height="1280"
+        alt="aglacita, gestión de citas"
+        class="mx-auto h-auto w-full max-w-sm"
+      />
+    </section>
+
+    <section class="bg-surface-50 px-4 py-12 md:px-8 dark:bg-surface-900" aria-labelledby="benefits-title">
+      <div class="mx-auto flex max-w-5xl flex-col gap-8">
+        <h2 id="benefits-title" class="m-0 text-center text-2xl font-bold md:text-3xl">Ventajas y beneficios</h2>
+        <div class="grid gap-4 sm:grid-cols-2">
+          @for (benefit of benefits; track benefit.title) {
+            <article
+              class="flex items-start gap-4 rounded-3xl border border-surface bg-surface-0 p-5 shadow-sm dark:bg-surface-950"
+            >
+              <span
+                class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary-400 to-primary-700 text-white"
+                aria-hidden="true"
+              >
+                <i class="pi text-xl" [class]="benefit.icon"></i>
+              </span>
+              <div class="flex flex-col gap-1">
+                <h3 class="m-0 text-lg font-semibold">{{ benefit.title }}</h3>
+                <p class="m-0 text-muted-color">{{ benefit.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="px-4 py-12 md:px-8" aria-labelledby="contact-title">
+      <div
+        class="mx-auto flex max-w-3xl flex-col items-center gap-4 rounded-3xl bg-linear-to-br from-primary-500 via-primary-600 to-primary-800 p-8 text-center text-white shadow-xl shadow-primary-500/25"
+      >
+        <h2 id="contact-title" class="m-0 text-2xl font-bold">¿Quieres adquirir aglacita?</h2>
+        <p class="m-0 text-white/90">Escríbenos para más información:</p>
+        <a [href]="contactHref" class="text-lg font-semibold text-white underline">{{ contactEmail }}</a>
+        <a
+          [routerLink]="loginPath"
+          class="mt-2 rounded-full bg-white px-8 py-3 text-base font-semibold text-primary-700 no-underline transition hover:bg-primary-50"
+        >
+          ¿Ya tienes cuenta? Inicia sesión
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="flex flex-col items-center gap-2 bg-surface-900 px-4 py-6 text-center text-sm text-surface-300">
+    <img src="logos/logo-horizontal-invertido.png" width="2000" height="570" alt="aglacita" class="h-10 w-auto" />
+    <p class="m-0">© {{ year }} aglacita. Todos los derechos reservados.</p>
+  </footer>
+</div>
