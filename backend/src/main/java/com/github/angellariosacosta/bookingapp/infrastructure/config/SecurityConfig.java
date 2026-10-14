@@ -1,5 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.config;
 
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller.WhatsAppWebhookController;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.CsrfCookieFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.JwtAuthenticationFilter;
@@ -81,6 +82,9 @@ public class SecurityConfig {
                 .csrf(csrf -> {
                     if (csrfProperties.isEnabled()) {
                         csrf.spa();
+                        // Meta no es un navegador: no puede enviar el token CSRF. El webhook se autentica
+                        // con su propia firma HMAC (ver WhatsAppWebhookController).
+                        csrf.ignoringRequestMatchers(WhatsAppWebhookController.WEBHOOK_PATH);
                     } else {
                         csrf.disable();
                     }
@@ -114,8 +118,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
                                 "/error",
-                                "/actuator/health"   // health check de ECS/ALB: sin credenciales, solo estado
-
+                                "/actuator/health",   // health check de ECS/ALB: sin credenciales, solo estado
+                                WhatsAppWebhookController.WEBHOOK_PATH   // Meta: token de verificación + firma HMAC, sin JWT
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

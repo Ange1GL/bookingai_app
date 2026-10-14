@@ -257,3 +257,9 @@ En resumen: `DispatcherServlet` (Spring MVC) responde *qué controlador* atiende
 | `authenticationManager(AuthenticationConfiguration)` | Publica el `AuthenticationManager` interno de Spring como bean inyectable, para casos de uso de login. |
 
 Los beans de `Cache<String, Bucket>` y `FilterRegistrationBean<RateLimitFilter>` para el rate limiting **no** viven aquí — están en `RateLimitConfig` (clase separada), justamente para que `RateLimitFilter` no dependa de un bean declarado en esta misma clase (`SecurityConfig` ya depende de `RateLimitFilter` como campo final; si el `Cache` fuera un método de instancia aquí, se cerraría un ciclo). Ver `docs/rate-limiting.md`.
+
+---
+
+## Rutas públicas adicionales y excepciones CSRF
+
+Además de las rutas de `/api/v1/auth/*` y `/actuator/health`, `/api/v1/webhooks/whatsapp` está en `permitAll` y excluida de CSRF (`csrf.ignoringRequestMatchers`): Meta no es un navegador y no puede enviar el token. Se autentica con el token de verificación (GET) y la firma HMAC del cuerpo (POST). Ver `whatsapp-webhook.md`.
