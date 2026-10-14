@@ -2,7 +2,20 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@/core/guard/auth.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  {
+    path: '',
+    pathMatch: 'full',
+    loadChildren: () => import('./feature/landing/landing.routes').then((m) => m.LANDING_ROUTES),
+  },
+  {
+    path: 'terminos',
+    loadComponent: () => import('./feature/landing/page/terms-page/terms-page.component').then((m) => m.TermsPageComponent),
+  },
+  {
+    path: 'privacidad',
+    loadComponent: () =>
+      import('./feature/landing/page/privacy-page/privacy-page.component').then((m) => m.PrivacyPageComponent),
+  },
   {
     path: 'auth',
     loadChildren: () => import('./feature/auth/auth.routes').then((m) => m.AUTH_ROUTES),

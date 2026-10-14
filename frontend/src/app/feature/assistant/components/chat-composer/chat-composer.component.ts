@@ -1,26 +1,29 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 import { ComposerForm } from '../../models/composer-form.model';
+import { VoiceInputComponent } from '../voice-input/voice-input.component';
 
 export const MESSAGE_MAX_LENGTH = 500;
 const COUNTER_VISIBLE_FROM = 400;
 
 @Component({
   selector: 'app-chat-composer',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, VoiceInputComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './chat-composer.component.html',
 })
 export class ChatComposerComponent {
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('messageInput');
 
   readonly disabled = input(false);
   readonly placeholder = input('Escribe un mensaje…');
   readonly sent = output<string>();
 
   protected readonly maxLength = MESSAGE_MAX_LENGTH;
+  protected readonly recording = signal(false);
   protected readonly form: FormGroup<ComposerForm> = this.fb.group({
     text: this.fb.control('', [Validators.required, Validators.maxLength(MESSAGE_MAX_LENGTH)]),
   });
@@ -45,5 +48,17 @@ export class ChatComposerComponent {
     }
     this.sent.emit(text);
     this.form.reset();
+  }
+
+  /** Dictated text is appended for review, never sent automatically. */
+  protected appendTranscription(text: string): void {
+    const control = this.form.controls.text;
+    const current = control.value.trim();
+    control.setValue(`${current ? `${current} ` : ''}${text}`.slice(0, MESSAGE_MAX_LENGTH));
+    const element = this.textarea()?.nativeElement;
+    if (element) {
+      element.focus();
+      element.setSelectionRange(element.value.length, element.value.length);
+    }
   }
 }

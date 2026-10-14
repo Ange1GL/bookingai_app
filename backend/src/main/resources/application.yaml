@@ -34,16 +34,54 @@ spring:
         format_sql: false
     show-sql: false
 
+  # Dictado por voz: spring.servlet.multipart corta la subida antes de leerla completa en memoria.
+  # El limite fino (y su mensaje) lo aplica assistant.voice.max-audio-bytes.
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
+
   ai:
+    # El starter de OpenAI activa TODOS sus modelos por defecto (matchIfMissing=true): solo se usa la
+    # transcripcion; el chat sigue con DeepSeek y el resto se apaga para no crear clientes innecesarios.
     model:
       chat: deepseek
+      audio:
+        transcription: openai
+        speech: none
+      embedding: none
+      image: none
+      moderation: none
     deepseek:
       api-key: ${DEEPSEEK_API_KEY}
       chat:
         options:
           model: deepseek-flash
           temperature: 0.7
-      
+    openai:
+      # Sin valor por defecto a proposito: si falta, la app no arranca. Ver docs/voice-transcription.md
+      api-key: ${API_OPENAI_KEY}
+      audio:
+        transcription:
+          model: gpt-4o-mini-transcribe   # el modelo ligero (~0.003 USD/min)
+          language: es
+          temperature: 0
+          # Vocabulario del dominio: mejora nombres y horas. Son pocos tokens de texto.
+          prompt: "Dictado para un asistente de citas de una barbería: agendar, mover o cancelar citas, nombres de clientes, servicios, días y horas."
+          # Sin reintentos: cada reintento podria volver a cobrarse. El usuario decide si reintenta.
+          max-retries: 0
+          # Por debajo de los 30 s de API Gateway; transcribir 30 s de audio tarda 1-3 s.
+          timeout: 15s
+
+assistant:
+  voice:
+    min-audio-bytes: 1024          # menos que esto es un blob vacio o corrupto
+    max-audio-bytes: 524288        # 512 KB: 30 s de opus ~110 KB; Safari (AAC) pesa mas
+    daily-limit-per-user: 40       # dictados por usuario y dia de negocio
+    # Tope GLOBAL mensual: acota el gasto aunque todos los usuarios agoten su cuota.
+    # Peor caso: 1500 x 30 s = 750 min x 0.003 USD = 2.25 USD/mes. Ver docs/voice-transcription.md
+    monthly-limit: 1500
+
 security:
   jwt:
     # Secreto HS256 en base64 (>= 32 bytes decodificados). Dev: .env; QA: Parameter Store via ECS.
