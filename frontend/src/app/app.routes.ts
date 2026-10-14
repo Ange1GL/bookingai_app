@@ -8,6 +8,11 @@ export const routes: Routes = [
     loadChildren: () => import('./feature/landing/landing.routes').then((m) => m.LANDING_ROUTES),
   },
   {
+    path: 'privacidad',
+    loadComponent: () =>
+      import('./feature/landing/page/privacy-page/privacy-page.component').then((m) => m.PrivacyPageComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () => import('./feature/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },

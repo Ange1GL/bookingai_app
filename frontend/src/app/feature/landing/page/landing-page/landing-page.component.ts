@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CONTACT_EMAIL, LOGIN_PATH, PRIVACY_PATH } from '../../data/contact';
+import { PRIVACY_HIGHLIGHTS } from '../../data/privacy-policy';
 
-const CONTACT_EMAIL = 'lariosacostaa@gmail.com';
 const CONTACT_SUBJECT = 'Quiero adquirir aglacita';
-const LOGIN_PATH = '/auth/login';
 
 interface Benefit {
   title: string;
@@ -42,7 +42,9 @@ const BENEFITS: Benefit[] = [
 })
 export class LandingPageComponent {
   protected readonly benefits = BENEFITS;
+  protected readonly highlights = PRIVACY_HIGHLIGHTS;
   protected readonly loginPath = LOGIN_PATH;
+  protected readonly privacyPath = PRIVACY_PATH;
   protected readonly contactEmail = CONTACT_EMAIL;
   protected readonly contactHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(CONTACT_SUBJECT)}`;
   protected readonly year = new Date().getFullYear();

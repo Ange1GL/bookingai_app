@@ -57,6 +57,34 @@
       </div>
     </section>
 
+    <section class="bg-surface-50 px-4 py-12 md:px-8 dark:bg-surface-900" aria-labelledby="privacy-title">
+      <div class="mx-auto flex max-w-5xl flex-col gap-8">
+        <div class="flex flex-col items-center gap-2 text-center">
+          <h2 id="privacy-title" class="m-0 text-2xl font-bold md:text-3xl">Política de privacidad</h2>
+          <p class="m-0 max-w-2xl text-muted-color">
+            Tratamos tus datos con transparencia: te decimos qué guardamos, para qué y con quién lo compartimos.
+          </p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          @for (item of highlights; track item.title) {
+            <article class="flex items-start gap-4 rounded-3xl border border-surface bg-surface-0 p-5 shadow-sm dark:bg-surface-950">
+              <span
+                class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary-400 to-primary-700 text-white"
+                aria-hidden="true"
+              >
+                <i class="pi text-xl" [class]="item.icon"></i>
+              </span>
+              <div class="flex flex-col gap-1">
+                <h3 class="m-0 text-lg font-semibold">{{ item.title }}</h3>
+                <p class="m-0 text-muted-color">{{ item.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
+        <a [routerLink]="privacyPath" class="mx-auto font-semibold text-primary">Leer la política de privacidad completa</a>
+      </div>
+    </section>
+
     <section class="px-4 py-12 md:px-8" aria-labelledby="contact-title">
       <div
         class="mx-auto flex max-w-3xl flex-col items-center gap-4 rounded-3xl bg-linear-to-br from-primary-500 via-primary-600 to-primary-800 p-8 text-center text-white shadow-xl shadow-primary-500/25"
@@ -76,6 +104,7 @@
 
   <footer class="flex flex-col items-center gap-2 bg-surface-900 px-4 py-6 text-center text-sm text-surface-300">
     <img src="logos/logo-horizontal-invertido.png" width="2000" height="570" alt="aglacita" class="h-10 w-auto" />
+    <a [routerLink]="privacyPath" class="text-surface-300 underline">Política de privacidad</a>
     <p class="m-0">© {{ year }} aglacita. Todos los derechos reservados.</p>
   </footer>
 </div>
