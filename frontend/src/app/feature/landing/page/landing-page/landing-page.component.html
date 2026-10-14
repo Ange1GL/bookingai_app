@@ -104,7 +104,10 @@
 
   <footer class="flex flex-col items-center gap-2 bg-surface-900 px-4 py-6 text-center text-sm text-surface-300">
     <img src="logos/logo-horizontal-invertido.png" width="2000" height="570" alt="aglacita" class="h-10 w-auto" />
-    <a [routerLink]="privacyPath" class="text-surface-300 underline">Política de privacidad</a>
+    <nav class="flex gap-4" aria-label="Legal">
+      <a [routerLink]="privacyPath" class="text-surface-300 underline">Política de privacidad</a>
+      <a [routerLink]="termsPath" class="text-surface-300 underline">Condiciones del servicio</a>
+    </nav>
     <p class="m-0">© {{ year }} aglacita. Todos los derechos reservados.</p>
   </footer>
 </div>

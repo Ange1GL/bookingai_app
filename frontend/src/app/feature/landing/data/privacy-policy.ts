@@ -1,9 +1,4 @@
-export interface PrivacySection {
-  title: string;
-  paragraphs?: string[];
-  items?: string[];
-  closing?: string[];
-}
+import { LegalSection } from './legal-section';
 
 export interface PrivacyHighlight {
   title: string;
@@ -36,7 +31,7 @@ export const PRIVACY_HIGHLIGHTS: PrivacyHighlight[] = [
   },
 ];
 
-export const PRIVACY_SECTIONS: PrivacySection[] = [
+export const PRIVACY_SECTIONS: LegalSection[] = [
   {
     title: '1. Quiénes somos y alcance',
     paragraphs: [

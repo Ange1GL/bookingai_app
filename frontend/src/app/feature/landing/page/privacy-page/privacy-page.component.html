@@ -1,49 +1,7 @@
-<div class="flex min-h-screen flex-col bg-surface-0 dark:bg-surface-950">
-  <header class="flex items-center justify-between gap-3 px-4 py-3 md:px-8">
-    <a routerLink="/" aria-label="aglacita, inicio">
-      <img src="logos/logo-horizontal-230.webp" width="230" height="64" alt="aglacita" class="h-10 w-auto" />
-    </a>
-    <a
-      [routerLink]="loginPath"
-      class="rounded-full border border-primary px-5 py-2 text-sm font-semibold text-primary no-underline transition hover:bg-primary-50 dark:hover:bg-primary-500/10"
-    >
-      Iniciar sesión
-    </a>
-  </header>
-
-  <main class="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-10 md:px-8">
-    <div class="flex flex-col gap-2">
-      <h1 class="m-0 text-3xl font-bold tracking-tight">Política de privacidad</h1>
-      <p class="m-0 text-sm text-muted-color">Última actualización: {{ lastUpdate }}</p>
-    </div>
-
-    @for (section of sections; track section.title) {
-      <section class="flex flex-col gap-3">
-        <h2 class="m-0 text-xl font-semibold">{{ section.title }}</h2>
-        @for (paragraph of section.paragraphs; track paragraph) {
-          <p class="m-0 text-muted-color">{{ paragraph }}</p>
-        }
-        @if (section.items) {
-          <ul class="m-0 flex list-disc flex-col gap-2 pl-5 text-muted-color">
-            @for (item of section.items; track item) {
-              <li>{{ item }}</li>
-            }
-          </ul>
-        }
-        @for (paragraph of section.closing; track paragraph) {
-          <p class="m-0 text-muted-color">{{ paragraph }}</p>
-        }
-      </section>
-    }
-
-    <section class="flex flex-col gap-2 rounded-3xl bg-surface-50 p-6 dark:bg-surface-900">
-      <h2 class="m-0 text-xl font-semibold">11. Contacto</h2>
-      <p class="m-0 text-muted-color">
-        Para dudas o para ejercer tus derechos escríbenos a
-        <a [href]="contactHref" class="font-medium text-primary">{{ contactEmail }}</a>.
-      </p>
-    </section>
-
-    <a routerLink="/" class="w-fit text-sm font-medium text-primary no-underline">← Volver al inicio</a>
-  </main>
-</div>
+<app-legal-document
+  heading="Política de privacidad"
+  [lastUpdate]="lastUpdate"
+  [sections]="sections"
+  contactTitle="11. Contacto"
+  contactSubject="Privacidad aglacita"
+/>
