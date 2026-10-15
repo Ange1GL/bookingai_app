@@ -23,10 +23,10 @@ public class CompanySelectionService implements CompanySelectionUseCase {
 
 	@Override
 	@Transactional(readOnly = true)
-	public CompanySelection select(String conversationKey, Long companyId) {
-		Company company = companyRepository.findById(companyId)
-				.orElseThrow(() -> new CompanyNotFoundException("Company not found with id: " + companyId));
-		CompanySelection selection = new CompanySelection(company.getId(), company.getName(), company.getUserId());
+	public CompanySelection select(String conversationKey, Long ownerUserId) {
+		Company company = companyRepository.findByUserId(ownerUserId)
+				.orElseThrow(() -> new CompanyNotFoundException("Company not found for owner: " + ownerUserId));
+		CompanySelection selection = new CompanySelection(company.getUserId(), company.getName());
 		conversations.saveSelection(conversationKey, selection);
 		return selection;
 	}

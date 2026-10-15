@@ -20,7 +20,7 @@ public class CreateCompanyService implements CreateCompanyUseCase {
 	@Override
 	@Transactional
 	public Company create(CreateCompanyCommand command) {
-		Company company = Company.createNew(command.name(), command.userId());
+		Company company = new Company(command.userId(), command.name());
 		if (companyRepository.existsByUserId(command.userId())) {
 			throw new CompanyAlreadyExistsException("User already has a company");
 		}

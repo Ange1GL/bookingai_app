@@ -1,7 +1,6 @@
 package com.github.angellariosacosta.bookingapp.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -42,7 +41,6 @@ class CreateCompanyServiceTest {
 
 		Company result = service.create(new CreateCompanyCommand(NAME, USER_ID));
 
-		assertNull(result.getId());
 		assertEquals(NAME, result.getName());
 		assertEquals(USER_ID, result.getUserId());
 	}

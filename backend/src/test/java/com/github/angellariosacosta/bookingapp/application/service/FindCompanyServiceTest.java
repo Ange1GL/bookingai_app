@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.github.angellariosacosta.bookingapp.application.port.out.CompanyRepositoryPort;
+import com.github.angellariosacosta.bookingapp.application.result.CompanySearchResult;
 import com.github.angellariosacosta.bookingapp.domain.exception.CompanyNotFoundException;
 import com.github.angellariosacosta.bookingapp.domain.model.Company;
 
@@ -25,7 +26,9 @@ import com.github.angellariosacosta.bookingapp.domain.model.Company;
 class FindCompanyServiceTest {
 
 	private static final Long USER_ID = 1L;
-	private static final Company COMPANY = new Company(10L, "Barbería El Güero", USER_ID);
+	private static final Company COMPANY = new Company(USER_ID, "Barbería El Güero");
+	private static final CompanySearchResult RESULT = new CompanySearchResult(USER_ID, "Barbería El Güero", "Juan Pérez");
+	private static final CompanySearchResult SAME_OWNER_NAME = new CompanySearchResult(2L, "Corte Fino", "Juan Pérez");
 
 	@Mock
 	private CompanyRepositoryPort companyRepository;
@@ -49,20 +52,31 @@ class FindCompanyServiceTest {
 		assertThrows(CompanyNotFoundException.class, () -> service.findByOwner(USER_ID));
 	}
 
-	@DisplayName("Should search by the stripped name")
+	@DisplayName("Should search companies by the stripped business name")
 	@Test
 	void shouldSearchByStrippedName() {
-		when(companyRepository.searchByName("güero")).thenReturn(List.of(COMPANY));
+		when(companyRepository.searchByName("güero")).thenReturn(List.of(RESULT));
 
-		assertEquals(List.of(COMPANY), service.searchByName("  güero "));
+		assertEquals(List.of(RESULT), service.searchByName("  güero "));
 		verify(companyRepository).searchByName("güero");
 	}
 
-	@DisplayName("Should return an empty list without querying when the name is blank")
+	@DisplayName("Should search companies by the stripped owner name and keep every owner with the same name")
 	@Test
-	void shouldReturnEmptyWhenNameIsBlank() {
+	void shouldSearchByStrippedOwnerNameReturningAllMatches() {
+		when(companyRepository.searchByOwnerName("juan")).thenReturn(List.of(RESULT, SAME_OWNER_NAME));
+
+		assertEquals(List.of(RESULT, SAME_OWNER_NAME), service.searchByOwnerName(" juan"));
+		verify(companyRepository).searchByOwnerName("juan");
+	}
+
+	@DisplayName("Should return an empty list without querying when the text is blank")
+	@Test
+	void shouldReturnEmptyWhenTextIsBlank() {
 		assertTrue(service.searchByName("  ").isEmpty());
 		assertTrue(service.searchByName(null).isEmpty());
+		assertTrue(service.searchByOwnerName("  ").isEmpty());
+		assertTrue(service.searchByOwnerName(null).isEmpty());
 
 		verifyNoInteractions(companyRepository);
 	}

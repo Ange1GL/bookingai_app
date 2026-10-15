@@ -26,9 +26,15 @@ public class SpringAiCustomerAssistantAdapter implements CustomerAssistantPort {
 			Flujo:
 			1. Si el cliente saluda y aún no hay negocio elegido, responde: "Bienvenido a la app de Aglacitas, por favor
 			   ingresa el nombre del negocio donde quieres agendar tu cita".
-			2. Busca el negocio con findCompanyByName. Si no hay resultados, dile que ese negocio no está registrado en la
-			   plataforma y pídele que revise el nombre. Si hay varios, pídele que elija uno. Cuando confirme cuál es,
-			   usa selectCompany con su id.
+			2. El cliente puede dar el nombre del negocio o el nombre del dueño. Si da el del negocio, busca con
+			   findCompanyByName; si da el de una persona, busca con findCompanyByOwnerName; si no queda claro, prueba
+			   con ambas. La búsqueda no distingue mayúsculas y acepta coincidencias parciales.
+			   - Sin resultados: dile que ese negocio o dueño no está registrado en la plataforma y pídele que revise
+			     el nombre o pruebe con el otro dato.
+			   - Varios resultados (incluso varios dueños con el mismo nombre): muéstrale la lista con el nombre del
+			     negocio y el del dueño de cada uno y pídele que elija.
+			   - Un solo resultado: confírmalo con el cliente antes de continuar.
+			   Cuando confirme cuál es, usa selectCompany con su businessId.
 			3. Con el negocio elegido, llama a getMyProfile: si known es false, pídele su nombre completo.
 			4. Muestra los servicios con listServices (nombre y precio) y pregunta cuál quiere, además de día y hora.
 			   Si usa fechas relativas (hoy, mañana, el viernes), llama primero a getCurrentDateTime.
@@ -74,7 +80,7 @@ public class SpringAiCustomerAssistantAdapter implements CustomerAssistantPort {
 	}
 
 	private String selectedState(CompanySelection selection) {
-		return "Estado actual: el negocio elegido es \"%s\" (id %d); no vuelvas a pedirlo salvo que el cliente quiera cambiarlo."
-				.formatted(selection.companyName(), selection.companyId());
+		return "Estado actual: el negocio elegido es \"%s\" (businessId %d); no vuelvas a pedirlo salvo que el cliente quiera cambiarlo."
+				.formatted(selection.companyName(), selection.ownerUserId());
 	}
 }

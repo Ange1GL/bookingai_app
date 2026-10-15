@@ -5,8 +5,8 @@ import java.util.Optional;
 import com.github.angellariosacosta.bookingapp.application.result.CompanySelection;
 
 public interface CompanySelectionUseCase {
-	// Lanza CompanyNotFoundException si el negocio no existe.
-	CompanySelection select(String conversationKey, Long companyId);
+	// El negocio se identifica por el id de su dueño. Lanza CompanyNotFoundException si ese usuario no tiene negocio.
+	CompanySelection select(String conversationKey, Long ownerUserId);
 
 	Optional<CompanySelection> current(String conversationKey);
 }

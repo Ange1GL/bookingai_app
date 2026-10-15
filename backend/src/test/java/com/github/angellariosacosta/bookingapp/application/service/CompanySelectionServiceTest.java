@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,8 @@ import com.github.angellariosacosta.bookingapp.domain.model.Company;
 class CompanySelectionServiceTest {
 
 	private static final String KEY = "1001:5215512345678";
-	private static final Company COMPANY = new Company(10L, "Barbería El Güero", 7L);
+	private static final Long OWNER_ID = 7L;
+	private static final Company COMPANY = new Company(OWNER_ID, "Barbería El Güero");
 
 	@Mock
 	private CompanyRepositoryPort companyRepository;
@@ -39,29 +41,29 @@ class CompanySelectionServiceTest {
 	@DisplayName("Should store the company with its owner as the conversation tenant")
 	@Test
 	void shouldStoreSelectionWithOwner() {
-		when(companyRepository.findById(10L)).thenReturn(Optional.of(COMPANY));
+		when(companyRepository.findByUserId(OWNER_ID)).thenReturn(Optional.of(COMPANY));
 
-		CompanySelection selection = service.select(KEY, 10L);
+		CompanySelection selection = service.select(KEY, OWNER_ID);
 
-		CompanySelection expected = new CompanySelection(10L, "Barbería El Güero", 7L);
+		CompanySelection expected = new CompanySelection(OWNER_ID, "Barbería El Güero");
 		assertEquals(expected, selection);
 		verify(conversations).saveSelection(KEY, expected);
 	}
 
-	@DisplayName("Should not store anything when the company does not exist")
+	@DisplayName("Should not store anything when the owner has no company")
 	@Test
-	void shouldNotStoreWhenCompanyDoesNotExist() {
-		when(companyRepository.findById(99L)).thenReturn(Optional.empty());
+	void shouldNotStoreWhenOwnerHasNoCompany() {
+		when(companyRepository.findByUserId(99L)).thenReturn(Optional.empty());
 
 		assertThrows(CompanyNotFoundException.class, () -> service.select(KEY, 99L));
 
-		verify(conversations, never()).saveSelection(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+		verify(conversations, never()).saveSelection(any(), any());
 	}
 
 	@DisplayName("Should return the current selection of the conversation")
 	@Test
 	void shouldReturnCurrentSelection() {
-		CompanySelection stored = new CompanySelection(10L, "Barbería El Güero", 7L);
+		CompanySelection stored = new CompanySelection(OWNER_ID, "Barbería El Güero");
 		when(conversations.findSelection(KEY)).thenReturn(Optional.of(stored));
 
 		assertEquals(Optional.of(stored), service.current(KEY));

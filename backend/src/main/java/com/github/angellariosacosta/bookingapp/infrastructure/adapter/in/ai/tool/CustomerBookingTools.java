@@ -16,9 +16,9 @@ import com.github.angellariosacosta.bookingapp.application.port.in.CompanySelect
 import com.github.angellariosacosta.bookingapp.application.port.in.FindCompanyUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.FindCustomerByPhoneUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListPriceCatalogUseCase;
+import com.github.angellariosacosta.bookingapp.application.result.CompanySearchResult;
 import com.github.angellariosacosta.bookingapp.application.result.CompanySelection;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
-import com.github.angellariosacosta.bookingapp.domain.model.Company;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.domain.model.PriceCatalog;
 
@@ -56,17 +56,26 @@ public class CustomerBookingTools {
 				now.withNano(0), now.getDayOfWeek().getDisplayName(TextStyle.FULL, TOOL_LOCALE), clock.getZone());
 	}
 
-	@Tool(description = "Busca negocios registrados por nombre (coincidencia parcial). Devuelve id y nombre. "
+	@Tool(description = "Busca negocios registrados por el nombre del negocio (coincidencia parcial, sin distinguir "
+			+ "mayúsculas). Devuelve businessId, nombre del negocio y nombre del dueño. "
 			+ "Lista vacía significa que ese negocio no está registrado en la plataforma.")
-	public List<CompanySummary> findCompanyByName(String name) {
-		return findCompany.searchByName(name).stream().map(CompanySummary::from).toList();
+	public List<CompanySummary> findCompanyByName(String businessName) {
+		return findCompany.searchByName(businessName).stream().map(CompanySummary::from).toList();
 	}
 
-	@Tool(description = "Elige el negocio donde el cliente quiere agendar, por su id (obtenido de findCompanyByName). "
-			+ "Llámala solo cuando el cliente confirmó cuál negocio es.")
-	public CompanySummary selectCompany(Long companyId, ToolContext toolContext) {
-		CompanySelection selection = companySelection.select(conversationKey(toolContext), companyId);
-		return new CompanySummary(selection.companyId(), selection.companyName());
+	@Tool(description = "Busca negocios por el nombre de su dueño (coincidencia parcial, sin distinguir mayúsculas). "
+			+ "Úsala cuando el cliente dice el nombre de la persona y no el del negocio. Puede devolver varios dueños con "
+			+ "el mismo nombre: en ese caso muéstralos con el nombre de su negocio y pide al cliente que elija. "
+			+ "Lista vacía significa que no hay un dueño con ese nombre registrado en la plataforma.")
+	public List<CompanySummary> findCompanyByOwnerName(String ownerName) {
+		return findCompany.searchByOwnerName(ownerName).stream().map(CompanySummary::from).toList();
+	}
+
+	@Tool(description = "Elige el negocio donde el cliente quiere agendar, por su businessId (obtenido de "
+			+ "findCompanyByName o findCompanyByOwnerName). Llámala solo cuando el cliente confirmó cuál negocio es.")
+	public SelectedCompany selectCompany(Long businessId, ToolContext toolContext) {
+		CompanySelection selection = companySelection.select(conversationKey(toolContext), businessId);
+		return new SelectedCompany(selection.ownerUserId(), selection.companyName());
 	}
 
 	@Tool(description = "Indica si el cliente que escribe ya está registrado en el negocio elegido (se identifica por su "
@@ -118,10 +127,14 @@ public class CustomerBookingTools {
 		return value == null || value.isBlank();
 	}
 
-	public record CompanySummary(Long id, String name) {
-		static CompanySummary from(Company company) {
-			return new CompanySummary(company.getId(), company.getName());
+	// businessId es el id del dueño del negocio (relación uno a uno).
+	public record CompanySummary(Long businessId, String businessName, String ownerName) {
+		static CompanySummary from(CompanySearchResult result) {
+			return new CompanySummary(result.ownerUserId(), result.companyName(), result.ownerName());
 		}
+	}
+
+	public record SelectedCompany(Long businessId, String businessName) {
 	}
 
 	public record CustomerProfile(boolean known, String name) {

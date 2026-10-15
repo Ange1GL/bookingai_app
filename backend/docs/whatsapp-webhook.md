@@ -15,8 +15,11 @@ POST webhook -> ReceiveWhatsAppEventService (log de metadatos)
              -> CustomerReplyPort (LoggingCustomerReplyAdapter: demo, solo log; sin envío a Meta todavía)
 ```
 
-1. **Elegir negocio**: saludo → pide el nombre del negocio → `findCompanyByName` (si no existe, avisa que no está
-   registrado) → `selectCompany`. El negocio elegido se guarda en el servidor (`CustomerConversationPort`, en memoria,
+1. **Elegir negocio**: saludo → pide el negocio → el cliente puede dar el nombre del **negocio**
+   (`findCompanyByName`) o el del **dueño** (`findCompanyByOwnerName`); ambas búsquedas son parciales y no distinguen
+   mayúsculas. Sin resultados avisa que no está registrado; con varios (también varios dueños con el mismo nombre)
+   muestra negocio + dueño y pide elegir; con uno lo confirma → `selectCompany(businessId)` (el `businessId` es el id
+   del dueño, ver `company.md`). El negocio elegido se guarda en el servidor (`CustomerConversationPort`, en memoria,
    clave `phoneNumberId:from`, máx. 1000 conversaciones, se pierde al reiniciar).
 2. **Reservar**: `getMyProfile` (identifica al cliente por su número y pide el nombre si es nuevo) → `listServices` →
    `bookMyAppointment`, que reutiliza `BookAppointmentUseCase` (crea/busca cliente por teléfono bajo el tenant del

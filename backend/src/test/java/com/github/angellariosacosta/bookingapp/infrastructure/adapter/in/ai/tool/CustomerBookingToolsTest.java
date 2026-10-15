@@ -33,12 +33,15 @@ import com.github.angellariosacosta.bookingapp.application.port.in.CompanySelect
 import com.github.angellariosacosta.bookingapp.application.port.in.FindCompanyUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.FindCustomerByPhoneUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListPriceCatalogUseCase;
+import com.github.angellariosacosta.bookingapp.application.result.CompanySearchResult;
 import com.github.angellariosacosta.bookingapp.application.result.CompanySelection;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
 import com.github.angellariosacosta.bookingapp.domain.model.Customer;
 import com.github.angellariosacosta.bookingapp.domain.model.PriceCatalog;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.CustomerBookingTools.BookingConfirmation;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.CustomerBookingTools.CompanySummary;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.CustomerBookingTools.CustomerProfile;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.CustomerBookingTools.SelectedCompany;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerBookingToolsTest {
@@ -47,7 +50,7 @@ class CustomerBookingToolsTest {
 	private static final String PHONE = "5215512345678";
 	private static final Long OWNER_ID = 7L;
 	private static final Long OTHER_OWNER_ID = 8L;
-	private static final CompanySelection SELECTION = new CompanySelection(10L, "Barbería El Güero", OWNER_ID);
+	private static final CompanySelection SELECTION = new CompanySelection(OWNER_ID, "Barbería El Güero");
 	private static final String START = "2030-01-01T10:00:00";
 	private static final String END = "2030-01-01T10:30:00";
 
@@ -142,6 +145,48 @@ class CustomerBookingToolsTest {
 
 		assertTrue(profile.known());
 		assertEquals("Ana", profile.name());
+	}
+
+	@DisplayName("Should find companies by business name exposing the owner id as businessId")
+	@Test
+	void shouldFindCompaniesByBusinessName() {
+		when(findCompany.searchByName("güero"))
+				.thenReturn(List.of(new CompanySearchResult(OWNER_ID, "Barbería El Güero", "Juan Pérez")));
+
+		List<CompanySummary> result = tools.findCompanyByName("güero");
+
+		assertEquals(List.of(new CompanySummary(OWNER_ID, "Barbería El Güero", "Juan Pérez")), result);
+	}
+
+	@DisplayName("Should return every owner that shares the searched name so the customer can choose")
+	@Test
+	void shouldFindEveryOwnerWithSameName() {
+		when(findCompany.searchByOwnerName("juan")).thenReturn(List.of(
+				new CompanySearchResult(OWNER_ID, "Barbería El Güero", "Juan Pérez"),
+				new CompanySearchResult(OTHER_OWNER_ID, "Corte Fino", "Juan Pérez")));
+
+		List<CompanySummary> result = tools.findCompanyByOwnerName("juan");
+
+		assertEquals(2, result.size());
+		assertEquals("Corte Fino", result.get(1).businessName());
+	}
+
+	@DisplayName("Should return an empty list when no owner matches")
+	@Test
+	void shouldReturnEmptyWhenNoOwnerMatches() {
+		when(findCompany.searchByOwnerName("nadie")).thenReturn(List.of());
+
+		assertTrue(tools.findCompanyByOwnerName("nadie").isEmpty());
+	}
+
+	@DisplayName("Should select the company by businessId for the current conversation")
+	@Test
+	void shouldSelectCompanyForConversation() {
+		when(companySelection.select(KEY, OWNER_ID)).thenReturn(SELECTION);
+
+		SelectedCompany selected = tools.selectCompany(OWNER_ID, context);
+
+		assertEquals(new SelectedCompany(OWNER_ID, "Barbería El Güero"), selected);
 	}
 
 	@DisplayName("Should report an unknown customer")
