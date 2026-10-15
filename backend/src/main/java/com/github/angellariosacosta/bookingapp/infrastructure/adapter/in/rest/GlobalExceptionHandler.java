@@ -52,6 +52,18 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
+	@ExceptionHandler(CompanyAlreadyExistsException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleCompanyAlreadyExists(CompanyAlreadyExistsException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(CompanyNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleCompanyNotFound(CompanyNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
 	@ExceptionHandler(PriceCatalogNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErrorResponse handlePriceCatalogNotFound(PriceCatalogNotFoundException ex) {

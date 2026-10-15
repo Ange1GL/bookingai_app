@@ -27,6 +27,7 @@ Monorepo: `backend/` (Spring Boot, Maven, hexagonal) and `frontend/` (Angular 21
 ## Docs
 - `docs/aws-deployment.md` (CI/CD del frontend a S3 + CloudFront con invalidación de caché; variable `CLOUDFRONT_DISTRIBUTION_ID`), `docs/security-remediation-plan.md`, `docs/price-catalog-management.md`, `docs/frontend-structure.md`, `docs/appointments-calendar.md`, `docs/assistant-chat.md`, `docs/customers-management.md`
 - Backend: `backend/docs/customer-blacklist.md` (lista negra por bloqueo directo, única vía: `POST /customers/{id}/blacklist` con motivo opcional ≤ 250, idempotente; `DELETE /customers/{id}/blacklist` para quitar; un cliente bloqueado no puede reservar y sus citas futuras se cancelan; sin umbrales ni no-shows)
+- Backend: `backend/docs/company.md` (negocio mínimo `name` + `userId` dueño, una por usuario; `POST /api/v1/companies` y `GET /api/v1/companies/me`; `searchByName` lo usará el flujo de WhatsApp para clientes, plan en `backend/.plans/whatsapp-customer-booking-flow.md`)
 - Backend: `backend/docs/customer-list.md` (`GET /api/v1/customers` paginado por tenant, filtros `name`/`phone`, `size` máx. 50)
 - Backend: `backend/docs/actuator-health.md` (Actuator solo expone `GET /actuator/health` público y sin detalle, para health check de ECS Fargate/ALB; no exponer otros endpoints)
 - Backend: `backend/docs/price-catalog.md` (cada cita referencia un servicio del catálogo de precios; el frontend debe enviar `priceCatalogId` al crear citas)
