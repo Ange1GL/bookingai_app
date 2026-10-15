@@ -35,7 +35,7 @@ public class ReceiveWhatsAppEventService implements ReceiveWhatsAppEventUseCase 
 	private void dispatch(IncomingMessage message) {
 		try {
 			handleCustomerMessage.handle(new HandleCustomerMessageCommand(
-					message.phoneNumberId(), message.from(), message.type(), message.text()));
+					message.phoneNumberId(), message.from(), message.messageId(), message.type(), message.text()));
 		} catch (RuntimeException ex) {
 			log.error("Error procesando mensaje de WhatsApp id={}: {}", message.messageId(), ex.getMessage(), ex);
 		}

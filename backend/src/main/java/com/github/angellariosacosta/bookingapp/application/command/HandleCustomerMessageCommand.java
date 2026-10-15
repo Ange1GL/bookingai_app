@@ -1,7 +1,7 @@
 package com.github.angellariosacosta.bookingapp.application.command;
 
 /** Mensaje de texto de un cliente final recibido por WhatsApp. {@code from} ya viene autenticado por la firma HMAC. */
-public record HandleCustomerMessageCommand(String phoneNumberId, String from, String type, String text) {
+public record HandleCustomerMessageCommand(String phoneNumberId, String from, String messageId, String type, String text) {
 
 	private static final String TEXT_TYPE = "text";
 
@@ -16,5 +16,9 @@ public record HandleCustomerMessageCommand(String phoneNumberId, String from, St
 
 	public boolean hasSender() {
 		return phoneNumberId != null && !phoneNumberId.isBlank() && from != null && !from.isBlank();
+	}
+
+	public boolean hasMessageId() {
+		return messageId != null && !messageId.isBlank();
 	}
 }

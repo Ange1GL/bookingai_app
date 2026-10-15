@@ -31,9 +31,25 @@ Seguridad del agente:
 - El log de la respuesta (`LoggingCustomerReplyAdapter`) imprime el texto que se le enviaría al cliente; es temporal y
   se reemplaza por el envío real. El texto entrante nunca se loguea.
 
-Limitaciones conocidas del demo: la llamada a la IA es síncrona dentro del request del webhook (si tarda, Meta puede
-reintentar y duplicar); no hay idempotencia por `messageId` ni límite por teléfono; el `from` de WhatsApp (p. ej.
-`5215512345678`) puede no coincidir con el formato en que el administrador guardó el teléfono del cliente.
+### Defensas del procesamiento (Parte C del plan)
+
+`HandleCustomerMessageService.handle` se ejecuta **fuera del request** (`@Async`, executor `whatsappTaskExecutor` de
+`WhatsAppAsyncConfig`: 2–4 hilos, cola de 100) y el webhook responde 200 a Meta de inmediato; si la cola se llena, el
+envío se rechaza y se registra (el webhook sigue respondiendo 200). Orden de las defensas dentro del handler:
+
+1. **Remitente válido**: sin `phoneNumberId` o `from` se ignora.
+2. **Idempotencia** (`ProcessedMessagePort`): el `messageId` se registra de forma atómica; un reintento de Meta se
+   ignora sin responder. Máx. 10 000 ids, retención 24 h.
+3. **Límite por teléfono** (`CustomerRateLimitPort`): 10 mensajes por minuto (ventana fija). El primero por encima del
+   límite recibe un aviso; el resto se descarta en silencio para no amplificar un abuso.
+4. **Un turno a la vez por conversación**: locks por clave (64 franjas) evitan que dos mensajes seguidos del mismo
+   cliente intercalen estado y memoria del chat.
+
+Todo el estado de las defensas (conversación, ids vistos, contadores) está en memoria: se pierde al reiniciar y no se
+comparte entre instancias; con más de una instancia hay que moverlo a Redis o a tablas con clave única.
+
+Limitaciones conocidas del demo: no hay tope diario de gasto de IA por teléfono ni global; el `from` de WhatsApp
+(p. ej. `5215512345678`) puede no coincidir con el formato en que el administrador guardó el teléfono del cliente.
 
 ## Endpoints
 

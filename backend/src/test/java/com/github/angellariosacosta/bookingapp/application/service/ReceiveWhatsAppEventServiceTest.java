@@ -32,20 +32,23 @@ class ReceiveWhatsAppEventServiceTest {
 		return new IncomingMessage("1001", "5215512345678", id, "text", text);
 	}
 
-	@DisplayName("Should hand each incoming message to the customer agent")
+	private static HandleCustomerMessageCommand command(String id, String text) {
+		return new HandleCustomerMessageCommand("1001", "5215512345678", id, "text", text);
+	}
+
+	@DisplayName("Should hand each incoming message, with its id, to the customer agent")
 	@Test
 	void shouldDispatchEachMessage() {
 		service.receive(new ReceiveWhatsAppEventCommand(List.of(message("m1", "hola"), message("m2", "quiero cita"))));
 
-		verify(handleCustomerMessage).handle(new HandleCustomerMessageCommand("1001", "5215512345678", "text", "hola"));
-		verify(handleCustomerMessage).handle(new HandleCustomerMessageCommand("1001", "5215512345678", "text", "quiero cita"));
+		verify(handleCustomerMessage).handle(command("m1", "hola"));
+		verify(handleCustomerMessage).handle(command("m2", "quiero cita"));
 	}
 
-	@DisplayName("Should keep processing the remaining messages when one fails")
+	@DisplayName("Should keep processing the remaining messages when one fails (e.g. executor queue full)")
 	@Test
 	void shouldContinueWhenOneMessageFails() {
-		doThrow(new IllegalStateException("boom")).when(handleCustomerMessage)
-				.handle(new HandleCustomerMessageCommand("1001", "5215512345678", "text", "hola"));
+		doThrow(new IllegalStateException("boom")).when(handleCustomerMessage).handle(command("m1", "hola"));
 
 		service.receive(new ReceiveWhatsAppEventCommand(List.of(message("m1", "hola"), message("m2", "otra"))));
 

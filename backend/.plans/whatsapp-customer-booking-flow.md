@@ -48,7 +48,7 @@ Se mantiene el log actual (metadatos, teléfono enmascarado).
   con `SYSTEM_USER_EMPLOYEE_META` (nueva propiedad `whatsapp.cloud.system-user-token`, sin default, validada con `@NotBlank`).
 - Si el token no está, el demo debe poder correr en modo "solo log de la respuesta" (flag) para probar sin enviar.
 
-## Parte C — Seguridad mínima del demo (se amplía después)
+## Parte C — Seguridad mínima del demo (se amplía después) — IMPLEMENTADA (idempotencia, asíncrono, rate limit; ver docs/whatsapp-webhook.md)
 - Firma HMAC ya validada (autentica a Meta y por tanto el `from`).
 - `ownerUserId` nunca viene del modelo ni del texto; solo del estado de servidor.
 - Idempotencia por `messageId` (Meta reintenta): cache en memoria de ids procesados.
