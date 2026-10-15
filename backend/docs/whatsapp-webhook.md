@@ -1,7 +1,39 @@
 # Webhook de WhatsApp Cloud API
 
 Endpoint público que Meta usa para verificar la URL (GET) y entregar mensajes y estados (POST).
-Fase 1: valida y registra metadatos. El procesamiento con el agente de IA es la Fase 2 (ver `plan-whatsapp-webhook.md`).
+Valida la firma, registra metadatos y entrega cada mensaje de texto al agente de IA para clientes (demo, ver
+"Agente para clientes"). Plan completo en `.plans/whatsapp-customer-booking-flow.md`.
+
+## Agente para clientes (demo)
+
+Los clientes finales escriben al número de WhatsApp del negocio y el agente los guía; se reutiliza este mismo webhook
+(Meta solo permite una URL por app).
+
+```
+POST webhook -> ReceiveWhatsAppEventService (log de metadatos)
+             -> HandleCustomerMessageService -> CustomerAssistantPort (SpringAiCustomerAssistantAdapter + CustomerBookingTools)
+             -> CustomerReplyPort (LoggingCustomerReplyAdapter: demo, solo log; sin envío a Meta todavía)
+```
+
+1. **Elegir negocio**: saludo → pide el nombre del negocio → `findCompanyByName` (si no existe, avisa que no está
+   registrado) → `selectCompany`. El negocio elegido se guarda en el servidor (`CustomerConversationPort`, en memoria,
+   clave `phoneNumberId:from`, máx. 1000 conversaciones, se pierde al reiniciar).
+2. **Reservar**: `getMyProfile` (identifica al cliente por su número y pide el nombre si es nuevo) → `listServices` →
+   `bookMyAppointment`, que reutiliza `BookAppointmentUseCase` (crea/busca cliente por teléfono bajo el tenant del
+   negocio y respeta la lista negra).
+
+Seguridad del agente:
+- `CustomerBookingTools` es un set aparte de `BookingTools` (que depende del JWT del administrador) y solo reserva:
+  sin lista negra, sin buscar clientes ni cancelar/mover citas.
+- El tenant (`ownerUserId`) sale del estado del servidor y el teléfono del cliente, de `from` (autenticado por la firma
+  HMAC); llegan por `ToolContext`, nunca como parámetros que el modelo pueda inventar.
+- La memoria del chat usa el prefijo `wa:` y no se cruza con la del asistente del administrador.
+- El log de la respuesta (`LoggingCustomerReplyAdapter`) imprime el texto que se le enviaría al cliente; es temporal y
+  se reemplaza por el envío real. El texto entrante nunca se loguea.
+
+Limitaciones conocidas del demo: la llamada a la IA es síncrona dentro del request del webhook (si tarda, Meta puede
+reintentar y duplicar); no hay idempotencia por `messageId` ni límite por teléfono; el `from` de WhatsApp (p. ej.
+`5215512345678`) puede no coincidir con el formato en que el administrador guardó el teléfono del cliente.
 
 ## Endpoints
 

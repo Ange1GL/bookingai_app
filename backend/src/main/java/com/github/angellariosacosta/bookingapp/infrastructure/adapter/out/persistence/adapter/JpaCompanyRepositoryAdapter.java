@@ -42,6 +42,11 @@ public class JpaCompanyRepositoryAdapter implements CompanyRepositoryPort {
 	}
 
 	@Override
+	public Optional<Company> findById(Long id) {
+		return jpaRepository.findById(id).map(mapper::toDomain);
+	}
+
+	@Override
 	public Optional<Company> findByUserId(Long userId) {
 		return jpaRepository.findByUserId(userId).map(mapper::toDomain);
 	}

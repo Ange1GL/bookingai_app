@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.BookingTools;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.ai.tool.CustomerBookingTools;
 
 @Configuration
 public class AiConfig {
@@ -48,6 +49,17 @@ public class AiConfig {
 				.defaultSystem(SYSTEM_PROMPT)
 				.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
 				.defaultTools(bookingTools)
+				.build();
+	}
+
+	// Agente para clientes finales de WhatsApp: sin system prompt por defecto (se arma por turno con el estado
+	// de la conversación) y solo con las tools de cliente, nunca las de administrador.
+	@Bean
+	@Qualifier("customerChatClient")
+	public ChatClient customerChatClient(ChatModel chatModel, ChatMemory chatMemory, CustomerBookingTools customerBookingTools) {
+		return ChatClient.builder(chatModel)
+				.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+				.defaultTools(customerBookingTools)
 				.build();
 	}
 
