@@ -87,6 +87,11 @@ whatsapp:
     # Sin valores por defecto a proposito: si faltan, la app no arranca. Ver docs/whatsapp-webhook.md
     verify-token: ${WHATSAPP_VERIFY_TOKEN}   # el que se pega en el panel de Meta
     app-secret: ${WHATSAPP_APP_SECRET}       # Meta > Configuracion de la app > Basica; firma los POST
+  cloud:
+    # Envio de respuestas. Vacio a proposito por defecto: sin token la app arranca en modo demo (solo log).
+    system-user-token: ${SYSTEM_USER_EMPLOYEE_META:}   # token permanente del usuario del sistema de Meta
+    api-version: v26.0
+    base-url: https://graph.facebook.com
 
 security:
   jwt:

@@ -12,7 +12,7 @@ Los clientes finales escriben al número de WhatsApp del negocio y el agente los
 ```
 POST webhook -> ReceiveWhatsAppEventService (log de metadatos)
              -> HandleCustomerMessageService -> CustomerAssistantPort (SpringAiCustomerAssistantAdapter + CustomerBookingTools)
-             -> CustomerReplyPort (LoggingCustomerReplyAdapter: demo, solo log; sin envío a Meta todavía)
+             -> CustomerReplyPort (WhatsAppCloudReplyAdapter si hay token; si no, LoggingCustomerReplyAdapter: solo log)
 ```
 
 1. **Elegir negocio**: saludo → pide el negocio → el cliente puede dar el nombre del **negocio**
@@ -31,8 +31,8 @@ Seguridad del agente:
 - El tenant (`ownerUserId`) sale del estado del servidor y el teléfono del cliente, de `from` (autenticado por la firma
   HMAC); llegan por `ToolContext`, nunca como parámetros que el modelo pueda inventar.
 - La memoria del chat usa el prefijo `wa:` y no se cruza con la del asistente del administrador.
-- El log de la respuesta (`LoggingCustomerReplyAdapter`) imprime el texto que se le enviaría al cliente; es temporal y
-  se reemplaza por el envío real. El texto entrante nunca se loguea.
+- El texto entrante nunca se loguea. Con envío real tampoco se loguea el texto de la respuesta ni el token; solo el
+  teléfono enmascarado y, si Meta rechaza, el status y los primeros 300 caracteres del error.
 
 ### Defensas del procesamiento (Parte C del plan)
 
@@ -84,7 +84,26 @@ curl "http://localhost:8082/api/v1/webhooks/whatsapp?hub.mode=subscribe&hub.veri
 | `WHATSAPP_VERIFY_TOKEN` | `whatsapp.webhook.verify-token` | Cadena inventada por nosotros; la misma se pega en el panel de Meta |
 | `WHATSAPP_APP_SECRET` | `whatsapp.webhook.app-secret` | Meta → Configuración de la app → Básica |
 
-Sin valor por defecto: si faltan o están vacías, la app no arranca. En dev van en `.env`; en QA, en Parameter Store (SecureString) inyectadas como `secrets` de la task definition de ECS. Nunca en el repo ni en la imagen.
+### Envío de respuestas (Cloud API)
+
+| Variable | Propiedad | Origen |
+|---|---|---|
+| `SYSTEM_USER_EMPLOYEE_META` | `whatsapp.cloud.system-user-token` | Token **permanente** de un usuario del sistema de Meta (Business Settings → Usuarios del sistema → Generar token, permiso `whatsapp_business_messaging`) |
+| — | `whatsapp.cloud.api-version` / `base-url` | `v26.0` / `https://graph.facebook.com` por defecto |
+
+`WhatsAppReplyConfig` decide el modo al arrancar: **con token** envía con `POST {base}/{version}/{phone_number_id}/messages`
+(`Authorization: Bearer`, mensaje de texto, máx. 4096 caracteres, timeouts de 5 s de conexión y 10 s de lectura);
+**sin token** (variable vacía o ausente) arranca en modo demo y solo registra la respuesta en el log, con un aviso al
+arrancar. A diferencia de las dos variables de arriba, esta no es obligatoria. Un fallo de envío se registra y no
+se propaga (no hay a quién reintentar). El `phone_number_id` debe ser numérico (evita inyectar rutas en la URL).
+Los mensajes de texto libre solo se aceptan dentro de las 24 h posteriores al último mensaje del cliente, que es
+siempre el caso aquí porque solo se responde a un mensaje entrante.
+
+En QA hay que crear el parámetro `SYSTEM_USER_EMPLOYEE_META` en Parameter Store (SecureString) y añadirlo como `secret`
+en `.aws/task-definition-backend.json`; hacerlo en ese orden, porque ECS no arranca la tarea si el parámetro referenciado
+no existe.
+
+Sin valor por defecto (las dos primeras variables): si faltan o están vacías, la app no arranca. En dev van en `.env`; en QA, en Parameter Store (SecureString) inyectadas como `secrets` de la task definition de ECS. Nunca en el repo ni en la imagen.
 
 Generar el token de verificación (32 bytes aleatorios en hex):
 
