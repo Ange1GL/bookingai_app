@@ -1,7 +1,58 @@
 # Webhook de WhatsApp Cloud API
 
 Endpoint público que Meta usa para verificar la URL (GET) y entregar mensajes y estados (POST).
-Fase 1: valida y registra metadatos. El procesamiento con el agente de IA es la Fase 2 (ver `plan-whatsapp-webhook.md`).
+Valida la firma, registra metadatos y entrega cada mensaje de texto al agente de IA para clientes (demo, ver
+"Agente para clientes"). Plan completo en `.plans/whatsapp-customer-booking-flow.md`.
+
+## Agente para clientes (demo)
+
+Los clientes finales escriben al número de WhatsApp del negocio y el agente los guía; se reutiliza este mismo webhook
+(Meta solo permite una URL por app).
+
+```
+POST webhook -> ReceiveWhatsAppEventService (log de metadatos)
+             -> HandleCustomerMessageService -> CustomerAssistantPort (SpringAiCustomerAssistantAdapter + CustomerBookingTools)
+             -> CustomerReplyPort (WhatsAppCloudReplyAdapter si hay token; si no, LoggingCustomerReplyAdapter: solo log)
+```
+
+1. **Elegir negocio**: saludo → pide el negocio → el cliente puede dar el nombre del **negocio**
+   (`findCompanyByName`) o el del **dueño** (`findCompanyByOwnerName`); ambas búsquedas son parciales y no distinguen
+   mayúsculas. Sin resultados avisa que no está registrado; con varios (también varios dueños con el mismo nombre)
+   muestra negocio + dueño y pide elegir; con uno lo confirma → `selectCompany(businessId)` (el `businessId` es el id
+   del dueño, ver `company.md`). El negocio elegido se guarda en el servidor (`CustomerConversationPort`, en memoria,
+   clave `phoneNumberId:from`, máx. 1000 conversaciones, se pierde al reiniciar).
+2. **Reservar**: `getMyProfile` (identifica al cliente por su número y pide el nombre si es nuevo) → `listServices` →
+   `bookMyAppointment`, que reutiliza `BookAppointmentUseCase` (crea/busca cliente por teléfono bajo el tenant del
+   negocio y respeta la lista negra).
+
+Seguridad del agente:
+- `CustomerBookingTools` es un set aparte de `BookingTools` (que depende del JWT del administrador) y solo reserva:
+  sin lista negra, sin buscar clientes ni cancelar/mover citas.
+- El tenant (`ownerUserId`) sale del estado del servidor y el teléfono del cliente, de `from` (autenticado por la firma
+  HMAC); llegan por `ToolContext`, nunca como parámetros que el modelo pueda inventar.
+- La memoria del chat usa el prefijo `wa:` y no se cruza con la del asistente del administrador.
+- El texto entrante nunca se loguea. Con envío real tampoco se loguea el texto de la respuesta ni el token; solo el
+  teléfono enmascarado y, si Meta rechaza, el status y los primeros 300 caracteres del error.
+
+### Defensas del procesamiento (Parte C del plan)
+
+`HandleCustomerMessageService.handle` se ejecuta **fuera del request** (`@Async`, executor `whatsappTaskExecutor` de
+`WhatsAppAsyncConfig`: 2–4 hilos, cola de 100) y el webhook responde 200 a Meta de inmediato; si la cola se llena, el
+envío se rechaza y se registra (el webhook sigue respondiendo 200). Orden de las defensas dentro del handler:
+
+1. **Remitente válido**: sin `phoneNumberId` o `from` se ignora.
+2. **Idempotencia** (`ProcessedMessagePort`): el `messageId` se registra de forma atómica; un reintento de Meta se
+   ignora sin responder. Máx. 10 000 ids, retención 24 h.
+3. **Límite por teléfono** (`CustomerRateLimitPort`): 10 mensajes por minuto (ventana fija). El primero por encima del
+   límite recibe un aviso; el resto se descarta en silencio para no amplificar un abuso.
+4. **Un turno a la vez por conversación**: locks por clave (64 franjas) evitan que dos mensajes seguidos del mismo
+   cliente intercalen estado y memoria del chat.
+
+Todo el estado de las defensas (conversación, ids vistos, contadores) está en memoria: se pierde al reiniciar y no se
+comparte entre instancias; con más de una instancia hay que moverlo a Redis o a tablas con clave única.
+
+Limitaciones conocidas del demo: no hay tope diario de gasto de IA por teléfono ni global; el `from` de WhatsApp
+(p. ej. `5215512345678`) puede no coincidir con el formato en que el administrador guardó el teléfono del cliente.
 
 ## Endpoints
 
@@ -33,7 +84,26 @@ curl "http://localhost:8082/api/v1/webhooks/whatsapp?hub.mode=subscribe&hub.veri
 | `WHATSAPP_VERIFY_TOKEN` | `whatsapp.webhook.verify-token` | Cadena inventada por nosotros; la misma se pega en el panel de Meta |
 | `WHATSAPP_APP_SECRET` | `whatsapp.webhook.app-secret` | Meta → Configuración de la app → Básica |
 
-Sin valor por defecto: si faltan o están vacías, la app no arranca. En dev van en `.env`; en QA, en Parameter Store (SecureString) inyectadas como `secrets` de la task definition de ECS. Nunca en el repo ni en la imagen.
+### Envío de respuestas (Cloud API)
+
+| Variable | Propiedad | Origen |
+|---|---|---|
+| `SYSTEM_USER_EMPLOYEE_META` | `whatsapp.cloud.system-user-token` | Token **permanente** de un usuario del sistema de Meta (Business Settings → Usuarios del sistema → Generar token, permiso `whatsapp_business_messaging`) |
+| — | `whatsapp.cloud.api-version` / `base-url` | `v26.0` / `https://graph.facebook.com` por defecto |
+
+`WhatsAppReplyConfig` decide el modo al arrancar: **con token** envía con `POST {base}/{version}/{phone_number_id}/messages`
+(`Authorization: Bearer`, mensaje de texto, máx. 4096 caracteres, timeouts de 5 s de conexión y 10 s de lectura);
+**sin token** (variable vacía o ausente) arranca en modo demo y solo registra la respuesta en el log, con un aviso al
+arrancar. A diferencia de las dos variables de arriba, esta no es obligatoria. Un fallo de envío se registra y no
+se propaga (no hay a quién reintentar). El `phone_number_id` debe ser numérico (evita inyectar rutas en la URL).
+Los mensajes de texto libre solo se aceptan dentro de las 24 h posteriores al último mensaje del cliente, que es
+siempre el caso aquí porque solo se responde a un mensaje entrante.
+
+En QA hay que crear el parámetro `SYSTEM_USER_EMPLOYEE_META` en Parameter Store (SecureString) y añadirlo como `secret`
+en `.aws/task-definition-backend.json`; hacerlo en ese orden, porque ECS no arranca la tarea si el parámetro referenciado
+no existe.
+
+Sin valor por defecto (las dos primeras variables): si faltan o están vacías, la app no arranca. En dev van en `.env`; en QA, en Parameter Store (SecureString) inyectadas como `secrets` de la task definition de ECS. Nunca en el repo ni en la imagen.
 
 Generar el token de verificación (32 bytes aleatorios en hex):
 
