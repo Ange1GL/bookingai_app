@@ -46,7 +46,7 @@
     "postcss": "^8.4.49",
     "prettier": "^3.0.0",
     "tailwindcss": "^4.1.11",
-    "typescript": "~5.9.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.11"
   },
   "overrides": {
