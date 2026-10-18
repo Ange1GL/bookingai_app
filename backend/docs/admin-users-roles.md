@@ -23,3 +23,21 @@ Pendiente para fases siguientes: las consultas `existsBy...` de los vínculos si
 inactivas (a propósito, para poder reactivarlas en lugar de violar el `UNIQUE`); los adaptadores de
 guardado aún no preservan `deleted` al hacer `save` desde el dominio (se resuelve cuando se
 implemente la baja lógica).
+
+## Fase 2 — Autorización por permiso y primer admin
+
+- **`@EnableMethodSecurity`** en `SecurityConfig`. Hasta ahora los permisos se cargaban como
+  `GrantedAuthority` pero ningún endpoint los exigía. Los endpoints admin usarán
+  `@PreAuthorize("hasAnyAuthority(<permiso>, ADMIN_ALL)")`, con los nombres en
+  `infrastructure.security.Authorities` (sin strings sueltos).
+- **403 uniforme:** `SecurityAccessDeniedHandler` responde `ErrorResponse` (status 403) cuando un usuario
+  autenticado no tiene el permiso. (Sin autenticar sigue siendo 401 por `SecurityEntryPoint`.)
+- **Usuario deshabilitado = sin acceso inmediato:** `JwtAuthenticationFilter` rechaza con 401
+  (`JwtErrorCode.USER_DISABLED`) a quien tenga `active=false`, aunque su access token no haya expirado.
+- **Primer administrador:** variable de entorno `BOOTSTRAP_ADMIN_USERNAME` (`admin.bootstrap.username`).
+  Al arrancar, `BootstrapAdminInitializer` (después de `DataInitializer`) asigna `ADMIN` a ese usuario
+  existente. Idempotente; vacío = no hace nada; si el usuario no existe solo registra un warning.
+  Pasar a ser admin conserva los roles que ya tenía.
+
+> Despliegue: antes de usar los endpoints admin, define `BOOTSTRAP_ADMIN_USERNAME` con el username del
+> dueño actual (en `.env` para dev; en Parameter Store para QA). Si no, nadie tendrá `ADMIN_ALL`.

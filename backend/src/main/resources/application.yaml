@@ -93,6 +93,12 @@ whatsapp:
     api-version: v26.0
     base-url: https://graph.facebook.com
 
+admin:
+  bootstrap:
+    # Usuario existente que recibe el rol ADMIN al arrancar (idempotente). Vacio = no hace nada.
+    # Resuelve el primer admin: despues los admins se gestionan por la API. Ver docs/admin-users-roles.md
+    username: ${BOOTSTRAP_ADMIN_USERNAME:}
+
 security:
   jwt:
     # Secreto HS256 en base64 (>= 32 bytes decodificados). Dev: .env; QA: Parameter Store via ECS.

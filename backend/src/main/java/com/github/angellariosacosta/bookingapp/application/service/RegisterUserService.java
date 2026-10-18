@@ -37,7 +37,7 @@ public class RegisterUserService implements RegisterUserCase {
             throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
         }
 
-        Role defaultRole = roleRepository.findByName("USER")
+        Role defaultRole = roleRepository.findByName(Role.USER_NAME)
                 .orElseThrow(() -> {
                     log.error("Default role USER not found in database");
                     return new IllegalStateException("Default role USER not found");
