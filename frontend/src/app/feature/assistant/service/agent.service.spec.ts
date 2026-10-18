@@ -32,6 +32,7 @@ describe('AgentService', () => {
     service.chat('s-1', 'hola').subscribe((value) => (reply = value));
     const req = http.expectOne(`${BASE}/chat`);
     expect(req.request.body).toEqual({ sessionId: 's-1', message: 'hola' });
+    expect(req.request.context.get(SKIP_ERROR_TOAST)).toBe(true);
     req.flush({ reply: 'Hola, ¿en qué te ayudo?' });
     expect(reply).toBe('Hola, ¿en qué te ayudo?');
   });

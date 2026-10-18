@@ -1,6 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model, output } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { ButtonModule } from 'primeng/button';
 import { DrawerModule } from 'primeng/drawer';
 import { SkeletonModule } from 'primeng/skeleton';
 import { CalendarAppointment } from '../../models/calendar.model';
@@ -13,13 +14,14 @@ const MINUTES_PER_HOUR = 60;
 
 @Component({
   selector: 'app-appointment-detail',
-  imports: [DrawerModule, SkeletonModule, CurrencyPipe],
+  imports: [DrawerModule, SkeletonModule, ButtonModule, CurrencyPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './appointment-detail.component.html',
 })
 export class AppointmentDetailComponent {
   readonly appointment = input<CalendarAppointment | null>(null);
   readonly visible = model(false);
+  readonly cancelRequested = output<CalendarAppointment>();
 
   private readonly appointmentsService = inject(AppointmentsService);
 
@@ -33,6 +35,12 @@ export class AppointmentDetailComponent {
   protected readonly full = computed(() => {
     const detail = this.detailResource.hasValue() ? this.detailResource.value() : undefined;
     return detail?.id === this.appointment()?.id ? detail : undefined;
+  });
+
+  /** Finished and already-cancelled appointments have nothing left to cancel. */
+  protected readonly cancellable = computed(() => {
+    const status = this.appointment()?.status;
+    return status === 'reserved' || status === 'in-progress';
   });
 
   protected readonly style = computed(() => STATUS_STYLE[this.appointment()?.status ?? 'reserved']);

@@ -9,8 +9,9 @@ import { ConfirmDialogComponent } from '@/shared/components/confirm-dialog/confi
 import { BlacklistDialogComponent } from '../../components/blacklist-dialog/blacklist-dialog.component';
 import { CustomerCardComponent } from '../../components/customer-card/customer-card.component';
 import { CustomerFiltersComponent } from '../../components/customer-filters/customer-filters.component';
-import { CustomerFormDialogComponent } from '../../components/customer-form-dialog/customer-form-dialog.component';
-import { CreateCustomerRequestDto, CustomerListItemDto, CustomerPageDto, PAGE_SIZE } from '../../models/customer.dto';
+import { CustomerFormDialogComponent } from '@/shared/components/customer-form-dialog/customer-form-dialog.component';
+import { CreateCustomerRequestDto } from '@/shared/models/customer-input.model';
+import { CustomerListItemDto, CustomerPageDto, PAGE_SIZE } from '../../models/customer.dto';
 import { BlacklistFilter, CustomerQuery, INITIAL_FILTERS } from '../../models/customer-query.model';
 import { CustomersService } from '../../service/customers.service';
 

@@ -16,10 +16,9 @@ const DEFAULT_AUDIO_EXTENSION = 'webm';
 export class AgentService {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiBaseUrl}/api/v1/agent`;
-  // The chat renders its own "thinking" state, so the full-screen loader stays out.
-  private readonly options = { context: new HttpContext().set(SKIP_LOADER, true) };
-  // Dictation shows its errors inline under the composer instead of a toast.
-  private readonly voiceOptions = { context: new HttpContext().set(SKIP_LOADER, true).set(SKIP_ERROR_TOAST, true) };
+  // The chat renders its own "thinking" state, so the full-screen loader stays out. Chat and dictation
+  // show their errors inline (retry / manual-booking hint) instead of a toast.
+  private readonly options = { context: new HttpContext().set(SKIP_LOADER, true).set(SKIP_ERROR_TOAST, true) };
 
   createSession(): Observable<string> {
     return this.http.post<SessionResponseDto>(`${this.url}/session`, null, this.options).pipe(map((r) => r.sessionId));
@@ -34,7 +33,7 @@ export class AgentService {
   transcribe(audio: Blob, mimeType: string): Observable<TranscriptionResponseDto> {
     const body = new FormData();
     body.append(AUDIO_PART, audio, `${AUDIO_FILE_BASE_NAME}.${audioExtension(mimeType)}`);
-    return this.http.post<TranscriptionResponseDto>(`${this.url}/transcriptions`, body, this.voiceOptions);
+    return this.http.post<TranscriptionResponseDto>(`${this.url}/transcriptions`, body, this.options);
   }
 }
 

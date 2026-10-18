@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { SearchInputComponent } from '@/shared/components/search-input/search-input.component';
-import { NAME_MAX_LENGTH } from '../../models/customer.dto';
+import { NAME_MAX_LENGTH } from '@/shared/models/customer-input.model';
 import { BlacklistFilter } from '../../models/customer-query.model';
 
 interface FilterOption {

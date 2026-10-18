@@ -3,13 +3,13 @@ import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } fr
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { CustomerForm } from '../../models/customer-form.model';
 import {
   CreateCustomerRequestDto,
   NAME_MAX_LENGTH,
   PHONE_MAX_LENGTH,
   PHONE_PATTERN,
-} from '../../models/customer.dto';
-import { CustomerForm } from '../../models/customer-form.model';
+} from '../../models/customer-input.model';
 
 @Component({
   selector: 'app-customer-form-dialog',

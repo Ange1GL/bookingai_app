@@ -38,6 +38,9 @@ El backend aplica además la cuota diaria por usuario y el tope mensual global. 
 
 **Privacidad**: el audio solo viaja al backend (nunca directo al proveedor; la API key no llega al navegador) y no se guarda.
 
+## Si el asistente no responde
+Cuando el envío falla (error de red/5xx del agente, respuesta vacía o más de 45 s sin respuesta, `AGENT_REPLY_TIMEOUT_MS`), el mensaje queda marcado como fallido y debajo aparece, además de *Reintentar*, un aviso: "El asistente no respondió. Puedes reintentar, consultar con el administrador o agendar la cita tú mismo" con el botón **Crear la cita manualmente**. El botón navega a `/appointments?nueva=true` (`shared/navigation/appointment-links.ts`); el calendario abre el formulario de nueva cita y quita el parámetro de la URL. Las peticiones del chat usan `SKIP_ERROR_TOAST`: el error se muestra en línea, no como toast. Al reintentar con éxito, el aviso desaparece.
+
 ## Estructura
 ```
 feature/assistant/

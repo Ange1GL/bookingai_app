@@ -24,6 +24,22 @@
         <i class="pi pi-refresh text-[10px]" aria-hidden="true"></i>
         No se pudo enviar · Reintentar
       </button>
+      <div
+        class="flex flex-col gap-2 rounded-2xl bg-amber-50 p-3 text-xs leading-relaxed text-amber-800 dark:bg-amber-500/10 dark:text-amber-300"
+        role="note"
+      >
+        <p class="m-0">
+          El asistente no respondió. Puedes reintentar, consultar con el administrador o agendar la cita tú mismo.
+        </p>
+        <button
+          type="button"
+          class="flex min-h-9 w-fit cursor-pointer items-center gap-1.5 rounded-full bg-amber-100 px-3 font-medium text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"
+          (click)="createManually.emit()"
+        >
+          <i class="pi pi-calendar-plus text-[10px]" aria-hidden="true"></i>
+          Crear la cita manualmente
+        </button>
+      </div>
     }
   </div>
 </div>
