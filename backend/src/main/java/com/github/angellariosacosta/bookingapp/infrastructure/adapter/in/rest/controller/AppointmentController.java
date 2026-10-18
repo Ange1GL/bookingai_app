@@ -30,8 +30,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AppointmentController {
 
-
-
 	private final CreateAppointmentUseCase createAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
 	private final AppointmentRestMapper mapper;
@@ -41,9 +39,7 @@ public class AppointmentController {
 			@Valid @RequestBody CreateAppointmentRequest request,
 			@CurrentUserId Long userId) {
 		Appointment appointment = createAppointment.create(mapper.toCommand(request, userId));
-		return ResponseEntity
-				.ok((mapper.toResponse(appointment)));
-
+		return ResponseEntity.ok(mapper.toResponse(appointment));
 	}
 
 	@GetMapping("/{id}")

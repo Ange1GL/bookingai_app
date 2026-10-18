@@ -235,6 +235,39 @@ public ResponseEntity<AuthResponse> login(...) {
 }
 ```
 
+### Manejo de errores HTTP: siempre `ErrorResponse`
+
+**Regla obligatoria:** toda respuesta de error de la API tiene el cuerpo `ErrorResponse` (`timestamp`, `status`, `error`, `message`) y se construye **únicamente** con el factory `ErrorResponse.of(HttpStatus, String)`. Nunca `new ErrorResponse(...)` a mano, ni `Map`, ni el cuerpo por defecto de Spring.
+
+- **Controllers y casos de uso no fabrican respuestas de error.** Lanzan una excepción de `domain.exception` y el `GlobalExceptionHandler` la traduce.
+- **Nueva excepción → nuevo `@ExceptionHandler`** en `GlobalExceptionHandler`, con `@ResponseStatus(HttpStatus.X)` y `return errorBody(HttpStatus.X, mensaje)` (el helper privado delega en `ErrorResponse.of`). Usar el mismo `HttpStatus` en ambos lugares.
+- **Prohibido `ResponseStatusException`** y `response.sendError(...)` en el código propio: producen el formato por defecto de Spring, distinto al contrato.
+- **Errores de proveedores externos** (IA, transcripción, etc.): loguear el detalle donde ocurre y devolver al cliente un mensaje genérico; nunca exponer `ex.getMessage()` del proveedor.
+- **Fuera de MVC** (filtros y `AuthenticationEntryPoint`, que corren antes del `@RestControllerAdvice`): escribir `ErrorResponse.of(...)` con `JsonMapper`, como hacen `SecurityEntryPoint` y `RateLimitFilter`.
+- **Excepción deliberada:** el webhook de WhatsApp (`WhatsAppWebhookController`) responde 401/403 con cuerpo vacío porque es un endpoint público para Meta y no debe dar pistas.
+
+```java
+// MAL
+throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "El asistente no está disponible");
+return new ErrorResponse(Instant.now().toString(), 404, "Not Found", msg);
+
+// BIEN — controller/servicio
+throw new AssistantUnavailableException(ex);
+
+// BIEN — GlobalExceptionHandler
+@ExceptionHandler(AssistantUnavailableException.class)
+@ResponseStatus(HttpStatus.BAD_GATEWAY)
+public ErrorResponse handleAssistantUnavailable(AssistantUnavailableException ex) {
+    return errorBody(HttpStatus.BAD_GATEWAY, ASSISTANT_UNAVAILABLE_MESSAGE);
+}
+```
+
+### Checklist de errores REST
+
+- [ ] ¿Lanzo una excepción de dominio en vez de armar la respuesta de error en el controller?
+- [ ] ¿Agregué su `@ExceptionHandler` en `GlobalExceptionHandler` devolviendo `ErrorResponse` vía `errorBody`/`ErrorResponse.of`?
+- [ ] ¿No hay `ResponseStatusException` ni `new ErrorResponse(...)` fuera del factory?
+
 ### Checklist de tipos de retorno REST
 
 - [ ] ¿El tipo de retorno del controller/handler es un `record` tipado en lugar de `Map<String, Object>`?

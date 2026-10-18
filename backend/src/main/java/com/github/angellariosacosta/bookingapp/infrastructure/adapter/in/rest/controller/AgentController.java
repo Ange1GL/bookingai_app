@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.github.angellariosacosta.bookingapp.application.command.TranscribeVoiceCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.TranscribeVoiceUseCase;
 import com.github.angellariosacosta.bookingapp.application.result.VoiceTranscriptionResult;
+import com.github.angellariosacosta.bookingapp.domain.exception.AssistantUnavailableException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidVoiceAudioException;
 
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
@@ -36,7 +35,6 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/agent")
 public class AgentController {
 
-	private static final String ASSISTANT_UNAVAILABLE = "El asistente no está disponible en este momento";
 	private static final String UNREADABLE_AUDIO = "No se pudo leer el audio";
 
 	private final ChatClient chatClient;
@@ -67,7 +65,7 @@ public class AgentController {
 			return ResponseEntity.ok(new ChatResponse(reply));
 		} catch (Exception ex) {
 			log.error("Error processing chat request: {}", ex.getMessage(), ex);
-			throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, ASSISTANT_UNAVAILABLE);
+			throw new AssistantUnavailableException(ex);
 		}
 	}
 
@@ -90,7 +88,7 @@ public class AgentController {
 			return ResponseEntity.ok(new ChatResponse(reply));
 		} catch (Exception ex) {
 			log.error("Error in raw-chat endpoint: {}", ex.getMessage(), ex);
-			throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, ASSISTANT_UNAVAILABLE);
+			throw new AssistantUnavailableException(ex);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest;
 
-import java.time.Instant;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ public class GlobalExceptionHandler {
 	private static final String MISSING_PART_MESSAGE = "La parte '%s' es obligatoria";
 	private static final String UPLOAD_TOO_LARGE_MESSAGE = "El archivo supera el tamaño máximo permitido";
 	private static final String SPEECH_TO_TEXT_UNAVAILABLE_MESSAGE = "El dictado no está disponible en este momento";
+	private static final String ASSISTANT_UNAVAILABLE_MESSAGE = "El asistente no está disponible en este momento";
 	private static final String UNREADABLE_BODY_MESSAGE =
 			"El cuerpo de la petición es inválido: revisa el JSON y el formato de las fechas (yyyy-MM-ddTHH:mm:ss)";
 
@@ -137,6 +137,13 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.BAD_GATEWAY, SPEECH_TO_TEXT_UNAVAILABLE_MESSAGE);
 	}
 
+	// El detalle del proveedor de IA ya quedó en el log del controlador; al cliente solo un mensaje genérico.
+	@ExceptionHandler(AssistantUnavailableException.class)
+	@ResponseStatus(HttpStatus.BAD_GATEWAY)
+	public ErrorResponse handleAssistantUnavailable(AssistantUnavailableException ex) {
+		return errorBody(HttpStatus.BAD_GATEWAY, ASSISTANT_UNAVAILABLE_MESSAGE);
+	}
+
 	// Tope de spring.servlet.multipart: se corta antes de leer el archivo completo en memoria.
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
 	@ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
@@ -217,11 +224,6 @@ public class GlobalExceptionHandler {
 	}
 
 	private ErrorResponse errorBody(HttpStatus status, String message) {
-		return new ErrorResponse(
-				Instant.now().toString(),
-				status.value(),
-				status.getReasonPhrase(),
-				message
-		);
+		return ErrorResponse.of(status, message);
 	}
 }

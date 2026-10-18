@@ -1,7 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.security.filter;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Objects;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -74,12 +73,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
         log.warn("Rate limit excedido para ip={} en {} {}",
                 clientIp, request.getMethod(), request.getRequestURI());
 
-        ErrorResponse body = new ErrorResponse(
-                Instant.now().toString(),
-                HttpStatus.TOO_MANY_REQUESTS.value(),
-                HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
-                RATE_LIMIT_MESSAGE
-        );
+        ErrorResponse body = ErrorResponse.of(HttpStatus.TOO_MANY_REQUESTS, RATE_LIMIT_MESSAGE);
 
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSeconds));
