@@ -3,7 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SKIP_LOADER } from '@/core/interceptor/loader.interceptor';
-import { CreateCustomerRequestDto, CustomerDto, CustomerPageDto, PAGE_SIZE } from '../models/customer.dto';
+import { CreateCustomerRequestDto } from '@/shared/models/customer-input.model';
+import { CustomerDto, CustomerPageDto, PAGE_SIZE } from '../models/customer.dto';
 import { CustomerQuery, toSearchParams } from '../models/customer-query.model';
 
 // Every caller renders its own loading state (skeletons, button spinners).

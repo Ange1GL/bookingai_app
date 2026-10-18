@@ -22,14 +22,5 @@ export interface CustomerDto {
   phone: string;
 }
 
-/** Mirrors CreateCustomerRequest. */
-export interface CreateCustomerRequestDto {
-  name: string;
-  phone: string;
-}
-
-export const NAME_MAX_LENGTH = 100;
-export const PHONE_MAX_LENGTH = 20;
 export const BLACKLIST_REASON_MAX_LENGTH = 250;
-export const PHONE_PATTERN = /^\+?[\d\s()-]+$/;
 export const PAGE_SIZE = 10;

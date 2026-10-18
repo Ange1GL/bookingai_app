@@ -1,16 +1,18 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { definePreset } from '@primeuix/themes';
 import Aura from '@primeuix/themes/aura';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
+import { PRIMENG_ES } from './core/config/primeng-es';
 import { credentialsInterceptor } from './core/interceptor/credentials.interceptor';
 import { csrfInterceptor } from './core/interceptor/csrf.interceptor';
 import { errorInterceptor } from './core/interceptor/error.interceptor';
 import { loaderInterceptor } from './core/interceptor/loader.interceptor';
 import { refreshInterceptor } from './core/interceptor/refresh.interceptor';
+import { GlobalErrorHandler } from './core/service/global-error-handler';
 import { routes } from './app.routes';
 
 const VioletPreset = definePreset(Aura, {
@@ -39,7 +41,8 @@ export const appConfig: ApplicationConfig = {
     // Order matters: `refresh` is innermost so recovered 401s never reach `error`.
     provideHttpClient(withFetch(), withInterceptors([credentialsInterceptor, csrfInterceptor, loaderInterceptor, errorInterceptor, refreshInterceptor])),
     provideAnimationsAsync(),
-    providePrimeNG({ theme: { preset: VioletPreset, options: { darkModeSelector: '.app-dark' } } }),
+    providePrimeNG({ translation: PRIMENG_ES, theme: { preset: VioletPreset, options: { darkModeSelector: '.app-dark' } } }),
     MessageService,
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
 };

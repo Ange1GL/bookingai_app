@@ -14,6 +14,9 @@ export interface SessionResponseDto {
   sessionId: string;
 }
 
+/** The cloud agent can hang; after this the message is marked as failed and the manual fallback is offered. */
+export const AGENT_REPLY_TIMEOUT_MS = 45_000;
+
 export type ChatRole = 'user' | 'assistant';
 
 /** `error` only applies to user messages whose delivery failed and can be retried. */

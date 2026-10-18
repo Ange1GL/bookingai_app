@@ -47,6 +47,17 @@
           }
         </dd>
       </dl>
+
+      @if (cancellable()) {
+        <p-button
+          label="Cancelar cita"
+          icon="pi pi-times"
+          severity="danger"
+          [outlined]="true"
+          [fluid]="true"
+          (onClick)="cancelRequested.emit(item)"
+        />
+      }
     </div>
   }
 </p-drawer>

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.angellariosacosta.bookingapp.application.command.CancelAppointmentCommand;
+import com.github.angellariosacosta.bookingapp.application.port.in.CancelAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreateAppointmentUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.QueryAppointmentsUseCase;
 import com.github.angellariosacosta.bookingapp.domain.model.Appointment;
@@ -32,6 +34,7 @@ public class AppointmentController {
 
 	private final CreateAppointmentUseCase createAppointment;
 	private final QueryAppointmentsUseCase queryAppointments;
+	private final CancelAppointmentUseCase cancelAppointment;
 	private final AppointmentRestMapper mapper;
 
 	@PostMapping
@@ -39,6 +42,12 @@ public class AppointmentController {
 			@Valid @RequestBody CreateAppointmentRequest request,
 			@CurrentUserId Long userId) {
 		Appointment appointment = createAppointment.create(mapper.toCommand(request, userId));
+		return ResponseEntity.ok(mapper.toResponse(appointment));
+	}
+
+	@PostMapping("/{id}/cancel")
+	public ResponseEntity<AppointmentResponse> cancel(@PathVariable Long id, @CurrentUserId Long userId) {
+		Appointment appointment = cancelAppointment.cancel(new CancelAppointmentCommand(id, userId));
 		return ResponseEntity.ok(mapper.toResponse(appointment));
 	}
 

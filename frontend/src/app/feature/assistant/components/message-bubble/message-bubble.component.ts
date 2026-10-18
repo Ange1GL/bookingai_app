@@ -12,6 +12,7 @@ import { AssistantAvatarComponent } from '../assistant-avatar/assistant-avatar.c
 export class MessageBubbleComponent {
   readonly message = input.required<ChatMessage>();
   readonly retry = output<number>();
+  readonly createManually = output<void>();
 
   protected readonly isUser = computed(() => this.message().role === 'user');
   protected readonly bubbleClass = computed(() =>

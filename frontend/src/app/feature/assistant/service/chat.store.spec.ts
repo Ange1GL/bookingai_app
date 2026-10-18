@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Observable, of, Subject, throwError } from 'rxjs';
+import { AGENT_REPLY_TIMEOUT_MS } from '../models/chat.model';
 import { AgentService } from './agent.service';
 import { ChatStore } from './chat.store';
 
@@ -61,6 +62,29 @@ describe('ChatStore', () => {
       ['user', 'sent'],
       ['assistant', 'sent'],
     ]);
+  });
+
+  it('treats a blank reply as no response so the manual fallback is offered', () => {
+    chat.mockReturnValueOnce(of('   '));
+    store.send('agenda');
+
+    expect(store.messages().map((m) => [m.role, m.state])).toEqual([['user', 'error']]);
+    expect(store.sending()).toBe(false);
+  });
+
+  it('gives up when the agent never answers', () => {
+    vi.useFakeTimers();
+    try {
+      chat.mockReturnValueOnce(new Subject<string>());
+      store.send('agenda');
+
+      vi.advanceTimersByTime(AGENT_REPLY_TIMEOUT_MS + 1);
+
+      expect(store.messages()[0]?.state).toBe('error');
+      expect(store.sending()).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('starts a new conversation with a fresh session', () => {

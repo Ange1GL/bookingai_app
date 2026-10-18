@@ -1,6 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, of, switchMap, tap } from 'rxjs';
-import { ChatMessage, ChatRole } from '../models/chat.model';
+import { map, Observable, of, switchMap, tap, timeout } from 'rxjs';
+import { AGENT_REPLY_TIMEOUT_MS, ChatMessage, ChatRole } from '../models/chat.model';
 import { AgentService } from './agent.service';
 
 /** Conversation state for the assistant page; provided at route level so it lives with the page. */
@@ -47,7 +47,16 @@ export class ChatStore {
   private deliver(id: number, message: string): void {
     this.sendingState.set(true);
     this.ensureSession()
-      .pipe(switchMap((sessionId) => this.agent.chat(sessionId, message)))
+      .pipe(
+        switchMap((sessionId) => this.agent.chat(sessionId, message)),
+        timeout({ first: AGENT_REPLY_TIMEOUT_MS }),
+        map((reply) => {
+          if (!reply?.trim()) {
+            throw new Error('Empty agent reply');
+          }
+          return reply;
+        }),
+      )
       .subscribe({
         next: (reply) => {
           this.append('assistant', reply);

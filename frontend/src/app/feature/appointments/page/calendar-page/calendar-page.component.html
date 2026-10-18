@@ -8,6 +8,10 @@
     (viewChange)="changeView($event)"
   />
 
+  <div class="flex justify-end">
+    <p-button label="Nueva cita" icon="pi pi-plus" (onClick)="openForm()" />
+  </div>
+
   @if (failed()) {
     <div
       class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
@@ -54,4 +58,18 @@
   </div>
 </div>
 
-<app-appointment-detail [appointment]="detail()" [(visible)]="detailVisible" />
+<app-appointment-detail [appointment]="detail()" [(visible)]="detailVisible" (cancelRequested)="askCancel($event)" />
+
+<app-confirm-dialog
+  [(visible)]="cancelVisible"
+  header="Cancelar cita"
+  icon="pi-exclamation-triangle"
+  severity="danger"
+  confirmLabel="Sí, cancelar cita"
+  cancelLabel="Volver"
+  [message]="cancelMessage()"
+  [busy]="cancelling()"
+  (confirmed)="confirmCancel()"
+/>
+
+<app-appointment-form-dialog [(visible)]="formVisible" [day]="selectedDate()" [saving]="creating()" (submitted)="create($event)" />

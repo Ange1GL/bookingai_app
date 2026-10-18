@@ -49,7 +49,7 @@
         <span class="rounded-full bg-surface-200/70 px-3 py-1 text-xs font-medium text-muted-color dark:bg-surface-800">Hoy</span>
       </div>
       @for (message of store.messages(); track message.id) {
-        <app-message-bubble [message]="message" (retry)="store.retry($event)" />
+        <app-message-bubble [message]="message" (retry)="store.retry($event)" (createManually)="createManually()" />
       }
       @if (store.sending()) {
         <div class="flex items-end gap-2" role="status" aria-label="El asistente está escribiendo">

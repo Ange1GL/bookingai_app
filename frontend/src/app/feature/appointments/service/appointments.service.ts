@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SKIP_LOADER } from '@/core/interceptor/loader.interceptor';
-import { AppointmentDto } from '../models/appointment.dto';
+import { AppointmentDto, CreateAppointmentRequestDto } from '../models/appointment.dto';
 import { toLocalIso } from '../utils/calendar-date.util';
 
 @Injectable({ providedIn: 'root' })
@@ -14,6 +14,16 @@ export class AppointmentsService {
   /** Full detail of one appointment, including its service and price. */
   findById(id: number): Observable<AppointmentDto> {
     return this.http.get<AppointmentDto>(`${this.url}/${id}`, { context: new HttpContext().set(SKIP_LOADER, true) });
+  }
+
+  /** Books an appointment; the backend rejects overlaps, past times and blacklisted customers (409/400). */
+  create(request: CreateAppointmentRequestDto): Observable<AppointmentDto> {
+    return this.http.post<AppointmentDto>(this.url, request, { context: new HttpContext().set(SKIP_LOADER, true) });
+  }
+
+  /** Cancels an appointment (not a delete: it stays listed as cancelled). Returns the updated appointment. */
+  cancel(id: number): Observable<AppointmentDto> {
+    return this.http.post<AppointmentDto>(`${this.url}/${id}/cancel`, {}, { context: new HttpContext().set(SKIP_LOADER, true) });
   }
 
   /** Appointments of the authenticated user in the half-open range [from, to). */
