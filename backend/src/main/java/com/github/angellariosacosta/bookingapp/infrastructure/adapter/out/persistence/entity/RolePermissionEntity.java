@@ -22,6 +22,11 @@ public class RolePermissionEntity {
     @Column(name = "permission_id")
     private Long permissionId;
 
+    // false = vínculo revocado lógicamente; reasignar lo reactiva.
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "role_id",

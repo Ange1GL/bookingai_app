@@ -31,12 +31,24 @@ public class RoleEntity extends BaseEntity {
     private String description;
 
     @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
+    // Roles del catálogo base (USER, ADMIN): no se deshabilitan, eliminan ni renombran.
+    @Builder.Default
+    @Column(name = "is_system", nullable = false)
+    private boolean system = false;
+
+    @Builder.Default
     @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private Set<RolePermissionEntity> rolePermissions = new HashSet<>();
 
+    // Solo vínculos activos hacia permisos vigentes (activos y no eliminados).
     public Set<PermissionEntity> getPermissionEntities() {
         return rolePermissions.stream()
+                .filter(RolePermissionEntity::isActive)
                 .map(RolePermissionEntity::getPermission)
+                .filter(permission -> permission.isActive() && !permission.isDeleted())
                 .collect(Collectors.toSet());
     }
 }

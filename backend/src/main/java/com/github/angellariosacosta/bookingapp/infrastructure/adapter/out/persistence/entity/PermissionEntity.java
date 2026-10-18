@@ -24,4 +24,13 @@ public class PermissionEntity extends BaseEntity {
 
     @Column(length = 255)
     private String description;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
+    // Permisos del catálogo base (referenciados desde código): nunca se deshabilitan ni eliminan.
+    @Builder.Default
+    @Column(name = "is_system", nullable = false)
+    private boolean system = false;
 }

@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.domain.model;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +27,14 @@ public class User implements Serializable {
     private String password;
 
     private boolean active;
+
+    // Teléfono en formato internacional (solo dígitos); destino de la contraseña temporal por WhatsApp.
+    private String phone;
+
+    // true mientras la contraseña sea temporal: el usuario debe cambiarla antes de usar el resto de la API.
+    private boolean mustChangePassword;
+
+    private Instant passwordChangedAt;
 
     @Builder.Default
     private Set<Role> roles = new HashSet<>();

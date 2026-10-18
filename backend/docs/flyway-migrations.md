@@ -107,9 +107,12 @@ la de un compañero y en producción.
 - **`status_appointment`** → `V2__seed_status_appointment.sql`. Antes vivía en
   `src/main/resources/data.sql` con `spring.sql.init.mode: always`; ese archivo y esa propiedad se
   eliminaron para no tener dos mecanismos de seed en paralelo.
-- **Roles y permisos** → los sigue gestionando `DataInitializer` (`ApplicationRunner` en
-  `infrastructure.config`), que es idempotente. **No se duplican en SQL**: tener el mismo dato
-  sembrado en dos lugares es garantía de divergencia entre entornos.
+- **Roles y permisos** → `V23__admin_users_roles_permissions.sql` siembra el catálogo del sistema
+  (marcado `is_system = true`) porque la administración de roles necesita saber qué filas son
+  intocables y los nuevos permisos (`ROLE_*`, `PERMISSION_*`) deben existir de forma determinista.
+  Es idempotente (`on conflict`). `DataInitializer` sigue corriendo como red de seguridad y también
+  crea sus filas como `system`; si se agrega un permiso/rol base nuevo, va en una migración nueva
+  (y, de preferencia, retirarlo de `DataInitializer` para no mantenerlo en dos sitios).
 
 ## Cómo se generó el baseline
 

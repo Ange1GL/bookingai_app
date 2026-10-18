@@ -48,7 +48,7 @@ public class DataInitializer implements ApplicationRunner {
         return permissionRepository.findByName(name).orElseGet(() -> {
             log.info("Creating permission: {}", name);
             return permissionRepository.save(
-                    PermissionEntity.builder().name(name).description(description).build()
+                    PermissionEntity.builder().name(name).description(description).system(true).build()
             );
         });
     }
@@ -57,7 +57,7 @@ public class DataInitializer implements ApplicationRunner {
         RoleEntity role = roleRepository.findByName(name).orElseGet(() -> {
             log.info("Creating role: {}", name);
             return roleRepository.save(
-                    RoleEntity.builder().name(name).description(description).build()
+                    RoleEntity.builder().name(name).description(description).system(true).build()
             );
         });
 
