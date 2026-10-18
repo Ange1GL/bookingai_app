@@ -1,6 +1,5 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest;
 
-import java.time.Instant;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -217,11 +216,6 @@ public class GlobalExceptionHandler {
 	}
 
 	private ErrorResponse errorBody(HttpStatus status, String message) {
-		return new ErrorResponse(
-				Instant.now().toString(),
-				status.value(),
-				status.getReasonPhrase(),
-				message
-		);
+		return ErrorResponse.of(status, message);
 	}
 }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Objects;
 
 @Component
@@ -33,12 +32,7 @@ public class SecurityEntryPoint implements AuthenticationEntryPoint {
                 request.getMethod(), request.getRequestURI(),
                 Objects.requireNonNullElse(authException.getMessage(), "sin detalle"));
 
-        ErrorResponse body = new ErrorResponse(
-                Instant.now().toString(),
-                HttpStatus.UNAUTHORIZED.value(),
-                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                MESSAGE
-        );
+        ErrorResponse body = ErrorResponse.of(HttpStatus.UNAUTHORIZED, MESSAGE);
 
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(JSON_CONTENT_TYPE);
