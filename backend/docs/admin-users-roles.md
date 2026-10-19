@@ -212,6 +212,8 @@ POST /api/v1/admin/users
 
 ### Configuración de WhatsApp para credenciales
 
+Guía paso a paso para obtener la plantilla y el número en Meta: [whatsapp-plantilla-credenciales.md](whatsapp-plantilla-credenciales.md).
+
 Un mensaje iniciado por el negocio a alguien que no escribió en las últimas 24 h **solo puede ser una plantilla
 aprobada por Meta**. Prerrequisito externo: crear y aprobar una plantilla (idioma `es`) con dos variables de
 cuerpo, p. ej. `Hola, tu usuario es {{1}} y tu contraseña temporal es {{2}}. Deberás cambiarla al entrar.`
