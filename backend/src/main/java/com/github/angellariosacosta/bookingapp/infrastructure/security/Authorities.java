@@ -12,6 +12,12 @@ public final class Authorities {
     public static final String PERMISSION_READ = "PERMISSION_READ";
     public static final String PERMISSION_WRITE = "PERMISSION_WRITE";
 
+    // Expresiones para @PreAuthorize (deben ser constantes de compilación): el permiso específico o ADMIN_ALL.
+    public static final String CAN_READ_PERMISSIONS =
+            "hasAnyAuthority('" + PERMISSION_READ + "', '" + ADMIN_ALL + "')";
+    public static final String CAN_WRITE_PERMISSIONS =
+            "hasAnyAuthority('" + PERMISSION_WRITE + "', '" + ADMIN_ALL + "')";
+
     private Authorities() {
     }
 }

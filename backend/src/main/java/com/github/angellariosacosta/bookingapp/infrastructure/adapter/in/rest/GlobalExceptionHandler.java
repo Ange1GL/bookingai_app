@@ -70,6 +70,19 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
+	@ExceptionHandler(PermissionNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handlePermissionNotFound(PermissionNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicatePermissionNameException.class, PermissionInUseException.class,
+			SystemPermissionProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handlePermissionConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
 	@ExceptionHandler(InvalidFieldException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleInvalidField(InvalidFieldException ex) {
