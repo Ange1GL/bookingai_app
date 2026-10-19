@@ -135,3 +135,26 @@ Cómo conseguir la plantilla y el número en Meta: [whatsapp-plantilla-otp.md](w
   `SecureRandomOneTimeCodeGenerator`, `WhatsAppOtpConfig`.
 - Pendiente (no hecho): limpieza programada de filas vencidas de `one_time_code` (hoy se conservan como historial) y
   un "olvidé mi contraseña" de autoservicio (reutilizaría esta misma tabla con `PASSWORD_RESET`).
+
+## 8. Frontend (`frontend/`, Angular 21 + PrimeNG)
+
+- Ruta pública **`/auth/create-password`** (`CreatePasswordPageComponent` + `CreatePasswordFormComponent`): usuario,
+  código de 6 dígitos (`p-inputotp`, solo enteros), nueva contraseña y confirmación. Al enviar llama a
+  `AuthService.createPassword` → `POST /api/v1/auth/create-password`; con éxito guarda el usuario en `SessionService`
+  y navega a `/home` (el backend ya dejó las cookies de sesión). Los errores (p. ej. "Código inválido o vencido") los
+  muestra el `errorInterceptor` como toast.
+- Validación en el cliente igual a la del backend: `shared/validators/password-policy.validator.ts` (10–72
+  caracteres, letra y número) y `fields-match.validator.ts` (confirmación).
+- La pantalla de login enlaza a "Crea tu contraseña" para quien acaba de recibir un código.
+- Pruebas: `npx ng test --watch=false` (validadores, formulario y `AuthService.createPassword`).
+- El frontend aún **no tiene pantallas de administración** (usuarios/roles/permisos): hoy el alta se hace por la API
+  (`POST /api/v1/admin/users`). Cuando exista esa pantalla debe mostrar `passwordSet` y `codeSent` y ofrecer
+  "Reenviar código" (`reset-password`).
+
+## 9. Verificación realizada
+
+- Backend: 332 pruebas (incluye `CreatePasswordFlowTest`, flujo completo con BD real y sin transacción de prueba).
+- HTTP contra la app local: 22 comprobaciones (alta sin contraseña, mismo 400 para código/usuario inexistente, un solo
+  uso, reinicio, 5 fallos queman el código, deshabilitado no canjea, sin hash ni `temporaryPassword` en respuestas).
+- UI en el navegador: validaciones del formulario, "las contraseñas no coinciden", y canje real del código hasta
+  `/home` con la sesión abierta.
