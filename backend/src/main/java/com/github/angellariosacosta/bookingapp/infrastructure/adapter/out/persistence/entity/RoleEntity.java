@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,6 +41,7 @@ public class RoleEntity extends BaseEntity {
     private boolean system = false;
 
     @Builder.Default
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private Set<RolePermissionEntity> rolePermissions = new HashSet<>();
 

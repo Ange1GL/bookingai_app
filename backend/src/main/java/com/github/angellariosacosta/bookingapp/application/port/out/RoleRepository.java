@@ -1,5 +1,6 @@
 package com.github.angellariosacosta.bookingapp.application.port.out;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,6 +18,9 @@ public interface RoleRepository {
 
     /** Ignora los eliminados lógicamente. */
     Optional<Role> findById(Long id);
+
+    /** Los roles (no eliminados) cuyo id está en {@code ids}; los ids desconocidos simplemente no aparecen. */
+    List<Role> findAllByIds(Collection<Long> ids);
 
     /** Incluye eliminados: el nombre es único aunque el rol esté dado de baja. */
     boolean existsByName(String name);

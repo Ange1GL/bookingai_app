@@ -42,7 +42,7 @@ public class DataInitializer implements ApplicationRunner {
         PermissionEntity userDelete = findOrCreate("USER_DELETE", "Delete users");
         PermissionEntity adminAll   = findOrCreate("ADMIN_ALL",   "Full administrative access");
 
-        findOrCreateRole("USER",  "Standard user",  Set.of(userRead, userWrite, appointmentCreate, appointmentDelete, appointmentRead));
+        findOrCreateRole("USER",  "Standard user",  Set.of(appointmentCreate, appointmentDelete, appointmentRead));
         findOrCreateRole("ADMIN", "Administrator",  Set.of(userRead, userWrite, userDelete, adminAll));
 
         log.info("Roles and permissions initialized.");

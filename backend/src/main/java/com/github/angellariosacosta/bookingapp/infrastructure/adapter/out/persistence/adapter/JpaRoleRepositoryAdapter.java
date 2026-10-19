@@ -1,5 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.adapter;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,11 @@ public class JpaRoleRepositoryAdapter implements RoleRepository {
     @Override
     public Optional<Role> findById(Long id) {
         return jpaRepositoryRole.findByIdAndDeletedFalse(id).map(roleMapper::toDomain);
+    }
+
+    @Override
+    public List<Role> findAllByIds(Collection<Long> ids) {
+        return jpaRepositoryRole.findAllByIdInAndDeletedFalse(ids).stream().map(roleMapper::toDomain).toList();
     }
 
     @Override

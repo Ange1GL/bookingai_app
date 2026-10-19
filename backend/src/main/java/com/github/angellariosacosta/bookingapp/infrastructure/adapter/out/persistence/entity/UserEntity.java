@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persi
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -49,6 +50,7 @@ public class UserEntity extends BaseEntity {
     private Instant passwordChangedAt;
 
     @Builder.Default
+    @BatchSize(size = 50)
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private Set<UserRoleEntity> userRoles = new HashSet<>();
 

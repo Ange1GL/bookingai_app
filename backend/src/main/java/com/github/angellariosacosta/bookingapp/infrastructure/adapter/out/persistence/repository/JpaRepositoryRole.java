@@ -1,5 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -15,6 +17,8 @@ public interface JpaRepositoryRole extends JpaRepository<RoleEntity, Long> {
     Optional<RoleEntity> findByName(String name);
 
     Optional<RoleEntity> findByIdAndDeletedFalse(Long id);
+
+    List<RoleEntity> findAllByIdInAndDeletedFalse(Collection<Long> ids);
 
     // Incluye eliminados a propósito: uk_roles_name aplica también a las filas dadas de baja.
     boolean existsByName(String name);

@@ -25,6 +25,13 @@ public final class Authorities {
     public static final String CAN_WRITE_ROLES =
             "hasAnyAuthority('" + ROLE_WRITE + "', '" + ADMIN_ALL + "')";
 
+    public static final String CAN_READ_USERS =
+            "hasAnyAuthority('" + USER_READ + "', '" + ADMIN_ALL + "')";
+    public static final String CAN_WRITE_USERS =
+            "hasAnyAuthority('" + USER_WRITE + "', '" + ADMIN_ALL + "')";
+    public static final String CAN_DELETE_USERS =
+            "hasAnyAuthority('" + USER_DELETE + "', '" + ADMIN_ALL + "')";
+
     private Authorities() {
     }
 }

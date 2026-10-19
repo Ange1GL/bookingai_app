@@ -127,3 +127,54 @@ reasignación); `RoleDeactivationGuard` concentra las reglas de disable/delete; 
 estado compartido (entero 0/1/2) de las consultas paginadas de permisos y roles.
 `RoleRepository` (puerto existente) se amplió en vez de renombrarse, por la tarea pendiente de nomenclatura
 de persistencia. Los listados cargan permisos de forma EAGER (hasta 50 roles por página).
+
+## Fase 5 — Usuarios (`/api/v1/admin/users`)
+
+Lectura: `USER_READ`; edición/roles/estado: `USER_WRITE`; baja: `USER_DELETE` (todas también con `ADMIN_ALL`).
+El alta de usuarios y el reset de contraseña llegan en la fase 6.
+
+| Método y ruta | Acción |
+|---|---|
+| `GET /` | Lista **paginada** con buscador. Query: `q` (contiene, sin distinguir mayúsculas, sobre username, nombre, email y teléfono), `active`, `roleId`, `page` (0), `size` (20, máx. 50), `sortBy` (`USERNAME`\|`NAME`\|`EMAIL`\|`CREATED_AT`), `direction` |
+| `GET /{id}` | Detalle |
+| `PUT /{id}` | Edita `name`, `email` y `phone` (`phone` null = no cambiar). El `username` es inmutable |
+| `PUT /{id}/roles` | **Reemplaza** los roles: `{"roleIds":[…]}` (mínimo uno, todos activos) |
+| `PATCH /{id}/enable` · `/disable` | Habilita / deshabilita (idempotentes). Deshabilitar revoca sus refresh tokens |
+| `DELETE /{id}` | Baja lógica (`deleted=true`, `active=false`), 204 |
+
+```http
+GET /api/v1/admin/users?q=ang&active=true&roleId=2&page=0&size=20&sortBy=USERNAME&direction=ASC
+
+200 OK
+{ "content": [ { "id": 1, "username": "angel", "name": "Angel", "email": "angel@example.com",
+                 "phone": "5215512345678", "active": true, "mustChangePassword": false,
+                 "roles": [ { "id": 2, "name": "ADMIN" } ] } ],
+  "page": 0, "size": 20, "totalElements": 1, "totalPages": 1 }
+```
+
+La respuesta nunca incluye la contraseña ni datos de sesión.
+
+Reglas:
+
+- **No se puede** deshabilitarse, eliminarse ni quitarse el rol ADMIN a uno mismo → `409`.
+- **Último admin:** deshabilitar, eliminar o quitar ADMIN al único admin activo → `409`.
+- Roles inexistentes o deshabilitados, o lista vacía → `400`.
+- Email o teléfono duplicado → `409` (los valores de usuarios eliminados siguen reservados por los UNIQUE).
+- El teléfono se normaliza a solo dígitos (8–15, formato internacional; se aceptan `+`, espacios y guiones).
+- Un usuario eliminado deja de poder iniciar sesión o renovar su sesión (las búsquedas por username/email/id
+  ignoran `deleted`).
+- Quitar un rol es lógico (`user_roles.active=false`); reasignarlo reactiva la misma fila.
+
+### Corrección de seguridad incluida (V24)
+
+El rol `USER` (los dueños de negocio) tenía `USER_READ` y `USER_WRITE`, que hasta ahora ningún endpoint
+exigía. Como los endpoints admin sí los exigen, **cualquier usuario normal habría podido listar y editar a
+todos los demás**. `V24` revoca (lógicamente) esos dos permisos del rol `USER` y `DataInitializer` ya no los
+asigna. `USER_READ/WRITE/DELETE` quedan solo para `ADMIN`.
+
+### Cambios que tocan código previo
+
+- `UserRepository.save` ahora actualiza la fila existente (MapStruct `@MappingTarget`) en vez de reemplazarla:
+  conserva `deleted` y la auditoría. Sigue siendo solo-añadir en roles, pero ahora **reactiva** un vínculo
+  revocado (antes `BootstrapAdminInitializer` habría dado por asignado un ADMIN revocado sin efecto).
+- `@BatchSize(50)` en `UserEntity.userRoles` y `RoleEntity.rolePermissions` para no hacer N+1 al listar.

@@ -96,6 +96,19 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
+	@ExceptionHandler(UserNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleUserNotFound(UserNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicatePhoneException.class, SelfModificationException.class,
+			LastAdminProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleUserConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
 	@ExceptionHandler(InvalidFieldException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleInvalidField(InvalidFieldException ex) {
