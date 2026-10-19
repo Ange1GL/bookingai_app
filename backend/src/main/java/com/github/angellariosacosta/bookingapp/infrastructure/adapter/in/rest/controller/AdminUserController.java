@@ -1,11 +1,13 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,17 +16,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.port.in.AssignUserRolesUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ChangeUserStatusUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.CreateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.DeleteUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.GetUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ListUsersUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.ResetUserPasswordUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.UpdateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.query.ListUsersQuery;
 import com.github.angellariosacosta.bookingapp.application.query.SortDirection;
 import com.github.angellariosacosta.bookingapp.application.query.UserSortField;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AssignUserRolesRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateUserRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.PageResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UpdateUserRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserCredentialsResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.UserRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.Authorities;
@@ -45,6 +51,8 @@ public class AdminUserController {
 	private static final int MAX_PAGE_SIZE = 50;
 	private static final int MAX_SEARCH_LENGTH = 100;
 
+	private final CreateUserUseCase createUser;
+	private final ResetUserPasswordUseCase resetUserPassword;
 	private final ListUsersUseCase listUsers;
 	private final GetUserUseCase getUser;
 	private final UpdateUserUseCase updateUser;
@@ -52,6 +60,20 @@ public class AdminUserController {
 	private final ChangeUserStatusUseCase changeUserStatus;
 	private final DeleteUserUseCase deleteUser;
 	private final UserRestMapper mapper;
+
+	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; credentialsSent=false indica reintentar con reset-password.
+	@PostMapping
+	@PreAuthorize(Authorities.CAN_WRITE_USERS)
+	public ResponseEntity<UserCredentialsResponse> create(@Valid @RequestBody CreateUserRequest request) {
+		UserCredentialsResponse body = mapper.toCredentialsResponse(createUser.create(mapper.toCommand(request)));
+		return ResponseEntity.status(HttpStatus.CREATED).body(body);
+	}
+
+	@PostMapping("/{id}/reset-password")
+	@PreAuthorize(Authorities.CAN_WRITE_USERS)
+	public ResponseEntity<UserCredentialsResponse> resetPassword(@PathVariable Long id, @CurrentUserId Long actorId) {
+		return ResponseEntity.ok(mapper.toCredentialsResponse(resetUserPassword.reset(actorId, id)));
+	}
 
 	@GetMapping
 	@PreAuthorize(Authorities.CAN_READ_USERS)

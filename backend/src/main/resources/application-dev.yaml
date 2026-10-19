@@ -7,3 +7,9 @@ security:
     enabled: false
   cookie:
     secure: false
+
+# Sin WhatsApp configurado en local, la contrasena temporal del usuario nuevo se devuelve en la respuesta
+# (solo cuando no se pudo entregar por WhatsApp) para poder probar el flujo. NUNCA fuera de dev.
+admin:
+  users:
+    expose-temporary-password: true

@@ -41,7 +41,7 @@ class AssignUserRolesServiceTest {
 		userRepository = mock(UserRepository.class);
 		roleRepository = mock(RoleRepository.class);
 		service = new AssignUserRolesService(new UserFinder(userRepository), new UserAdminGuard(userRepository),
-				userRepository, roleRepository);
+				new AssignableRoles(roleRepository), userRepository);
 	}
 
 	private void target(Role... roles) {

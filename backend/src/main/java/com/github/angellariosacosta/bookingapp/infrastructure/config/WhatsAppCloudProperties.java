@@ -29,7 +29,21 @@ public class WhatsAppCloudProperties {
 
 	private Duration readTimeout = Duration.ofSeconds(10);
 
+	/** Número emisor (phone_number_id) desde el que se envían las contraseñas temporales. */
+	private String credentialsPhoneNumberId = "";
+
+	/** Plantilla aprobada por Meta con dos variables de cuerpo: {{1}} usuario y {{2}} contraseña. */
+	private String credentialsTemplateName = "";
+
+	private String credentialsTemplateLanguage = "es";
+
 	public boolean isSenderEnabled() {
 		return systemUserToken != null && !systemUserToken.isBlank();
+	}
+
+	public boolean isCredentialsSenderEnabled() {
+		return isSenderEnabled()
+				&& credentialsPhoneNumberId != null && !credentialsPhoneNumberId.isBlank()
+				&& credentialsTemplateName != null && !credentialsTemplateName.isBlank();
 	}
 }

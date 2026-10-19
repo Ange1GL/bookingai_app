@@ -92,12 +92,20 @@ whatsapp:
     system-user-token: ${SYSTEM_USER_EMPLOYEE_META:}   # token permanente del usuario del sistema de Meta
     api-version: v26.0
     base-url: https://graph.facebook.com
+    # Contrasena temporal de usuarios nuevos: mensaje de PLANTILLA aprobada por Meta (el negocio inicia la conversacion).
+    # Sin estos tres valores (token incluido) no se envia nada y la API responde credentialsSent=false.
+    credentials-phone-number-id: ${WHATSAPP_CREDENTIALS_PHONE_NUMBER_ID:}   # phone_number_id emisor
+    credentials-template-name: ${WHATSAPP_CREDENTIALS_TEMPLATE_NAME:}       # plantilla con {{1}}=usuario, {{2}}=contrasena
+    credentials-template-language: es
 
 admin:
   bootstrap:
     # Usuario existente que recibe el rol ADMIN al arrancar (idempotente). Vacio = no hace nada.
     # Resuelve el primer admin: despues los admins se gestionan por la API. Ver docs/admin-users-roles.md
     username: ${BOOTSTRAP_ADMIN_USERNAME:}
+  users:
+    # Solo true en application-dev.yaml: devuelve la contrasena temporal en la respuesta cuando WhatsApp no la entrego.
+    expose-temporary-password: false
 
 security:
   jwt:

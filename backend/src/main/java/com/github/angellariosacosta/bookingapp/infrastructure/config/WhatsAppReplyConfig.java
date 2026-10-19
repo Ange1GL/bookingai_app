@@ -19,16 +19,18 @@ import lombok.extern.slf4j.Slf4j;
 public class WhatsAppReplyConfig {
 
 	@Bean
-	public CustomerReplyPort customerReplyPort(WhatsAppCloudProperties properties) {
+	public CustomerReplyPort customerReplyPort(WhatsAppCloudProperties properties, RestClient whatsappRestClient) {
 		if (!properties.isSenderEnabled()) {
 			log.warn("SYSTEM_USER_EMPLOYEE_META vacío: las respuestas de WhatsApp solo se registran en el log (modo demo)");
 			return new LoggingCustomerReplyAdapter();
 		}
 		log.info("Envío de respuestas por la Cloud API de WhatsApp habilitado ({})", properties.getApiVersion());
-		return new WhatsAppCloudReplyAdapter(whatsappRestClient(properties), properties);
+		return new WhatsAppCloudReplyAdapter(whatsappRestClient, properties);
 	}
 
-	private RestClient whatsappRestClient(WhatsAppCloudProperties properties) {
+	/** Cliente HTTP de la Cloud API, compartido por el envío de respuestas y el de contraseñas temporales. */
+	@Bean
+	public RestClient whatsappRestClient(WhatsAppCloudProperties properties) {
 		HttpClient httpClient = HttpClient.newBuilder().connectTimeout(properties.getConnectTimeout()).build();
 		JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
 		requestFactory.setReadTimeout(properties.getReadTimeout());

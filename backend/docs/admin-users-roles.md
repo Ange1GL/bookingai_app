@@ -178,3 +178,64 @@ asigna. `USER_READ/WRITE/DELETE` quedan solo para `ADMIN`.
   conserva `deleted` y la auditoría. Sigue siendo solo-añadir en roles, pero ahora **reactiva** un vínculo
   revocado (antes `BootstrapAdminInitializer` habría dado por asignado un ADMIN revocado sin efecto).
 - `@BatchSize(50)` en `UserEntity.userRoles` y `RoleEntity.rolePermissions` para no hacer N+1 al listar.
+
+## Fase 6 — Alta de usuario y contraseña temporal por WhatsApp
+
+| Método y ruta | Permiso | Acción |
+|---|---|---|
+| `POST /api/v1/admin/users` | `USER_WRITE` | Crea el usuario con contraseña temporal y se la envía por WhatsApp (201) |
+| `POST /api/v1/admin/users/{id}/reset-password` | `USER_WRITE` | Regenera la contraseña temporal, cierra sus sesiones, limpia un bloqueo por intentos y la reenvía (200) |
+
+```http
+POST /api/v1/admin/users
+{ "username": "maria.lopez", "email": "maria@example.com", "name": "María López",
+  "phone": "+52 155 1234 5678", "roleIds": [1] }
+
+201 Created
+{ "user": { "id": 7, "username": "maria.lopez", "name": "María López", "email": "maria@example.com",
+            "phone": "5215512345678", "active": true, "mustChangePassword": true,
+            "roles": [ { "id": 1, "name": "USER" } ] },
+  "credentialsSent": true }
+```
+
+- `username`: 3–50, solo letras, dígitos, `.`, `-`, `_`; inmutable. `phone` obligatorio (se normaliza a dígitos).
+  Username/email/teléfono duplicados → `409`. Roles inexistentes, deshabilitados o lista vacía → `400`.
+- **Orden:** primero se guarda el usuario (hash BCrypt, `must_change_password=true`) y se hace commit; **después**
+  se envía el WhatsApp. Si el envío falla el usuario queda creado y la respuesta trae `credentialsSent: false`:
+  el admin usa `reset-password` para reintentar (no hay rollback).
+- `reset-password` sobre uno mismo → `409` (para eso es el cambio de contraseña); usuario sin teléfono → `400`.
+- La contraseña temporal: 12 caracteres (`SecureRandom`) con mayúscula, minúscula, dígito y símbolo, sin
+  caracteres ambiguos. Solo existe en memoria entre generarla y enviarla: **no se loguea, no se persiste y no se
+  devuelve por API**, con una excepción de desarrollo (abajo).
+- Aún no se **exige** el cambio de contraseña en el login: eso es la fase 7. Hasta entonces `mustChangePassword`
+  solo se informa.
+
+### Configuración de WhatsApp para credenciales
+
+Un mensaje iniciado por el negocio a alguien que no escribió en las últimas 24 h **solo puede ser una plantilla
+aprobada por Meta**. Prerrequisito externo: crear y aprobar una plantilla (idioma `es`) con dos variables de
+cuerpo, p. ej. `Hola, tu usuario es {{1}} y tu contraseña temporal es {{2}}. Deberás cambiarla al entrar.`
+(`{{1}}` = username, `{{2}}` = contraseña). Meta puede exigir la categoría *Authentication* para contenidos con
+contraseñas; esa categoría solo admite un código, así que si la rechazan hay que replantear el contenido.
+
+| Variable | Propiedad | Descripción |
+|---|---|---|
+| `SYSTEM_USER_EMPLOYEE_META` | `whatsapp.cloud.system-user-token` | El mismo token que ya usa el agente |
+| `WHATSAPP_CREDENTIALS_PHONE_NUMBER_ID` | `whatsapp.cloud.credentials-phone-number-id` | `phone_number_id` emisor |
+| `WHATSAPP_CREDENTIALS_TEMPLATE_NAME` | `whatsapp.cloud.credentials-template-name` | Nombre de la plantilla aprobada |
+| — | `whatsapp.cloud.credentials-template-language` | `es` por defecto |
+
+Si falta cualquiera de las tres primeras, `WhatsAppCredentialsConfig` usa `LoggingUserCredentialNotifierAdapter`
+(no envía, no loguea la clave) y la API responde `credentialsSent: false`.
+
+### Probar en local sin WhatsApp
+
+`application-dev.yaml` activa `admin.users.expose-temporary-password: true`. Con esa bandera **y solo cuando el
+WhatsApp no pudo entregarla**, la respuesta incluye `"temporaryPassword"`. Con WhatsApp configurado (o en
+cualquier perfil que no sea dev) nunca aparece. El perfil `dev` es el activo por defecto: en QA/prod debe
+activarse siempre el perfil `qa` (ver `application.yaml`).
+
+Código: `TemporaryCredentialsPersister` (parte transaccional), `CredentialsDelivery` (envío),
+`AssignableRoles` (validación de roles, compartida con la asignación de roles), puertos
+`TemporaryPasswordGenerator` y `UserCredentialNotifierPort` (a diferencia de `CustomerReplyPort`, informa si
+el mensaje salió).
