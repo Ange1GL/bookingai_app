@@ -11,7 +11,6 @@ public class AuthRestMapper {
 	// Omite accessToken/refreshToken a propósito: los JWT viajan solo en cookies HttpOnly
 	// (AuthController#writeAuthCookies). Exponerlos en el body anularía la mitigación XSS.
 	public AuthSuccessResponse toResponse(AuthTokenResult result) {
-		return new AuthSuccessResponse(result.userId(), result.username(), result.email(), result.roles(),
-				result.mustChangePassword());
+		return new AuthSuccessResponse(result.userId(), result.username(), result.email(), result.roles());
 	}
 }

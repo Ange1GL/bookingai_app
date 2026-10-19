@@ -84,7 +84,7 @@ class ChangePasswordServiceTest {
 				Clock.fixed(NOW, ZoneOffset.UTC));
 
 		user = User.builder().id(USER_ID).username("maria").email("m@example.com").password("old-hash")
-				.mustChangePassword(true).active(true)
+				.password("old-hash").active(true)
 				.roles(Set.of(new Role(1L, Role.USER_NAME, null, true, true, Set.of()))).build();
 		when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 		when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -107,14 +107,12 @@ class ChangePasswordServiceTest {
 		ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
 		verify(userRepository).save(saved.capture());
 		assertEquals("new-hash", saved.getValue().getPassword());
-		assertFalse(saved.getValue().isMustChangePassword());
 		assertEquals(NOW, saved.getValue().getPasswordChangedAt());
 
 		verify(refreshTokens).revokeAllByUserId(USER_ID);
 		verify(revocations).revoke(any());
 		assertEquals("new-access", result.accessToken());
 		assertEquals("raw-refresh", result.refreshToken());
-		assertFalse(result.mustChangePassword());
 	}
 
 	@Test

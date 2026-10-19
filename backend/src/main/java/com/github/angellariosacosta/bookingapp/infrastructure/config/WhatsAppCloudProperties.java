@@ -29,21 +29,21 @@ public class WhatsAppCloudProperties {
 
 	private Duration readTimeout = Duration.ofSeconds(10);
 
-	/** Número emisor (phone_number_id) desde el que se envían las contraseñas temporales. */
-	private String credentialsPhoneNumberId = "";
+	/** Número emisor (phone_number_id) desde el que se envían los códigos de un solo uso. */
+	private String otpPhoneNumberId = "";
 
-	/** Plantilla aprobada por Meta con dos variables de cuerpo: {{1}} usuario y {{2}} contraseña. */
-	private String credentialsTemplateName = "";
+	/** Plantilla de autenticación aprobada por Meta: el código va en el cuerpo y en el botón "Copiar código". */
+	private String otpTemplateName = "";
 
-	private String credentialsTemplateLanguage = "es";
+	private String otpTemplateLanguage = "es";
 
 	public boolean isSenderEnabled() {
 		return systemUserToken != null && !systemUserToken.isBlank();
 	}
 
-	public boolean isCredentialsSenderEnabled() {
+	public boolean isOtpSenderEnabled() {
 		return isSenderEnabled()
-				&& credentialsPhoneNumberId != null && !credentialsPhoneNumberId.isBlank()
-				&& credentialsTemplateName != null && !credentialsTemplateName.isBlank();
+				&& otpPhoneNumberId != null && !otpPhoneNumberId.isBlank()
+				&& otpTemplateName != null && !otpTemplateName.isBlank();
 	}
 }

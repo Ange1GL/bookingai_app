@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Administración de usuarios ({@code admin.users.*}). {@code exposeTemporaryPassword} solo debe activarse en el perfil
- * dev: devuelve la contraseña temporal en la respuesta, y únicamente cuando WhatsApp no la pudo entregar.
+ * Administración de usuarios ({@code admin.users.*}). {@code exposeOneTimeCode} solo debe activarse en el perfil dev:
+ * devuelve el código en la respuesta, y únicamente cuando WhatsApp no pudo entregarlo.
  */
 @Component
 @ConfigurationProperties(prefix = "admin.users")
@@ -16,5 +16,5 @@ import lombok.Setter;
 @Setter
 public class AdminUsersProperties {
 
-	private boolean exposeTemporaryPassword = false;
+	private boolean exposeOneTimeCode = false;
 }

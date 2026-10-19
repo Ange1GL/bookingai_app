@@ -5,7 +5,6 @@ import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoin
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.CsrfCookieFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.handler.SecurityAccessDeniedHandler;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.JwtAuthenticationFilter;
-import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.PasswordChangeRequiredFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,7 +25,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
 @RequiredArgsConstructor
@@ -43,7 +41,6 @@ public class SecurityConfig {
     private final SecurityAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
-    private final JsonMapper jsonMapper;
 
     // JwtAuthenticationFilter ya es un bean, así que Spring Boot lo auto-registraría también
     // como filtro de servlet a nivel de contenedor (Tomcat), aplicado a todas las rutas ("/*")
@@ -120,11 +117,10 @@ public class SecurityConfig {
                 // CORS ya aplicados. Ver docs/rate-limiting.md.
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
-                // Con contraseña temporal solo se permite cambiarla / cerrar sesión: ver PasswordChangeRequiredFilter.
-                .addFilterAfter(new PasswordChangeRequiredFilter(jsonMapper), JwtAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/create-password",   // el usuario sin contraseña canjea su OTP: aún no tiene sesión
                                 "/api/v1/auth/csrf",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",

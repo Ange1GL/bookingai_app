@@ -181,6 +181,11 @@ asigna. `USER_READ/WRITE/DELETE` quedan solo para `ADMIN`.
 
 ## Fase 6 — Alta de usuario y contraseña temporal por WhatsApp
 
+> **Reemplazado.** La contraseña temporal se sustituyó por un código de un solo uso (OTP) con el que el usuario crea su
+> propia contraseña. Vigente: [otp-password-creation.md](otp-password-creation.md). Esta sección queda como historial
+> (los campos `credentialsSent`/`temporaryPassword`, las variables `WHATSAPP_CREDENTIALS_*` y la plantilla de 2 variables
+> ya no existen: ahora son `codeSent`/`oneTimeCode`, `WHATSAPP_OTP_*` y una plantilla de autenticación).
+
 | Método y ruta | Permiso | Acción |
 |---|---|---|
 | `POST /api/v1/admin/users` | `USER_WRITE` | Crea el usuario con contraseña temporal y se la envía por WhatsApp (201) |
@@ -212,7 +217,7 @@ POST /api/v1/admin/users
 
 ### Configuración de WhatsApp para credenciales
 
-Guía paso a paso para obtener la plantilla y el número en Meta: [whatsapp-plantilla-credenciales.md](whatsapp-plantilla-credenciales.md).
+Guía paso a paso para obtener la plantilla y el número en Meta: [whatsapp-plantilla-otp.md](whatsapp-plantilla-otp.md).
 
 Un mensaje iniciado por el negocio a alguien que no escribió en las últimas 24 h **solo puede ser una plantilla
 aprobada por Meta**. Prerrequisito externo: crear y aprobar una plantilla (idioma `es`) con dos variables de
@@ -243,6 +248,10 @@ Código: `TemporaryCredentialsPersister` (parte transaccional), `CredentialsDeli
 el mensaje salió).
 
 ## Fase 7 — Cambio forzoso de contraseña
+
+> **Reemplazado en parte.** `must_change_password`, `PasswordChangeRequiredFilter` y `mustChangePassword` desaparecieron:
+> sin contraseña no hay login, así que no hay estado "temporal" que forzar. Se conserva `POST /api/v1/auth/change-password`
+> (cambio voluntario con sesión abierta). Vigente: [otp-password-creation.md](otp-password-creation.md).
 
 Un usuario creado o reiniciado por un admin tiene `must_change_password = true` y una contraseña temporal.
 

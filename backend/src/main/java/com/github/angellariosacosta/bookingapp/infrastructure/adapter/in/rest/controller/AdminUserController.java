@@ -30,7 +30,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreateUserRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.PageResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UpdateUserRequest;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserCredentialsResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserOneTimeCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.UserRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.Authorities;
@@ -61,18 +61,18 @@ public class AdminUserController {
 	private final DeleteUserUseCase deleteUser;
 	private final UserRestMapper mapper;
 
-	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; credentialsSent=false indica reintentar con reset-password.
+	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; codeSent=false indica reintentar con reset-password.
 	@PostMapping
 	@PreAuthorize(Authorities.CAN_WRITE_USERS)
-	public ResponseEntity<UserCredentialsResponse> create(@Valid @RequestBody CreateUserRequest request) {
-		UserCredentialsResponse body = mapper.toCredentialsResponse(createUser.create(mapper.toCommand(request)));
+	public ResponseEntity<UserOneTimeCodeResponse> create(@Valid @RequestBody CreateUserRequest request) {
+		UserOneTimeCodeResponse body = mapper.toOneTimeCodeResponse(createUser.create(mapper.toCommand(request)));
 		return ResponseEntity.status(HttpStatus.CREATED).body(body);
 	}
 
 	@PostMapping("/{id}/reset-password")
 	@PreAuthorize(Authorities.CAN_WRITE_USERS)
-	public ResponseEntity<UserCredentialsResponse> resetPassword(@PathVariable Long id, @CurrentUserId Long actorId) {
-		return ResponseEntity.ok(mapper.toCredentialsResponse(resetUserPassword.reset(actorId, id)));
+	public ResponseEntity<UserOneTimeCodeResponse> resetPassword(@PathVariable Long id, @CurrentUserId Long actorId) {
+		return ResponseEntity.ok(mapper.toOneTimeCodeResponse(resetUserPassword.reset(actorId, id)));
 	}
 
 	@GetMapping

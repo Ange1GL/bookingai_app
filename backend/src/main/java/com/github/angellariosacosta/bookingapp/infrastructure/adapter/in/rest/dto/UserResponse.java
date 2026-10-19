@@ -9,7 +9,7 @@ public record UserResponse(
 		String email,
 		String phone,
 		boolean active,
-		boolean mustChangePassword,
+		boolean passwordSet,
 		List<RoleSummaryResponse> roles
 ) {
 }

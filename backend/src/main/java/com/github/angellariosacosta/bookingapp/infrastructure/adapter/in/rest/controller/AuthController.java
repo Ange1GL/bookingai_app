@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.application.command.ChangePasswordCommand;
+import com.github.angellariosacosta.bookingapp.application.command.CreatePasswordCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.AuthenticateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ChangePasswordUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.CreatePasswordUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
@@ -21,6 +23,7 @@ import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AuthSuccessResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChangePasswordRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreatePasswordRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.LoginRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AuthRestMapper;
@@ -46,6 +49,7 @@ public class AuthController {
     private final RefreshAccessTokenUseCase refreshAccessTokenUseCase;
     private final LogoutUseCase logoutUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
+    private final CreatePasswordUseCase createPasswordUseCase;
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
     private final AuthRestMapper authRestMapper;
@@ -89,6 +93,20 @@ public class AuthController {
                 .orElseThrow(() -> new AuthException(AuthError.REFRESH_TOKEN_INVALID));
         AuthTokenResult result = refreshAccessTokenUseCase.refresh(
                 rawRefreshToken, httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest));
+        writeAuthCookies(httpResponse, result);
+        return ResponseEntity.ok(authRestMapper.toResponse(result));
+    }
+
+    // Público: quien aún no tiene contraseña canjea el código de un solo uso que recibió por WhatsApp, define su
+    // contraseña y queda con sesión abierta.
+    @PostMapping("/create-password")
+    public ResponseEntity<AuthSuccessResponse> createPassword(
+            @Valid @RequestBody CreatePasswordRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
+        AuthTokenResult result = createPasswordUseCase.createPassword(new CreatePasswordCommand(
+                request.username(), request.code(), request.newPassword(),
+                httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest)));
         writeAuthCookies(httpResponse, result);
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }

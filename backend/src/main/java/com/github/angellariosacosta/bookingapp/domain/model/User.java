@@ -24,15 +24,13 @@ public class User implements Serializable {
 
     private String name;
 
+    // null = cuenta sin contraseña: pendiente de crearla con un código de un solo uso (OTP) enviado por WhatsApp.
     private String password;
 
     private boolean active;
 
-    // Teléfono en formato internacional (solo dígitos); destino de la contraseña temporal por WhatsApp.
+    // Teléfono en formato internacional (solo dígitos); destino del código de un solo uso por WhatsApp.
     private String phone;
-
-    // true mientras la contraseña sea temporal: el usuario debe cambiarla antes de usar el resto de la API.
-    private boolean mustChangePassword;
 
     private Instant passwordChangedAt;
 

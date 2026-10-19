@@ -1,9 +1,12 @@
 package com.github.angellariosacosta.bookingapp.application.port.in;
 
-import com.github.angellariosacosta.bookingapp.application.result.IssuedCredentialsResult;
+import com.github.angellariosacosta.bookingapp.application.result.IssuedCodeResult;
 
-/** Regenera la contraseña temporal de un usuario, cierra sus sesiones y se la reenvía por WhatsApp. */
+/**
+ * Invalida la contraseña actual del usuario, cierra sus sesiones y le envía por WhatsApp un código de un solo uso
+ * para que cree una nueva.
+ */
 public interface ResetUserPasswordUseCase {
 
-	IssuedCredentialsResult reset(Long actorId, Long userId);
+	IssuedCodeResult reset(Long actorId, Long userId);
 }

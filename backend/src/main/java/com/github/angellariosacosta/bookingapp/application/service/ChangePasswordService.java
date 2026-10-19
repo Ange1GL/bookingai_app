@@ -61,7 +61,6 @@ public class ChangePasswordService implements ChangePasswordUseCase {
 		}
 
 		user.setPassword(passwordHasher.hash(command.newPassword()));
-		user.setMustChangePassword(false);
 		user.setPasswordChangedAt(Instant.now(clock));
 		User saved = userRepository.save(user);
 

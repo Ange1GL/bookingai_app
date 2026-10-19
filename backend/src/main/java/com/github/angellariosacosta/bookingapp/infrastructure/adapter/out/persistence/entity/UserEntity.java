@@ -43,9 +43,6 @@ public class UserEntity extends BaseEntity {
     @Column(length = 20)
     private String phone;
 
-    @Column(name = "must_change_password", nullable = false)
-    private boolean mustChangePassword;
-
     @Column(name = "password_changed_at")
     private Instant passwordChangedAt;
 

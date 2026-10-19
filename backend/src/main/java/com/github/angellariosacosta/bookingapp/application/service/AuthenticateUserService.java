@@ -41,6 +41,11 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
             log.warn("Login failed user={} reason=user_disabled", username);
             throw new AuthException(AuthError.USER_DISABLED);
         }
+        if (user.getPassword() == null) {
+            // Cuenta pendiente de crear su contraseña con el código de un solo uso: no se puede iniciar sesión aún.
+            log.warn("Login failed user={} reason=password_not_created", username);
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+        }
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.warn("Login failed user={} reason=invalid_credentials", username);
             failedLoginAttempts.register(user.getId());

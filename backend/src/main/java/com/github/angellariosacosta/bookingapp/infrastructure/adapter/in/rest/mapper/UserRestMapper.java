@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.github.angellariosacosta.bookingapp.application.command.AssignUserRolesCommand;
 import com.github.angellariosacosta.bookingapp.application.command.CreateUserCommand;
 import com.github.angellariosacosta.bookingapp.application.command.UpdateUserCommand;
-import com.github.angellariosacosta.bookingapp.application.result.IssuedCredentialsResult;
+import com.github.angellariosacosta.bookingapp.application.result.IssuedCodeResult;
 import com.github.angellariosacosta.bookingapp.application.result.PageResult;
 import com.github.angellariosacosta.bookingapp.domain.model.Role;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
@@ -17,7 +17,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.PageResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RoleSummaryResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UpdateUserRequest;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserCredentialsResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserOneTimeCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.AdminUsersProperties;
 
@@ -49,14 +49,13 @@ public class UserRestMapper {
 				.map(role -> new RoleSummaryResponse(role.id(), role.name()))
 				.toList();
 		return new UserResponse(user.getId(), user.getUsername(), user.getName(), user.getEmail(), user.getPhone(),
-				user.isActive(), user.isMustChangePassword(), roles);
+				user.isActive(), user.getPassword() != null, roles);
 	}
 
-	// La contraseña solo se devuelve si la configuración lo permite (dev) y WhatsApp no la entregó.
-	public UserCredentialsResponse toCredentialsResponse(IssuedCredentialsResult result) {
-		boolean expose = adminUsersProperties.isExposeTemporaryPassword() && !result.delivered();
-		return new UserCredentialsResponse(
-				toResponse(result.user()), result.delivered(), expose ? result.temporaryPassword() : null);
+	// El código solo se devuelve si la configuración lo permite (dev) y WhatsApp no lo entregó.
+	public UserOneTimeCodeResponse toOneTimeCodeResponse(IssuedCodeResult result) {
+		boolean expose = adminUsersProperties.isExposeOneTimeCode() && !result.delivered();
+		return new UserOneTimeCodeResponse(toResponse(result.user()), result.delivered(), expose ? result.code() : null);
 	}
 
 	public PageResponse<UserResponse> toPageResponse(PageResult<User> page) {

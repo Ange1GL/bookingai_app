@@ -21,7 +21,7 @@ import org.springframework.web.client.RestClient;
 
 import com.github.angellariosacosta.bookingapp.infrastructure.config.WhatsAppCloudProperties;
 
-class WhatsAppCredentialNotifierAdapterTest {
+class WhatsAppOneTimeCodeNotifierAdapterTest {
 
 	private static final String BASE_URL = "https://graph.test";
 	private static final String TOKEN = "test-token";
@@ -31,21 +31,21 @@ class WhatsAppCredentialNotifierAdapterTest {
 
 	private MockRestServiceServer server;
 	private WhatsAppCloudProperties properties;
-	private WhatsAppCredentialNotifierAdapter adapter;
+	private WhatsAppOneTimeCodeNotifierAdapter adapter;
 
 	@BeforeEach
 	void setUp() {
 		properties = new WhatsAppCloudProperties();
 		properties.setSystemUserToken(TOKEN);
-		properties.setCredentialsPhoneNumberId(SENDER_ID);
-		properties.setCredentialsTemplateName("user_credentials");
+		properties.setOtpPhoneNumberId(SENDER_ID);
+		properties.setOtpTemplateName("codigo_verificacion");
 		RestClient.Builder builder = RestClient.builder().baseUrl(BASE_URL);
 		server = MockRestServiceServer.bindTo(builder).build();
-		adapter = new WhatsAppCredentialNotifierAdapter(builder.build(), properties);
+		adapter = new WhatsAppOneTimeCodeNotifierAdapter(builder.build(), properties);
 	}
 
 	@Test
-	void sendsTemplateWithUsernameAndPasswordAsBodyParameters() {
+	void sendsAnAuthenticationTemplateWithTheCodeInBodyAndCopyButton() {
 		server.expect(requestTo(ENDPOINT))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header("Authorization", "Bearer " + TOKEN))
@@ -53,14 +53,19 @@ class WhatsAppCredentialNotifierAdapterTest {
 				.andExpect(jsonPath("$.messaging_product").value("whatsapp"))
 				.andExpect(jsonPath("$.to").value(PHONE))
 				.andExpect(jsonPath("$.type").value("template"))
-				.andExpect(jsonPath("$.template.name").value("user_credentials"))
+				.andExpect(jsonPath("$.template.name").value("codigo_verificacion"))
 				.andExpect(jsonPath("$.template.language.code").value("es"))
 				.andExpect(jsonPath("$.template.components[0].type").value("body"))
-				.andExpect(jsonPath("$.template.components[0].parameters[0].text").value("angel"))
-				.andExpect(jsonPath("$.template.components[0].parameters[1].text").value("S3cret!pass"))
+				.andExpect(jsonPath("$.template.components[0].parameters[0].text").value("483920"))
+				.andExpect(jsonPath("$.template.components[0].sub_type").doesNotExist())
+				.andExpect(jsonPath("$.template.components[0].index").doesNotExist())
+				.andExpect(jsonPath("$.template.components[1].type").value("button"))
+				.andExpect(jsonPath("$.template.components[1].sub_type").value("url"))
+				.andExpect(jsonPath("$.template.components[1].index").value("0"))
+				.andExpect(jsonPath("$.template.components[1].parameters[0].text").value("483920"))
 				.andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-		assertTrue(adapter.sendTemporaryPassword(PHONE, "angel", "S3cret!pass"));
+		assertTrue(adapter.sendCode(PHONE, "483920"));
 
 		server.verify();
 	}
@@ -71,7 +76,7 @@ class WhatsAppCredentialNotifierAdapterTest {
 				.andRespond(withStatus(HttpStatus.BAD_REQUEST).body("{\"error\":{\"code\":132000}}")
 						.contentType(MediaType.APPLICATION_JSON));
 
-		assertFalse(adapter.sendTemporaryPassword(PHONE, "angel", "S3cret!pass"));
+		assertFalse(adapter.sendCode(PHONE, "483920"));
 
 		server.verify();
 	}
@@ -80,31 +85,31 @@ class WhatsAppCredentialNotifierAdapterTest {
 	void returnsFalseOnServerError() {
 		server.expect(requestTo(ENDPOINT)).andRespond(withServerError());
 
-		assertFalse(adapter.sendTemporaryPassword(PHONE, "angel", "S3cret!pass"));
+		assertFalse(adapter.sendCode(PHONE, "483920"));
 	}
 
 	@Test
 	void doesNotCallMetaWhenSenderIdIsNotNumeric() {
-		properties.setCredentialsPhoneNumberId("../evil");
+		properties.setOtpPhoneNumberId("../evil");
 
-		assertFalse(adapter.sendTemporaryPassword(PHONE, "angel", "S3cret!pass"));
+		assertFalse(adapter.sendCode(PHONE, "483920"));
 
 		server.verify();
 	}
 
 	@Test
 	void senderIsEnabledOnlyWhenTokenSenderAndTemplateAreConfigured() {
-		assertTrue(properties.isCredentialsSenderEnabled());
+		assertTrue(properties.isOtpSenderEnabled());
 
-		properties.setCredentialsTemplateName(" ");
-		assertFalse(properties.isCredentialsSenderEnabled());
+		properties.setOtpTemplateName(" ");
+		assertFalse(properties.isOtpSenderEnabled());
 
-		properties.setCredentialsTemplateName("user_credentials");
-		properties.setCredentialsPhoneNumberId("");
-		assertFalse(properties.isCredentialsSenderEnabled());
+		properties.setOtpTemplateName("codigo_verificacion");
+		properties.setOtpPhoneNumberId("");
+		assertFalse(properties.isOtpSenderEnabled());
 
-		properties.setCredentialsPhoneNumberId(SENDER_ID);
+		properties.setOtpPhoneNumberId(SENDER_ID);
 		properties.setSystemUserToken("");
-		assertFalse(properties.isCredentialsSenderEnabled());
+		assertFalse(properties.isOtpSenderEnabled());
 	}
 }
