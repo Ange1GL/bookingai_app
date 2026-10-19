@@ -120,3 +120,7 @@ openssl rand -hex 32
 ## Pruebas
 
 `WebhookSignatureVerifierTest` y `WhatsAppWebhookControllerTest` (MockMvc standalone). La exclusión de CSRF/permitAll de `SecurityConfig` no está cubierta por tests automáticos: se comprueba con el `curl` anterior contra un entorno con perfil `qa`.
+
+## Envío de contraseñas temporales
+
+La creación de usuarios envía la contraseña temporal con una **plantilla** de WhatsApp (mensaje iniciado por el negocio). Variables y requisitos de Meta: ver [admin-users-roles.md](admin-users-roles.md#configuración-de-whatsapp-para-credenciales).

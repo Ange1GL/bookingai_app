@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
+import com.github.angellariosacosta.bookingapp.application.command.ChangePasswordCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.AuthenticateUserUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.ChangePasswordUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AuthSuccessResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChangePasswordRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.LoginRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AuthRestMapper;
@@ -35,10 +39,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final AuthenticateUserUseCase authenticateUserUseCase;
     private final RegisterUserCase registerUserCase;
     private final RefreshAccessTokenUseCase refreshAccessTokenUseCase;
     private final LogoutUseCase logoutUseCase;
+    private final ChangePasswordUseCase changePasswordUseCase;
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
     private final AuthRestMapper authRestMapper;
@@ -86,6 +93,20 @@ public class AuthController {
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
 
+    // Requiere sesión (no está en permitAll). Cierra las demás sesiones y deja una nueva en las cookies.
+    @PostMapping("/change-password")
+    public ResponseEntity<AuthSuccessResponse> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @CurrentUserId Long userId,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse) {
+        AuthTokenResult result = changePasswordUseCase.changePassword(new ChangePasswordCommand(
+                userId, request.currentPassword(), request.newPassword(), readAccessToken(httpRequest),
+                httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest)));
+        writeAuthCookies(httpResponse, result);
+        return ResponseEntity.ok(authRestMapper.toResponse(result));
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         String rawRefreshToken = CookieUtils.readCookie(httpRequest, cookieProperties.getRefresh().getName())
@@ -96,6 +117,15 @@ public class AuthController {
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.expireAccessCookie().toString());
         httpResponse.addHeader(HttpHeaders.SET_COOKIE, authCookieFactory.expireRefreshCookie().toString());
         return ResponseEntity.noContent().build();
+    }
+
+    // Mismo origen del token que JwtAuthenticationFilter: cabecera Bearer o, si no, la cookie de acceso.
+    private String readAccessToken(HttpServletRequest request) {
+        String bearer = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (bearer != null && bearer.startsWith(BEARER_PREFIX)) {
+            return bearer.substring(BEARER_PREFIX.length());
+        }
+        return CookieUtils.readCookie(request, cookieProperties.getAccess().getName()).orElse(null);
     }
 
     private void writeAuthCookies(HttpServletResponse response, AuthTokenResult result) {

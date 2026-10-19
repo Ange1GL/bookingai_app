@@ -173,6 +173,7 @@ cors:
     - Authorization
     - X-RateLimit-Remaining
     - Retry-After
+    - X-Error-Code
   allow-credentials: true
   max-age: 3600
 

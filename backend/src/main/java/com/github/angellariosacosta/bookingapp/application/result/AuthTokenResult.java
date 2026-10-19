@@ -8,5 +8,6 @@ public record AuthTokenResult(
         Long userId,
         String username,
         String email,
-        List<String> roles
+        List<String> roles,
+        boolean mustChangePassword
 ) {}

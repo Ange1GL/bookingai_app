@@ -2,4 +2,5 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.d
 
 import java.util.List;
 
-public record AuthSuccessResponse(Long userId, String username, String email, List<String> roles) {}
+/** {@code mustChangePassword}: la contraseña es temporal y el frontend debe llevar al usuario a cambiarla. */
+public record AuthSuccessResponse(Long userId, String username, String email, List<String> roles, boolean mustChangePassword) {}

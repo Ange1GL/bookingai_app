@@ -48,7 +48,8 @@ class AuthTokenIssuer {
         RefreshToken saved = refreshTokenRepositoryPort.save(refreshToken);
 
         AuthTokenResult result = new AuthTokenResult(
-                accessToken, rawRefreshToken, user.getId(), user.getUsername(), user.getEmail(), roles);
+                accessToken, rawRefreshToken, user.getId(), user.getUsername(), user.getEmail(), roles,
+                user.isMustChangePassword());
         return new IssuedTokens(result, saved.getId());
     }
 }

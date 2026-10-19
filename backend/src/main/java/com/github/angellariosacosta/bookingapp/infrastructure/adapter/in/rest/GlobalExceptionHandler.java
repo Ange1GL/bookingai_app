@@ -258,6 +258,8 @@ public class GlobalExceptionHandler {
 			case INVALID_CREDENTIALS, REFRESH_TOKEN_INVALID, REFRESH_TOKEN_EXPIRED, REFRESH_TOKEN_REUSED
 					-> HttpStatus.UNAUTHORIZED;
 			case USER_DISABLED        -> HttpStatus.FORBIDDEN;
+			// 400 y no 401: un 401 haría creer al frontend que la sesión expiró y dispararía un refresh/logout.
+			case INVALID_CURRENT_PASSWORD -> HttpStatus.BAD_REQUEST;
 			case EMAIL_ALREADY_IN_USE, USERNAME_ALREADY_IN_USE -> HttpStatus.CONFLICT;
 		};
 	}

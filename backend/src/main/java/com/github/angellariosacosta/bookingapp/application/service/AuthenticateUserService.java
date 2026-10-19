@@ -26,6 +26,7 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final PasswordHasher passwordEncoder;
     private final AuthTokenIssuer authTokenIssuer;
     private final AccountBlockedRepository accountBlockedRepository;
+    private final FailedLoginAttempts failedLoginAttempts;
 
     @Transactional
     @Override
@@ -40,30 +41,11 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
         }
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.warn("Login failed user={} reason=invalid_credentials", username);
-            registerFailedAttempt(user.getId());
+            failedLoginAttempts.register(user.getId());
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
         }
         accountBlocked.ifPresent(accountBlockedRepository::resetAttempts);
         log.info("Login success user={}", username);
         return authTokenIssuer.issue(user, userAgent, ipAddress).result();
-    }
-
-    // Relee con lock pesimista (en vez de reusar el Optional cargado al inicio
-    // de authenticate()) para que el read-modify-write del contador sea atómico
-    // frente a intentos fallidos concurrentes del mismo usuario.
-    private void registerFailedAttempt(Long userId) {
-        accountBlockedRepository.findByUserIdForUpdate(userId).ifPresentOrElse(
-                blocked -> {
-                    blocked.incrementNumberOfAttempts();
-                    accountBlockedRepository.updateNumberOfAttempts(blocked);
-                    if (blocked.getEndExpiratedAt() != null) {
-                        accountBlockedRepository.updateExpiratedAt(blocked);
-                    }
-                },
-                () -> {
-                    AccountBlocked newBlocked = AccountBlocked.create(userId);
-                    accountBlockedRepository.save(newBlocked);
-                }
-        );
     }
 }

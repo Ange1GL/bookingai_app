@@ -239,3 +239,45 @@ Código: `TemporaryCredentialsPersister` (parte transaccional), `CredentialsDeli
 `AssignableRoles` (validación de roles, compartida con la asignación de roles), puertos
 `TemporaryPasswordGenerator` y `UserCredentialNotifierPort` (a diferencia de `CustomerReplyPort`, informa si
 el mensaje salió).
+
+## Fase 7 — Cambio forzoso de contraseña
+
+Un usuario creado o reiniciado por un admin tiene `must_change_password = true` y una contraseña temporal.
+
+- **Login / refresh:** funcionan normal (emiten cookies) pero la respuesta trae `"mustChangePassword": true`
+  (`AuthSuccessResponse`); el frontend debe llevar al usuario a la pantalla de cambio.
+- **Lo hace cumplir el backend**, no el frontend: `PasswordChangeRequiredFilter` (después del filtro JWT) responde
+  `403` con `ErrorResponse` y la cabecera `X-Error-Code: PASSWORD_CHANGE_REQUIRED` a **toda** ruta excepto
+  `POST /api/v1/auth/change-password`, `/logout`, `/refresh` y `GET /csrf`. La cabecera se expone por CORS
+  (`cors.exposed-headers`) para distinguir este 403 de uno por falta de permiso. La comparación de ruta es exacta.
+  Como el usuario se carga en cada petición, el bloqueo se levanta en cuanto cambia la contraseña.
+
+### `POST /api/v1/auth/change-password` (cualquier usuario autenticado)
+
+```http
+POST /api/v1/auth/change-password
+{ "currentPassword": "Tmp-Pass#12", "newPassword": "Mi-nueva-clave-2026" }
+
+200 OK  (+ cookies nuevas de acceso y refresh)
+{ "userId": 7, "username": "maria.lopez", "email": "maria@example.com", "roles": ["USER"], "mustChangePassword": false }
+```
+
+- **Política** (`PasswordPolicy`): 10–72 caracteres, al menos una letra y un dígito, distinta de la actual. El tope
+  de 72 existe porque BCrypt ignora el resto. Incumplirla → `400`.
+- **Contraseña actual incorrecta → `400`** (`INVALID_CURRENT_PASSWORD`, a propósito no 401: un 401 haría que el
+  frontend crea que la sesión expiró). Cuenta como intento fallido para el bloqueo de cuenta existente
+  (3 intentos → 30 min, `403`); `noRollbackFor = AuthException` evita que el rollback borre ese conteo.
+- Al cambiar: se guarda el hash, `must_change_password=false`, `password_changed_at`, se **revocan todos los refresh
+  tokens y el access token usado**, se limpian los intentos fallidos y se abre una sesión nueva.
+
+### Refactors que acompañan
+
+- `FailedLoginAttempts` (conteo/bloqueo) y `AccessTokenRevoker` se extrajeron de `AuthenticateUserService` y
+  `LogoutService` para compartirlos con el cambio de contraseña. Su comportamiento no cambia.
+
+### Observación pendiente (no verificada)
+
+`AuthenticateUserService.authenticate` es `@Transactional` y lanza `AuthException` justo después de contar el intento
+fallido. Con el rollback por defecto de Spring, esa escritura podría deshacerse y el bloqueo por intentos del
+**login** no llegaría a persistir. No lo comprobé con un test de integración sin transacción de prueba; si se
+confirma, basta `noRollbackFor = AuthException.class` como en `ChangePasswordService`.
