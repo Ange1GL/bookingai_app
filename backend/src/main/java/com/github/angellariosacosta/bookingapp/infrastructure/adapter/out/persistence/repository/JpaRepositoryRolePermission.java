@@ -1,5 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +11,8 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 public interface JpaRepositoryRolePermission extends JpaRepository<RolePermissionEntity, Long> {
 
     boolean existsByRoleIdAndPermissionId(Long roleId, Long permissionId);
+
+    List<RolePermissionEntity> findByRoleId(Long roleId);
 
     // "En uso" = vínculo activo con un rol que no ha sido eliminado.
     @Query("""

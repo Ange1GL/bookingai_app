@@ -1,5 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.adapter;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -15,6 +17,7 @@ import com.github.angellariosacosta.bookingapp.application.result.PageResult;
 import com.github.angellariosacosta.bookingapp.domain.model.Permission;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.entity.PermissionEntity;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.mapper.PermissionMapper;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.ActiveFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.JpaRepositoryPermission;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persistence.repository.JpaRepositoryRolePermission;
 
@@ -33,6 +36,11 @@ public class JpaPermissionRepositoryAdapter implements PermissionRepositoryPort 
 	@Override
 	public Optional<Permission> findById(Long id) {
 		return jpaRepository.findByIdAndDeletedFalse(id).map(mapper::toDomain);
+	}
+
+	@Override
+	public List<Permission> findAllByIds(Collection<Long> ids) {
+		return jpaRepository.findAllByIdInAndDeletedFalse(ids).stream().map(mapper::toDomain).toList();
 	}
 
 	@Override
@@ -56,7 +64,7 @@ public class JpaPermissionRepositoryAdapter implements PermissionRepositoryPort 
 	@Override
 	public PageResult<Permission> findPage(ListPermissionsQuery query) {
 		Page<PermissionEntity> page = jpaRepository.findPage(
-				toActiveFilter(query.active()),
+				ActiveFilter.of(query.active()),
 				LikePatterns.containsIgnoreCase(query.search()),
 				PageRequest.of(query.page(), query.size(), toSort(query)));
 		return new PageResult<>(
@@ -79,15 +87,6 @@ public class JpaPermissionRepositoryAdapter implements PermissionRepositoryPort 
 		entity.markAsDeleted();
 		entity.setActive(false);
 		jpaRepository.save(entity);
-	}
-
-	private int toActiveFilter(Boolean active) {
-		if (active == null) {
-			return JpaRepositoryPermission.ACTIVE_FILTER_ANY;
-		}
-		return active
-				? JpaRepositoryPermission.ACTIVE_FILTER_ONLY_ACTIVE
-				: JpaRepositoryPermission.ACTIVE_FILTER_ONLY_INACTIVE;
 	}
 
 	// El id como desempate hace estable el orden entre páginas cuando el campo principal se repite.

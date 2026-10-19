@@ -85,3 +85,45 @@ Reglas de negocio:
 Código: casos de uso `List/Get/Create/Update/ChangeStatus/DeletePermission*`, guard compartido
 `PermissionDeactivationGuard`, puerto `PermissionRepositoryPort` y adaptador `JpaPermissionRepositoryAdapter`.
 `PageResponse<T>` es el contenedor genérico de página que reutilizarán roles y usuarios.
+
+## Fase 4 — Roles (`/api/v1/admin/roles`)
+
+Lectura: `ROLE_READ` o `ADMIN_ALL`. Escritura: `ROLE_WRITE` o `ADMIN_ALL`. Mismo formato de lista, errores y
+baja lógica que permisos.
+
+| Método y ruta | Acción |
+|---|---|
+| `GET /` | Lista paginada (`q`, `active`, `page`, `size`≤50, `sortBy` `NAME`\|`CREATED_AT`, `direction`). Cada rol incluye sus permisos vigentes |
+| `GET /{id}` | Detalle con permisos |
+| `POST /` | Crea (201). `name` se normaliza a MAYÚSCULAS, `UPPER_SNAKE_CASE`, ≤50. `permissionIds` opcional |
+| `PUT /{id}` | Cambia `name` y `description` |
+| `PUT /{id}/permissions` | **Reemplaza** el conjunto de permisos: `{"permissionIds":[…]}` (lista vacía = quitar todos) |
+| `PATCH /{id}/enable` · `/disable` | Habilita / deshabilita (idempotentes) |
+| `DELETE /{id}` | Baja lógica, 204 |
+
+```http
+POST /api/v1/admin/roles
+{ "name": "receptionist", "description": "Front desk", "permissionIds": [1, 2] }
+
+201 Created
+{ "id": 3, "name": "RECEPTIONIST", "description": "Front desk", "active": true, "system": false,
+  "permissions": [ { "id": 1, "name": "APPOINTMENT_READ", "description": "Read appointments", "active": true, "system": true },
+                   { "id": 2, "name": "APPOINTMENT_CREATE", "description": "Create appointments", "active": true, "system": true } ] }
+```
+
+Reglas de negocio:
+
+- **En uso** = asignado con vínculo activo a algún usuario no eliminado. Deshabilitar/eliminar un rol en
+  uso → `409`. Roles `system` (`USER`, `ADMIN`) nunca se deshabilitan, eliminan ni renombran → `409`
+  (su descripción sí se puede editar).
+- `ADMIN` no puede perder `ADMIN_ALL` al reasignar permisos → `409`.
+- `permissionIds` con ids inexistentes/eliminados o permisos deshabilitados → `400` (`InvalidFieldException`).
+- Quitar un permiso a un rol es lógico (`role_permissions.active=false`); volver a asignarlo reactiva la
+  misma fila, no crea otra (respeta `uk_role_permissions_role_permission`).
+- Nombre duplicado → `409`, incluso contra roles eliminados.
+
+Detalles de implementación: `RolePermissionsAssigner` valida y aplica el conjunto (lo usan alta y
+reasignación); `RoleDeactivationGuard` concentra las reglas de disable/delete; `ActiveFilter` es el filtro de
+estado compartido (entero 0/1/2) de las consultas paginadas de permisos y roles.
+`RoleRepository` (puerto existente) se amplió en vez de renombrarse, por la tarea pendiente de nomenclatura
+de persistencia. Los listados cargan permisos de forma EAGER (hasta 50 roles por página).

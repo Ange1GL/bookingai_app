@@ -83,6 +83,19 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
+	@ExceptionHandler(RoleNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleRoleNotFound(RoleNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicateRoleNameException.class, RoleInUseException.class,
+			SystemRoleProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleRoleConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
 	@ExceptionHandler(InvalidFieldException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleInvalidField(InvalidFieldException ex) {
