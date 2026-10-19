@@ -275,9 +275,14 @@ POST /api/v1/auth/change-password
 - `FailedLoginAttempts` (conteo/bloqueo) y `AccessTokenRevoker` se extrajeron de `AuthenticateUserService` y
   `LogoutService` para compartirlos con el cambio de contraseña. Su comportamiento no cambia.
 
-### Observación pendiente (no verificada)
+### Corrección del bloqueo por intentos del login (verificada)
 
-`AuthenticateUserService.authenticate` es `@Transactional` y lanza `AuthException` justo después de contar el intento
-fallido. Con el rollback por defecto de Spring, esa escritura podría deshacerse y el bloqueo por intentos del
-**login** no llegaría a persistir. No lo comprobé con un test de integración sin transacción de prueba; si se
-confirma, basta `noRollbackFor = AuthException.class` como en `ChangePasswordService`.
+`AuthenticateUserService.authenticate` era `@Transactional` y lanza `AuthException` justo después de contar el
+intento fallido: con el rollback por defecto de Spring ese conteo se deshacía, así que **el bloqueo por intentos
+(3 fallos → 30 min) nunca se activaba en el login**. Se comprobó por HTTP contra la app local (3 fallos y luego la
+contraseña correcta devolvía 200). Ahora usa `@Transactional(noRollbackFor = AuthException.class)`, igual que
+`ChangePasswordService`. `AuthenticateUserServiceLockoutTest` lo cubre con transacciones reales (no es
+`@Transactional`, para no enmascarar el rollback) y falla si se quita el `noRollbackFor`.
+
+Efecto visible: ahora una cuenta con 3 contraseñas incorrectas seguidas queda bloqueada 30 minutos (`403`), como
+describe `account-lockout.md`.

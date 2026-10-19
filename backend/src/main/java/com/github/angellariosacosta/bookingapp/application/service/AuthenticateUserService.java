@@ -28,7 +28,9 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final AccountBlockedRepository accountBlockedRepository;
     private final FailedLoginAttempts failedLoginAttempts;
 
-    @Transactional
+    // noRollbackFor: al fallar la contraseña se lanza AuthException tras contar el intento; con el rollback por defecto
+    // ese conteo se deshacía y el bloqueo por intentos nunca se activaba (verificado por HTTP).
+    @Transactional(noRollbackFor = AuthException.class)
     @Override
     public AuthTokenResult authenticate(String username, String rawPassword, String userAgent, String ipAddress) {
         log.info("Login attempt user={}", username);
