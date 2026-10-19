@@ -36,6 +36,30 @@ describe('AuthService', () => {
     expect(session.isAuthenticated()).toBe(true);
   });
 
+  it('sends the one-time code and stores the user after creating the password', () => {
+    service.createPassword({ username: 'ana', code: '483920', newPassword: 'Mi-clave-2026' }).subscribe();
+
+    const req = http.expectOne(`${environment.apiBaseUrl}/api/v1/auth/create-password`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ username: 'ana', code: '483920', newPassword: 'Mi-clave-2026' });
+    req.flush(USER);
+
+    expect(session.user()).toEqual(USER);
+    expect(session.isAuthenticated()).toBe(true);
+  });
+
+  it('does not store a user when the code is rejected', () => {
+    service.createPassword({ username: 'ana', code: '000000', newPassword: 'Mi-clave-2026' }).subscribe({
+      error: () => undefined,
+    });
+
+    http
+      .expectOne(`${environment.apiBaseUrl}/api/v1/auth/create-password`)
+      .flush({ message: 'Código inválido o vencido' }, { status: 400, statusText: 'Bad Request' });
+
+    expect(session.user()).toBeNull();
+  });
+
   it('stores the user in the session after register', () => {
     service.register({ username: 'ana', email: 'ana@test.com', password: 'secret123', name: 'Ana' }).subscribe();
 
