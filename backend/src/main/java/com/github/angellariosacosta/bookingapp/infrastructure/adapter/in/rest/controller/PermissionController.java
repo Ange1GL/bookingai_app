@@ -37,9 +37,9 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/admin/permissions")
+@RequestMapping("/api/v1/permissions")
 @RequiredArgsConstructor
-public class AdminPermissionController {
+public class PermissionController {
 
 	private static final String DEFAULT_PAGE = "0";
 	private static final String DEFAULT_PAGE_SIZE = "20";

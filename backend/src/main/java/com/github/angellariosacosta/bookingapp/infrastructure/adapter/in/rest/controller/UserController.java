@@ -42,9 +42,9 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/admin/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
-public class AdminUserController {
+public class UserController {
 
 	private static final String DEFAULT_PAGE = "0";
 	private static final String DEFAULT_PAGE_SIZE = "20";

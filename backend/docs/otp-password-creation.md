@@ -21,8 +21,8 @@ Admin                       Backend                              WhatsApp       
   │                          │ ── cookies de sesión (queda con sesión abierta) ───────► │
 ```
 
-- **Alta** (`POST /api/v1/admin/users`): el usuario nace **sin contraseña** (`user_app.password IS NULL`).
-- **Reinicio / reenvío** (`POST /api/v1/admin/users/{id}/reset-password`): borra la contraseña actual, cierra sus
+- **Alta** (`POST /api/v1/users`): el usuario nace **sin contraseña** (`user_app.password IS NULL`).
+- **Reinicio / reenvío** (`POST /api/v1/users/{id}/reset-password`): borra la contraseña actual, cierra sus
   sesiones, limpia un posible bloqueo por intentos y emite un código nuevo. Sirve también para reenviar el código si
   el WhatsApp falló o el usuario no lo usó a tiempo.
 - **Crear contraseña** (`POST /api/v1/auth/create-password`, **público**): lo usa el propio usuario.
@@ -89,7 +89,7 @@ Política: 10–72 caracteres, al menos una letra y un dígito (`PasswordPolicy`
 ### Admin (`USER_WRITE`)
 
 ```http
-POST /api/v1/admin/users
+POST /api/v1/users
 { "username": "maria.lopez", "email": "maria@example.com", "name": "María López",
   "phone": "+52 155 1234 5678", "roleIds": [1] }
 
@@ -101,7 +101,7 @@ POST /api/v1/admin/users
 - `codeSent: false` ⇒ el usuario quedó creado pero Meta no aceptó el mensaje (o WhatsApp no está configurado).
 - Solo en el perfil **dev**, y solo si `codeSent` es `false`, la respuesta incluye `"oneTimeCode": "483920"` para
   poder probar sin WhatsApp (`admin.users.expose-one-time-code`). Nunca en otro caso.
-- `POST /api/v1/admin/users/{id}/reset-password` devuelve la misma forma. No se puede aplicar a uno mismo.
+- `POST /api/v1/users/{id}/reset-password` devuelve la misma forma. No se puede aplicar a uno mismo.
 
 ## 5. Lo que se eliminó
 
@@ -148,7 +148,7 @@ Cómo conseguir la plantilla y el número en Meta: [whatsapp-plantilla-otp.md](w
 - La pantalla de login enlaza a "Crea tu contraseña" para quien acaba de recibir un código.
 - Pruebas: `npx ng test --watch=false` (validadores, formulario y `AuthService.createPassword`).
 - El frontend aún **no tiene pantallas de administración** (usuarios/roles/permisos): hoy el alta se hace por la API
-  (`POST /api/v1/admin/users`). Cuando exista esa pantalla debe mostrar `passwordSet` y `codeSent` y ofrecer
+  (`POST /api/v1/users`). Cuando exista esa pantalla debe mostrar `passwordSet` y `codeSent` y ofrecer
   "Reenviar código" (`reset-password`).
 
 ## 9. Verificación realizada

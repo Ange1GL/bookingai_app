@@ -42,7 +42,7 @@ implemente la baja lógica).
 > Despliegue: antes de usar los endpoints admin, define `BOOTSTRAP_ADMIN_USERNAME` con el username del
 > dueño actual (en `.env` para dev; en Parameter Store para QA). Si no, nadie tendrá `ADMIN_ALL`.
 
-## Fase 3 — Permisos (`/api/v1/admin/permissions`)
+## Fase 3 — Permisos (`/api/v1/permissions`)
 
 Lectura: `PERMISSION_READ` o `ADMIN_ALL`. Escritura: `PERMISSION_WRITE` o `ADMIN_ALL` (403 si falta).
 Errores siempre con cuerpo `ErrorResponse`. Los eliminados lógicamente nunca aparecen ni se pueden consultar (404).
@@ -57,7 +57,7 @@ Errores siempre con cuerpo `ErrorResponse`. Los eliminados lógicamente nunca ap
 | `DELETE /{id}` | Baja lógica (`deleted=true`, `active=false`), 204 |
 
 ```http
-POST /api/v1/admin/permissions
+POST /api/v1/permissions
 { "name": "report_read", "description": "Read reports" }
 
 201 Created
@@ -65,7 +65,7 @@ POST /api/v1/admin/permissions
 ```
 
 ```http
-GET /api/v1/admin/permissions?q=user&active=true&page=0&size=20&sortBy=NAME&direction=ASC
+GET /api/v1/permissions?q=user&active=true&page=0&size=20&sortBy=NAME&direction=ASC
 
 200 OK
 { "content": [ { "id": 4, "name": "USER_READ", "description": "Read user data", "active": true, "system": true } ],
@@ -86,7 +86,7 @@ Código: casos de uso `List/Get/Create/Update/ChangeStatus/DeletePermission*`, g
 `PermissionDeactivationGuard`, puerto `PermissionRepositoryPort` y adaptador `JpaPermissionRepositoryAdapter`.
 `PageResponse<T>` es el contenedor genérico de página que reutilizarán roles y usuarios.
 
-## Fase 4 — Roles (`/api/v1/admin/roles`)
+## Fase 4 — Roles (`/api/v1/roles`)
 
 Lectura: `ROLE_READ` o `ADMIN_ALL`. Escritura: `ROLE_WRITE` o `ADMIN_ALL`. Mismo formato de lista, errores y
 baja lógica que permisos.
@@ -102,7 +102,7 @@ baja lógica que permisos.
 | `DELETE /{id}` | Baja lógica, 204 |
 
 ```http
-POST /api/v1/admin/roles
+POST /api/v1/roles
 { "name": "receptionist", "description": "Front desk", "permissionIds": [1, 2] }
 
 201 Created
@@ -128,7 +128,7 @@ estado compartido (entero 0/1/2) de las consultas paginadas de permisos y roles.
 `RoleRepository` (puerto existente) se amplió en vez de renombrarse, por la tarea pendiente de nomenclatura
 de persistencia. Los listados cargan permisos de forma EAGER (hasta 50 roles por página).
 
-## Fase 5 — Usuarios (`/api/v1/admin/users`)
+## Fase 5 — Usuarios (`/api/v1/users`)
 
 Lectura: `USER_READ`; edición/roles/estado: `USER_WRITE`; baja: `USER_DELETE` (todas también con `ADMIN_ALL`).
 El alta de usuarios y el reset de contraseña llegan en la fase 6.
@@ -143,7 +143,7 @@ El alta de usuarios y el reset de contraseña llegan en la fase 6.
 | `DELETE /{id}` | Baja lógica (`deleted=true`, `active=false`), 204 |
 
 ```http
-GET /api/v1/admin/users?q=ang&active=true&roleId=2&page=0&size=20&sortBy=USERNAME&direction=ASC
+GET /api/v1/users?q=ang&active=true&roleId=2&page=0&size=20&sortBy=USERNAME&direction=ASC
 
 200 OK
 { "content": [ { "id": 1, "username": "angel", "name": "Angel", "email": "angel@example.com",
@@ -188,11 +188,11 @@ asigna. `USER_READ/WRITE/DELETE` quedan solo para `ADMIN`.
 
 | Método y ruta | Permiso | Acción |
 |---|---|---|
-| `POST /api/v1/admin/users` | `USER_WRITE` | Crea el usuario con contraseña temporal y se la envía por WhatsApp (201) |
-| `POST /api/v1/admin/users/{id}/reset-password` | `USER_WRITE` | Regenera la contraseña temporal, cierra sus sesiones, limpia un bloqueo por intentos y la reenvía (200) |
+| `POST /api/v1/users` | `USER_WRITE` | Crea el usuario con contraseña temporal y se la envía por WhatsApp (201) |
+| `POST /api/v1/users/{id}/reset-password` | `USER_WRITE` | Regenera la contraseña temporal, cierra sus sesiones, limpia un bloqueo por intentos y la reenvía (200) |
 
 ```http
-POST /api/v1/admin/users
+POST /api/v1/users
 { "username": "maria.lopez", "email": "maria@example.com", "name": "María López",
   "phone": "+52 155 1234 5678", "roleIds": [1] }
 

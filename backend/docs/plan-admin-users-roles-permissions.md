@@ -44,7 +44,7 @@ Estado: **pendiente de aprobación** (no se ha editado código).
 - Seed de permisos nuevos (el enum/catálogo va por migración, no solo por `DataInitializer`): `ROLE_READ`, `ROLE_WRITE`, `PERMISSION_READ`, `PERMISSION_WRITE`; asignarlos a `ADMIN` (junto con `USER_READ/WRITE/DELETE` ya existentes).
 - Actualizar las entidades JPA en el mismo commit (checklist AGENTS.md) con el patrón FK doble campo y FK/UK nombradas.
 
-## 4. Endpoints (`/api/v1/admin/**`, errores siempre `ErrorResponse` vía `GlobalExceptionHandler`)
+## 4. Endpoints (`/api/v1/{users,roles,permissions}` (antes `/api/v1/admin/**`, ver plan-remove-admin-prefix.md), errores siempre `ErrorResponse` vía `GlobalExceptionHandler`)
 
 Autorización con `@PreAuthorize("hasAuthority('…')")` por permiso (`ADMIN_ALL` también pasa).
 

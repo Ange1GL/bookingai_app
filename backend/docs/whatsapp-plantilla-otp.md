@@ -140,7 +140,7 @@ Para ver el estado de la plantilla por API: `GET https://graph.facebook.com/v26.
 | `100` | Parámetro inválido | Revisa `phone_number_id` (debe ser numérico) y el cuerpo |
 
 Si Meta rechaza el mensaje, el backend **no** revierte el usuario: queda creado (sin contraseña), responde
-`codeSent: false` y se reintenta con `POST /api/v1/admin/users/{id}/reset-password`. En el log solo aparece el código
+`codeSent: false` y se reintenta con `POST /api/v1/users/{id}/reset-password`. En el log solo aparece el código
 de error de Meta; el OTP nunca se escribe.
 
 ## 9. Mientras la plantilla no esté aprobada

@@ -17,7 +17,7 @@ class SecurityAccessDeniedHandlerTest {
 		SecurityAccessDeniedHandler handler = new SecurityAccessDeniedHandler(JsonMapper.builder().build());
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		handler.handle(new MockHttpServletRequest("GET", "/api/v1/admin/users"), response,
+		handler.handle(new MockHttpServletRequest("GET", "/api/v1/users"), response,
 				new AccessDeniedException("denied"));
 
 		assertEquals(403, response.getStatus());
