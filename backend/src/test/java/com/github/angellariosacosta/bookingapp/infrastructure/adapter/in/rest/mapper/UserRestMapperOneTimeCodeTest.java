@@ -14,6 +14,7 @@ import com.github.angellariosacosta.bookingapp.domain.model.Role;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserOneTimeCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.AdminUsersProperties;
+import com.github.angellariosacosta.bookingapp.infrastructure.config.OtpDeliveryProperties;
 
 class UserRestMapperOneTimeCodeTest {
 
@@ -23,9 +24,33 @@ class UserRestMapperOneTimeCodeTest {
 			.phone("5215500000000").active(true).roles(Set.of(new Role(1L, "USER", null, true, true, Set.of()))).build();
 
 	private UserRestMapper mapperWithExpose(boolean expose) {
+		return mapper(expose, OtpDeliveryProperties.Mode.WHATSAPP);
+	}
+
+	private UserRestMapper mapper(boolean expose, OtpDeliveryProperties.Mode mode) {
 		AdminUsersProperties properties = new AdminUsersProperties();
 		properties.setExposeOneTimeCode(expose);
-		return new UserRestMapper(properties);
+		OtpDeliveryProperties delivery = new OtpDeliveryProperties();
+		delivery.setDelivery(mode);
+		return new UserRestMapper(properties, delivery);
+	}
+
+	@Test
+	void manualDeliveryReturnsTheCodeAndACopyPasteMessage() {
+		UserOneTimeCodeResponse response = mapper(false, OtpDeliveryProperties.Mode.MANUAL)
+				.toOneTimeCodeResponse(new IssuedCodeResult(withoutPassword, false, CODE));
+
+		assertEquals(CODE, response.oneTimeCode());
+		assertEquals("usuario: u\ncodigoAcceso: " + CODE, response.shareMessage());
+	}
+
+	@Test
+	void manualDeliveryNeverExposesAnythingWhenWhatsAppDeliveredIt() {
+		UserOneTimeCodeResponse response = mapper(false, OtpDeliveryProperties.Mode.MANUAL)
+				.toOneTimeCodeResponse(new IssuedCodeResult(withoutPassword, true, CODE));
+
+		assertNull(response.oneTimeCode());
+		assertNull(response.shareMessage());
 	}
 
 	@Test

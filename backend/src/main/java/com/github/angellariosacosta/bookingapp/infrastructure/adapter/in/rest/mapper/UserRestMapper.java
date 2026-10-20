@@ -20,6 +20,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserOneTimeCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.AdminUsersProperties;
+import com.github.angellariosacosta.bookingapp.infrastructure.config.OtpDeliveryProperties;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,15 +28,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserRestMapper {
 
+	private static final String SHARE_MESSAGE_FORMAT = "usuario: %s\ncodigoAcceso: %s";
+
 	private final AdminUsersProperties adminUsersProperties;
+	private final OtpDeliveryProperties otpDeliveryProperties;
 
 	public CreateUserCommand toCommand(CreateUserRequest request) {
 		return new CreateUserCommand(
-				request.username(), request.email(), request.name(), request.phone(), request.roleIds());
+				request.username(), request.email(), request.name(), request.lastName(), request.phone(), request.roleIds());
 	}
 
 	public UpdateUserCommand toCommand(Long id, UpdateUserRequest request) {
-		return new UpdateUserCommand(id, request.name(), request.email(), request.phone());
+		return new UpdateUserCommand(id, request.name(), request.lastName(), request.email(), request.phone());
 	}
 
 	public AssignUserRolesCommand toCommand(Long actorId, Long userId, AssignUserRolesRequest request) {
@@ -48,14 +52,18 @@ public class UserRestMapper {
 				.sorted(Comparator.comparing(Role::name))
 				.map(role -> new RoleSummaryResponse(role.id(), role.name()))
 				.toList();
-		return new UserResponse(user.getId(), user.getUsername(), user.getName(), user.getEmail(), user.getPhone(),
+		return new UserResponse(user.getId(), user.getUsername(), user.getName(), user.getLastName(), user.getEmail(), user.getPhone(),
 				user.isActive(), user.getPassword() != null, roles);
 	}
 
-	// El código solo se devuelve si la configuración lo permite (dev) y WhatsApp no lo entregó.
+	// El código solo se devuelve si WhatsApp no lo entregó y la entrega es manual (o estamos en dev). Con él viaja el
+	// texto listo para pegar en el chat del cliente.
 	public UserOneTimeCodeResponse toOneTimeCodeResponse(IssuedCodeResult result) {
-		boolean expose = adminUsersProperties.isExposeOneTimeCode() && !result.delivered();
-		return new UserOneTimeCodeResponse(toResponse(result.user()), result.delivered(), expose ? result.code() : null);
+		boolean expose = !result.delivered()
+				&& (otpDeliveryProperties.isManual() || adminUsersProperties.isExposeOneTimeCode());
+		String code = expose ? result.code() : null;
+		String shareMessage = expose ? SHARE_MESSAGE_FORMAT.formatted(result.user().getUsername(), code) : null;
+		return new UserOneTimeCodeResponse(toResponse(result.user()), result.delivered(), code, shareMessage);
 	}
 
 	public PageResponse<UserResponse> toPageResponse(PageResult<User> page) {

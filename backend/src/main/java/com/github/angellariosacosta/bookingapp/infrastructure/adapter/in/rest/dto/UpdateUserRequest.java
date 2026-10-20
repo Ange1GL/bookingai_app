@@ -5,10 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UpdateUserRequest(
+		@NotBlank(message = "El nombre es obligatorio")
 		@Size(max = 255, message = "El nombre no puede superar los 255 caracteres")
 		String name,
+		@NotBlank(message = "Los apellidos son obligatorios")
+		@Size(max = 255, message = "Los apellidos no pueden superar los 255 caracteres")
+		String lastName,
 
-		@NotBlank(message = "El email es obligatorio")
+		// Opcional: null o vacío borra el correo.
 		@Email(message = "El email no es válido")
 		@Size(max = 255, message = "El email no puede superar los 255 caracteres")
 		String email,

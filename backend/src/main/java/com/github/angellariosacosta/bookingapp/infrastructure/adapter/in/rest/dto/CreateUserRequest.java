@@ -13,15 +13,20 @@ public record CreateUserRequest(
 		@Size(min = 3, max = 50, message = "El username debe tener entre 3 y 50 caracteres")
 		String username,
 
-		@NotBlank(message = "El email es obligatorio")
+		// Opcional: null o vacío = el usuario no tiene correo.
 		@Email(message = "El email no es válido")
 		@Size(max = 255, message = "El email no puede superar los 255 caracteres")
 		String email,
 
+		@NotBlank(message = "El nombre es obligatorio")
 		@Size(max = 255, message = "El nombre no puede superar los 255 caracteres")
 		String name,
+		@NotBlank(message = "Los apellidos son obligatorios")
+		@Size(max = 255, message = "Los apellidos no pueden superar los 255 caracteres")
+		String lastName,
 
-		@NotBlank(message = "El teléfono es obligatorio (se usa para enviar la contraseña por WhatsApp)")
+		// 10 dígitos nacionales (se les antepone 52) o formato internacional con "+".
+		@NotBlank(message = "El teléfono es obligatorio (se usa para entregar el código de acceso por WhatsApp)")
 		@Size(max = 25, message = "El teléfono no puede superar los 25 caracteres")
 		String phone,
 

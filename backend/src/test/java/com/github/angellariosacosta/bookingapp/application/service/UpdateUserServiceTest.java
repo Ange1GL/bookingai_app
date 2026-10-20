@@ -41,7 +41,7 @@ class UpdateUserServiceTest {
 
 	@Test
 	void updatesNameEmailAndNormalizedPhone() {
-		User updated = service.update(new UpdateUserCommand(ID, "  New  ", " new@example.com ", "+52 155 1111 2222"));
+		User updated = service.update(new UpdateUserCommand(ID, "  New  ", "L", " new@example.com ", "+52 155 1111 2222"));
 
 		assertEquals("New", updated.getName());
 		assertEquals("new@example.com", updated.getEmail());
@@ -51,12 +51,12 @@ class UpdateUserServiceTest {
 
 	@Test
 	void nullPhoneKeepsCurrentOne() {
-		assertEquals("5215500000000", service.update(new UpdateUserCommand(ID, "n", "old@example.com", null)).getPhone());
+		assertEquals("5215500000000", service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", null)).getPhone());
 	}
 
 	@Test
 	void blankNameBecomesNull() {
-		assertEquals(null, service.update(new UpdateUserCommand(ID, "  ", "old@example.com", null)).getName());
+		assertEquals(null, service.update(new UpdateUserCommand(ID, "  ", "L", "old@example.com", null)).getName());
 	}
 
 	@Test
@@ -64,7 +64,7 @@ class UpdateUserServiceTest {
 		when(repository.existsByEmail("taken@example.com")).thenReturn(true);
 
 		AuthException error = assertThrows(AuthException.class,
-				() -> service.update(new UpdateUserCommand(ID, "n", "taken@example.com", null)));
+				() -> service.update(new UpdateUserCommand(ID, "n", "L", "taken@example.com", null)));
 
 		assertEquals(AuthError.EMAIL_ALREADY_IN_USE, error.getError());
 		verify(repository, never()).save(any());
@@ -72,7 +72,7 @@ class UpdateUserServiceTest {
 
 	@Test
 	void keepingTheSameEmailSkipsUniquenessCheck() {
-		service.update(new UpdateUserCommand(ID, "n", "old@example.com", null));
+		service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", null));
 
 		verify(repository, never()).existsByEmail(any());
 	}
@@ -82,19 +82,34 @@ class UpdateUserServiceTest {
 		when(repository.existsByPhone("5215511112222")).thenReturn(true);
 
 		assertThrows(DuplicatePhoneException.class,
-				() -> service.update(new UpdateUserCommand(ID, "n", "old@example.com", "5215511112222")));
+				() -> service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", "5215511112222")));
 	}
 
 	@Test
-	void rejectsInvalidPhoneAndBlankEmail() {
-		assertThrows(InvalidFieldException.class, () -> service.update(new UpdateUserCommand(ID, "n", "old@example.com", "abc")));
-		assertThrows(InvalidFieldException.class, () -> service.update(new UpdateUserCommand(ID, "n", " ", null)));
+	void rejectsInvalidPhone() {
+		assertThrows(InvalidFieldException.class, () -> service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", "abc")));
+	}
+
+	@Test
+	void blankEmailClearsItWithoutCheckingUniqueness() {
+		User updated = service.update(new UpdateUserCommand(ID, "n", "L", " ", null));
+
+		assertEquals(null, updated.getEmail());
+		verify(repository, never()).existsByEmail(any());
+	}
+
+	@Test
+	void updatesLastNameAndTenDigitPhoneGetsTheDefaultCountryCode() {
+		User updated = service.update(new UpdateUserCommand(ID, "n", " Ruiz ", "old@example.com", "55 1111 2222"));
+
+		assertEquals("Ruiz", updated.getLastName());
+		assertEquals("525511112222", updated.getPhone());
 	}
 
 	@Test
 	void reportsMissingUser() {
 		when(repository.findById(99L)).thenReturn(Optional.empty());
 
-		assertThrows(UserNotFoundException.class, () -> service.update(new UpdateUserCommand(99L, "n", "a@b.co", null)));
+		assertThrows(UserNotFoundException.class, () -> service.update(new UpdateUserCommand(99L, "n", "L", "a@b.co", null)));
 	}
 }

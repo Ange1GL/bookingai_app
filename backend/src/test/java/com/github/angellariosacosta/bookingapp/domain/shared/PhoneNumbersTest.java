@@ -31,4 +31,22 @@ class PhoneNumbersTest {
 	void rejectsNull() {
 		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalize(null));
 	}
+
+	@Test
+	void tenDigitNationalNumberGetsTheDefaultCountryCode() {
+		assertEquals("525512345678", PhoneNumbers.normalizeWithDefaultCountry("55 1234 5678"));
+	}
+
+	@Test
+	void plusPrefixAndLongerNumbersKeepTheirOwnCountry() {
+		assertEquals("14155552671", PhoneNumbers.normalizeWithDefaultCountry("+1 415 555 2671"));
+		assertEquals("525512345678", PhoneNumbers.normalizeWithDefaultCountry("525512345678"));
+		assertEquals("5215512345678", PhoneNumbers.normalizeWithDefaultCountry("+52 1 55 1234 5678"));
+	}
+
+	@Test
+	void defaultCountryNormalizationStillRejectsInvalidNumbers() {
+		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeWithDefaultCountry("abc"));
+		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeWithDefaultCountry(null));
+	}
 }

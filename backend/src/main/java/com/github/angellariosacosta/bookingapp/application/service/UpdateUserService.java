@@ -30,15 +30,17 @@ public class UpdateUserService implements UpdateUserUseCase {
 		applyEmail(user, command.email());
 		applyPhone(user, command.phone());
 		user.setName(blankToNull(command.name()));
+		user.setLastName(blankToNull(command.lastName()));
 
 		return userRepository.save(user);
 	}
 
 	private void applyEmail(User user, String rawEmail) {
-		if (rawEmail == null || rawEmail.isBlank()) {
-			throw new InvalidFieldException("email", "must not be null or blank");
+		String email = blankToNull(rawEmail);
+		if (email == null) {
+			user.setEmail(null);
+			return;
 		}
-		String email = rawEmail.strip();
 		if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
 			throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
 		}
@@ -49,7 +51,7 @@ public class UpdateUserService implements UpdateUserUseCase {
 		if (rawPhone == null) {
 			return;
 		}
-		String phone = PhoneNumbers.normalize(rawPhone);
+		String phone = PhoneNumbers.normalizeWithDefaultCountry(rawPhone);
 		if (!phone.equals(user.getPhone()) && userRepository.existsByPhone(phone)) {
 			throw new DuplicatePhoneException("Ya existe un usuario con ese teléfono");
 		}

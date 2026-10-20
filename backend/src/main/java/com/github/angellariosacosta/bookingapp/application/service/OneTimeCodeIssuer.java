@@ -14,6 +14,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.AccountBlock
 import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeGenerator;
 import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
+import com.github.angellariosacosta.bookingapp.application.port.out.PasswordRecoveryRequestRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
@@ -42,13 +43,15 @@ class OneTimeCodeIssuer {
 	private final OneTimeCodeRepositoryPort oneTimeCodeRepository;
 	private final RefreshTokenRepositoryPort refreshTokenRepository;
 	private final AccountBlockedRepository accountBlockedRepository;
+	private final PasswordRecoveryRequestRepositoryPort recoveryRequestRepository;
 	private final Clock clock;
 	private final Duration ttl;
 
 	OneTimeCodeIssuer(UserRepository userRepository, UserFinder userFinder, UserAdminGuard adminGuard,
 			AssignableRoles assignableRoles, OneTimeCodeGenerator codeGenerator, PasswordHasher passwordHasher,
 			OneTimeCodeRepositoryPort oneTimeCodeRepository, RefreshTokenRepositoryPort refreshTokenRepository,
-			AccountBlockedRepository accountBlockedRepository, Clock clock,
+			AccountBlockedRepository accountBlockedRepository,
+			PasswordRecoveryRequestRepositoryPort recoveryRequestRepository, Clock clock,
 			@Value("${security.otp.ttl-minutes}") long ttlMinutes) {
 		this.userRepository = userRepository;
 		this.userFinder = userFinder;
@@ -59,6 +62,7 @@ class OneTimeCodeIssuer {
 		this.oneTimeCodeRepository = oneTimeCodeRepository;
 		this.refreshTokenRepository = refreshTokenRepository;
 		this.accountBlockedRepository = accountBlockedRepository;
+		this.recoveryRequestRepository = recoveryRequestRepository;
 		this.clock = clock;
 		this.ttl = Duration.ofMinutes(ttlMinutes);
 	}
@@ -67,13 +71,15 @@ class OneTimeCodeIssuer {
 	@Transactional
 	IssuedCode issueForNewUser(CreateUserCommand command) {
 		String username = Usernames.normalize(command.username());
-		String email = requireEmail(command.email());
-		String phone = PhoneNumbers.normalize(command.phone());
+		String name = requireText("name", command.name());
+		String lastName = requireText("lastName", command.lastName());
+		String email = blankToNull(command.email());
+		String phone = PhoneNumbers.normalizeWithDefaultCountry(command.phone());
 
 		if (userRepository.existsByUsername(username)) {
 			throw new AuthException(AuthError.USERNAME_ALREADY_IN_USE);
 		}
-		if (userRepository.existsByEmail(email)) {
+		if (email != null && userRepository.existsByEmail(email)) {
 			throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
 		}
 		if (userRepository.existsByPhone(phone)) {
@@ -84,7 +90,8 @@ class OneTimeCodeIssuer {
 		User saved = userRepository.save(User.builder()
 				.username(username)
 				.email(email)
-				.name(blankToNull(command.name()))
+				.name(name)
+				.lastName(lastName)
 				.phone(phone)
 				.active(true)
 				.roles(new HashSet<>(roles))
@@ -113,6 +120,8 @@ class OneTimeCodeIssuer {
 		// La contraseña anterior deja de valer: se cierran sus sesiones y se limpia un posible bloqueo por intentos.
 		refreshTokenRepository.revokeAllByUserId(userId);
 		accountBlockedRepository.findByUserId(userId).ifPresent(accountBlockedRepository::resetAttempts);
+		// Si el usuario había pedido recuperar su contraseña, esta emisión atiende la solicitud.
+		recoveryRequestRepository.resolvePending(userId, Instant.now(clock));
 		return issue(saved, purpose);
 	}
 
@@ -125,11 +134,12 @@ class OneTimeCodeIssuer {
 		return new IssuedCode(user, code);
 	}
 
-	private String requireEmail(String rawEmail) {
-		if (rawEmail == null || rawEmail.isBlank()) {
-			throw new InvalidFieldException("email", "must not be null or blank");
+	private String requireText(String field, String raw) {
+		String value = blankToNull(raw);
+		if (value == null) {
+			throw new InvalidFieldException(field, "must not be null or blank");
 		}
-		return rawEmail.strip();
+		return value;
 	}
 
 	private String blankToNull(String value) {

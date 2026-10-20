@@ -33,10 +33,14 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    // Opcional: el canal de contacto real es el teléfono. Varias filas con email NULL no violan el unique.
     private String email;
 
     private String name;
+
+    @Column(name = "last_name")
+    private String lastName;
+
     private String password;
     private boolean active;
 

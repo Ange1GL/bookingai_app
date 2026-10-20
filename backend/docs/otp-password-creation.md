@@ -58,7 +58,7 @@ one_time_code ──────────────────────
 | Aspecto | Decisión |
 |---|---|
 | Código | 6 dígitos, `SecureRandom`, se guarda **solo su hash BCrypt** |
-| Vigencia | `security.otp.ttl-minutes` = **30** |
+| Vigencia | `security.otp.ttl-minutes` = **4320 (72 h)** por defecto (entrega manual); con WhatsApp conviene 30 |
 | Intentos | **5** fallos invalidan el código (hay que pedir otro). El conteo se persiste (`noRollbackFor`) |
 | Un solo uso | Al canjearlo se consume; no sirve dos veces |
 | Concurrencia | `SELECT … FOR UPDATE` sobre el código al canjear |
@@ -90,8 +90,8 @@ Política: 10–72 caracteres, al menos una letra y un dígito (`PasswordPolicy`
 
 ```http
 POST /api/v1/users
-{ "username": "maria.lopez", "email": "maria@example.com", "name": "María López",
-  "phone": "+52 155 1234 5678", "roleIds": [1] }
+{ "username": "maria.lopez", "name": "María", "lastName": "López Pérez",
+  "phone": "55 1234 5678", "roleIds": [1] }          // email opcional
 
 201 Created
 { "user": { "id": 7, …, "active": true, "passwordSet": false, "roles": [ … ] },
@@ -99,8 +99,11 @@ POST /api/v1/users
 ```
 
 - `codeSent: false` ⇒ el usuario quedó creado pero Meta no aceptó el mensaje (o WhatsApp no está configurado).
-- Solo en el perfil **dev**, y solo si `codeSent` es `false`, la respuesta incluye `"oneTimeCode": "483920"` para
-  poder probar sin WhatsApp (`admin.users.expose-one-time-code`). Nunca en otro caso.
+- Con `security.otp.delivery=manual` (por defecto) el sistema no envía nada: `codeSent` es `false` y la respuesta
+  incluye `oneTimeCode` y `shareMessage`, el texto listo para copiar y pegar en el chat del cliente:
+  `"shareMessage": "usuario: maria.lopez\ncodigoAcceso: 483920"`. Con `whatsapp`, solo se incluyen si el envío
+  falló y `admin.users.expose-one-time-code` está activo (perfil dev). Nunca en otro caso.
+- Ver [manual-onboarding-and-password-recovery.md](manual-onboarding-and-password-recovery.md).
 - `POST /api/v1/users/{id}/reset-password` devuelve la misma forma. No se puede aplicar a uno mismo.
 
 ## 5. Lo que se eliminó
@@ -119,7 +122,8 @@ POST /api/v1/users
 | `WHATSAPP_OTP_PHONE_NUMBER_ID` | `whatsapp.cloud.otp-phone-number-id` | `phone_number_id` emisor |
 | `WHATSAPP_OTP_TEMPLATE_NAME` | `whatsapp.cloud.otp-template-name` | Plantilla de autenticación aprobada |
 | — | `whatsapp.cloud.otp-template-language` | `es` por defecto |
-| — | `security.otp.ttl-minutes` | 30 |
+| `OTP_DELIVERY` | `security.otp.delivery` | `manual` (defecto) o `whatsapp` |
+| `OTP_TTL_MINUTES` | `security.otp.ttl-minutes` | 4320 |
 | — | `admin.users.expose-one-time-code` | `false`; `true` solo en `application-dev.yaml` |
 
 Cómo conseguir la plantilla y el número en Meta: [whatsapp-plantilla-otp.md](whatsapp-plantilla-otp.md).

@@ -18,6 +18,7 @@ import com.github.angellariosacosta.bookingapp.application.port.in.CreatePasswor
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.RequestPasswordRecoveryUseCase;
 import com.github.angellariosacosta.bookingapp.domain.exception.AuthException;
 import com.github.angellariosacosta.bookingapp.domain.shared.AuthError;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
@@ -25,7 +26,9 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChangePasswordRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreatePasswordRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.LoginRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.PasswordRecoveryAcceptedResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RequestPasswordRecoveryRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AuthRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.util.AuthCookieFactory;
@@ -50,6 +53,7 @@ public class AuthController {
     private final LogoutUseCase logoutUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
     private final CreatePasswordUseCase createPasswordUseCase;
+    private final RequestPasswordRecoveryUseCase requestPasswordRecoveryUseCase;
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
     private final AuthRestMapper authRestMapper;
@@ -109,6 +113,15 @@ public class AuthController {
                 httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest)));
         writeAuthCookies(httpResponse, result);
         return ResponseEntity.ok(authRestMapper.toResponse(result));
+    }
+
+    // Público: avisa al administrador de que el usuario olvidó su contraseña. Siempre 202 con el mismo cuerpo, exista o
+    // no el usuario, para no revelar qué cuentas existen. El administrador la atiende con POST /users/{id}/reset-password.
+    @PostMapping("/password-recovery")
+    public ResponseEntity<PasswordRecoveryAcceptedResponse> requestPasswordRecovery(
+            @Valid @RequestBody RequestPasswordRecoveryRequest request) {
+        requestPasswordRecoveryUseCase.request(request.username());
+        return ResponseEntity.accepted().body(PasswordRecoveryAcceptedResponse.standard());
     }
 
     // Requiere sesión (no está en permitAll). Cierra las demás sesiones y deja una nueva en las cookies.

@@ -24,7 +24,7 @@ public class ChangeEmailService implements ChangeEmailUseCase {
                 // TODO colocar una excepcion personalizada
                 .orElseThrow(() -> new IllegalStateException("Authenticated user not found: " + userId));
 
-        if (!user.getEmail().equals(newEmail) && userRepository.existsByEmail(newEmail)) {
+        if (!newEmail.equals(user.getEmail()) && userRepository.existsByEmail(newEmail)) {
             throw new AuthException(AuthError.EMAIL_ALREADY_IN_USE);
         }
 

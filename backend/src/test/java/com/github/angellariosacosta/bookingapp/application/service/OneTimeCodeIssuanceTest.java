@@ -32,6 +32,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeG
 import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeNotifierPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
+import com.github.angellariosacosta.bookingapp.application.port.out.PasswordRecoveryRequestRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.RoleRepository;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
@@ -63,6 +64,7 @@ class OneTimeCodeIssuanceTest {
 	private OneTimeCodeRepositoryPort codes;
 	private RefreshTokenRepositoryPort tokens;
 	private AccountBlockedRepository accountBlocked;
+	private PasswordRecoveryRequestRepositoryPort recoveryRequests;
 	private OneTimeCodeNotifierPort notifier;
 	private CreateUserService createService;
 	private ResetUserPasswordService resetService;
@@ -75,6 +77,7 @@ class OneTimeCodeIssuanceTest {
 		codes = mock(OneTimeCodeRepositoryPort.class);
 		tokens = mock(RefreshTokenRepositoryPort.class);
 		accountBlocked = mock(AccountBlockedRepository.class);
+		recoveryRequests = mock(PasswordRecoveryRequestRepositoryPort.class);
 		notifier = mock(OneTimeCodeNotifierPort.class);
 		OneTimeCodeGenerator generator = () -> CODE;
 		when(hasher.hash(CODE)).thenReturn("code-hash");
@@ -89,14 +92,14 @@ class OneTimeCodeIssuanceTest {
 		UserFinder finder = new UserFinder(userRepository);
 		OneTimeCodeIssuer issuer = new OneTimeCodeIssuer(userRepository, finder, new UserAdminGuard(userRepository),
 				new AssignableRoles(roleRepository), generator, hasher, codes, tokens, accountBlocked,
-				Clock.fixed(NOW, ZoneOffset.UTC), 30);
+				recoveryRequests, Clock.fixed(NOW, ZoneOffset.UTC), 30);
 		OneTimeCodeDelivery delivery = new OneTimeCodeDelivery(notifier);
 		createService = new CreateUserService(issuer, delivery);
 		resetService = new ResetUserPasswordService(issuer, delivery);
 	}
 
 	private CreateUserCommand command() {
-		return new CreateUserCommand(" new.user ", " new@example.com ", " New ", "+52 155 1234 5678", Set.of(11L));
+		return new CreateUserCommand(" new.user ", " new@example.com ", " New ", " López Pérez ", "+52 155 1234 5678", Set.of(11L));
 	}
 
 	@Test
@@ -118,6 +121,7 @@ class OneTimeCodeIssuanceTest {
 		assertEquals("new.user", user.getUsername());
 		assertEquals("new@example.com", user.getEmail());
 		assertEquals("New", user.getName());
+		assertEquals("López Pérez", user.getLastName());
 		assertNull(user.getPassword());
 		assertTrue(user.isActive());
 		assertEquals(Set.of(userRole), user.getRoles());
@@ -172,20 +176,35 @@ class OneTimeCodeIssuanceTest {
 	@Test
 	void rejectsInvalidInputsAndDisabledRolesWithoutIssuingAnything() {
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("ab", "a@b.co", null, "5215512345678", Set.of(11L))));
+				new CreateUserCommand("ab", "a@b.co", "N", "L", "5215512345678", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", null, "12", Set.of(11L))));
+				new CreateUserCommand("valid", "a@b.co", "N", "L", "12", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", " ", null, "5215512345678", Set.of(11L))));
+				new CreateUserCommand("valid", "a@b.co", " ", "L", "5215512345678", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", null, "5215512345678", Set.of())));
+				new CreateUserCommand("valid", "a@b.co", "N", "L", "5215512345678", Set.of())));
+
+		assertThrows(InvalidFieldException.class, () -> createService.create(
+				new CreateUserCommand("valid", "a@b.co", "N", " ", "5215512345678", Set.of(11L))));
 
 		when(roleRepository.findAllByIds(Set.of(12L))).thenReturn(List.of(disabledRole));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", null, "5215512345678", Set.of(12L))));
+				new CreateUserCommand("valid", "a@b.co", "N", "L", "5215512345678", Set.of(12L))));
 
 		verify(userRepository, never()).save(any());
 		verify(notifier, never()).sendCode(any(), any());
+	}
+
+	@Test
+	void emailIsOptionalAndTenDigitPhoneGetsTheDefaultCountryCode() {
+		when(roleRepository.findAllByIds(Set.of(11L))).thenReturn(List.of(userRole));
+
+		IssuedCodeResult result = createService.create(
+				new CreateUserCommand("new.user", "  ", "Ana", "Ruiz", "55 1234 5678", Set.of(11L)));
+
+		assertNull(result.user().getEmail());
+		assertEquals("525512345678", result.user().getPhone());
+		verify(userRepository, never()).existsByEmail(any());
 	}
 
 	private void existingTarget(String phone, String password) {

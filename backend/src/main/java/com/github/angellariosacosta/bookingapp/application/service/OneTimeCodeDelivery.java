@@ -21,7 +21,7 @@ class OneTimeCodeDelivery {
 		User user = issued.user();
 		boolean delivered = notifier.sendCode(user.getPhone(), issued.code());
 		if (!delivered) {
-			log.warn("Código NO entregado por WhatsApp userId={}; el admin puede reintentar con reset-password", user.getId());
+			log.info("Código no enviado automáticamente userId={}; el admin lo entrega a mano o reintenta con reset-password", user.getId());
 		}
 		return new IssuedCodeResult(user, delivered, issued.code());
 	}

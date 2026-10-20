@@ -20,9 +20,12 @@ public class User implements Serializable {
     // no cambia — por eso el email puede editarse libremente sin romper tokens ya emitidos.
     private String username;
 
+    // Opcional (puede ser null): el canal de contacto real es el teléfono.
     private String email;
 
     private String name;
+
+    private String lastName;
 
     // null = cuenta sin contraseña: pendiente de crearla con un código de un solo uso (OTP) enviado por WhatsApp.
     private String password;

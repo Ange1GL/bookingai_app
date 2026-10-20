@@ -37,8 +37,9 @@ public interface JpaRepositoryUser extends JpaRepository<UserEntity, Long> {
                    or exists (select 1 from UserRoleEntity ur
                               where ur.userId = u.id and ur.roleId = :roleFilter and ur.active = true))
               and (lower(u.username) like :pattern escape '\\'
-                   or lower(u.email) like :pattern escape '\\'
+                   or lower(coalesce(u.email, '')) like :pattern escape '\\'
                    or lower(coalesce(u.name, '')) like :pattern escape '\\'
+                   or lower(coalesce(u.lastName, '')) like :pattern escape '\\'
                    or coalesce(u.phone, '') like :pattern escape '\\')
             """)
     Page<UserEntity> findPage(

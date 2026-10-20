@@ -121,7 +121,11 @@ security:
       clock-skew-safety-margin-minutes: 5     # debe ser mayor que la tolerancia de reloj del JwtDecoder (~60s)
 
   otp:
-    ttl-minutes: 30    # vigencia del codigo de un solo uso; tras 5 intentos fallidos se invalida antes (OneTimeCode)
+    # manual: el codigo se devuelve al admin para que lo pase por su chat. whatsapp: lo envia Meta (requiere negocio verificado).
+    delivery: ${OTP_DELIVERY:manual}
+    # Vigencia del codigo de un solo uso; tras 5 intentos fallidos se invalida antes (OneTimeCode).
+    # Con entrega manual el usuario tarda en canjearlo: 72 h. Con whatsapp conviene bajarlo a 30.
+    ttl-minutes: ${OTP_TTL_MINUTES:4320}
 
   account-lock:
     reset-cleanup:

@@ -193,8 +193,8 @@ asigna. `USER_READ/WRITE/DELETE` quedan solo para `ADMIN`.
 
 ```http
 POST /api/v1/users
-{ "username": "maria.lopez", "email": "maria@example.com", "name": "María López",
-  "phone": "+52 155 1234 5678", "roleIds": [1] }
+{ "username": "maria.lopez", "name": "María", "lastName": "López Pérez",
+  "phone": "55 1234 5678", "roleIds": [1] }     // email opcional; 10 dígitos = México (+52)
 
 201 Created
 { "user": { "id": 7, "username": "maria.lopez", "name": "María López", "email": "maria@example.com",

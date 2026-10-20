@@ -63,7 +63,7 @@ class CreatePasswordFlowTest {
 		username = "zz_flow_" + UUID.randomUUID().toString().substring(0, 8);
 		Role userRole = roleRepository.findByName(Role.USER_NAME).orElseThrow();
 		String phone = "5299" + String.format("%08d", Math.abs(username.hashCode()) % 100_000_000);
-		created = createUser.create(new CreateUserCommand(username, username + "@example.test", "Flow", phone,
+		created = createUser.create(new CreateUserCommand(username, username + "@example.test", "Flow", "Test", phone,
 				Set.of(userRole.id())));
 	}
 
