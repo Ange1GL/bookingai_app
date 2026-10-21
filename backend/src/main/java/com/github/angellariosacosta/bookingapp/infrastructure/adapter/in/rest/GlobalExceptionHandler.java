@@ -70,6 +70,51 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
+	@ExceptionHandler(PermissionNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handlePermissionNotFound(PermissionNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicatePermissionNameException.class, PermissionInUseException.class,
+			SystemPermissionProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handlePermissionConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(RoleNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleRoleNotFound(RoleNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicateRoleNameException.class, RoleInUseException.class,
+			SystemRoleProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleRoleConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(UserNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleUserNotFound(UserNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
+	@ExceptionHandler({DuplicatePhoneException.class, SelfModificationException.class,
+			LastAdminProtectedException.class})
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public ErrorResponse handleUserConflict(RuntimeException ex) {
+		return errorBody(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
+	@ExceptionHandler(InvalidOneTimeCodeException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleInvalidOneTimeCode(InvalidOneTimeCodeException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(InvalidFieldException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleInvalidField(InvalidFieldException ex) {
@@ -219,6 +264,8 @@ public class GlobalExceptionHandler {
 			case INVALID_CREDENTIALS, REFRESH_TOKEN_INVALID, REFRESH_TOKEN_EXPIRED, REFRESH_TOKEN_REUSED
 					-> HttpStatus.UNAUTHORIZED;
 			case USER_DISABLED        -> HttpStatus.FORBIDDEN;
+			// 400 y no 401: un 401 haría creer al frontend que la sesión expiró y dispararía un refresh/logout.
+			case INVALID_CURRENT_PASSWORD -> HttpStatus.BAD_REQUEST;
 			case EMAIL_ALREADY_IN_USE, USERNAME_ALREADY_IN_USE -> HttpStatus.CONFLICT;
 		};
 	}

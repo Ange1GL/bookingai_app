@@ -9,7 +9,7 @@ import { refreshInterceptor } from './refresh.interceptor';
 const DATA_URL = `${environment.apiBaseUrl}/api/v1/appointments`;
 const REFRESH_URL = `${environment.apiBaseUrl}/api/v1/auth/refresh`;
 const LOGIN_URL = `${environment.apiBaseUrl}/api/v1/auth/login`;
-const USER = { userId: 1, username: 'ana', email: 'ana@test.com', roles: [] };
+const USER = { userId: 1, username: 'ana', email: 'ana@test.com', roles: [], permissions: [] };
 const UNAUTHORIZED = { status: 401, statusText: 'Unauthorized' };
 
 describe('refreshInterceptor', () => {

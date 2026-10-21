@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.config;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller.WhatsAppWebhookController;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.CsrfCookieFilter;
+import com.github.angellariosacosta.bookingapp.infrastructure.security.handler.SecurityAccessDeniedHandler;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.JwtAuthenticationFilter;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,6 +28,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 @EnableConfigurationProperties(CorsProperties.class)
 public class SecurityConfig {
 
@@ -35,6 +38,7 @@ public class SecurityConfig {
     private final CorsProperties corsProperties;
     private final CsrfProperties csrfProperties;
     private final SecurityEntryPoint securityEntryPoint;
+    private final SecurityAccessDeniedHandler accessDeniedHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitFilter rateLimitFilter;
 
@@ -97,6 +101,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint(securityEntryPoint)
+                                // 403 con ErrorResponse cuando falla un @PreAuthorize (permiso insuficiente).
+                                .accessDeniedHandler(accessDeniedHandler)
                 )
                 // jwtAuthenticationFilter debe registrarse primero: addFilterBefore(rateLimitFilter,
                 // JwtAuthenticationFilter.class) necesita que JwtAuthenticationFilter YA tenga una
@@ -114,6 +120,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/auth/login",
+                                "/api/v1/auth/password-recovery", // pide al admin reiniciar la contraseña: sin sesión
+                                "/api/v1/auth/verify-code",       // paso 1 de crear la contraseña: valida el OTP sin sesión
+                                "/api/v1/auth/create-password",   // el usuario sin contraseña canjea su OTP: aún no tiene sesión
                                 "/api/v1/auth/csrf",
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",

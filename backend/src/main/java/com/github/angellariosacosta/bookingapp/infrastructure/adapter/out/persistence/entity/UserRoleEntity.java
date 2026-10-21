@@ -22,6 +22,11 @@ public class UserRoleEntity {
     @Column(name = "role_id")
     private Long roleId;
 
+    // false = vínculo revocado lógicamente; reasignar lo reactiva.
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean active = true;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
             name = "user_id",

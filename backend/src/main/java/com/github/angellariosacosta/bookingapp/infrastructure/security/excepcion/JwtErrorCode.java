@@ -5,7 +5,8 @@ public enum JwtErrorCode {
     TOKEN_INVALID(401, "Token inválido"),
     TOKEN_MALFORMED(401, "Token mal formado"),
     TOKEN_SIGNATURE_INVALID(401, "Firma del token inválida"),
-    TOKEN_REVOKED(401, "Token revocado");
+    TOKEN_REVOKED(401, "Token revocado"),
+    USER_DISABLED(401, "Usuario deshabilitado");
 
     private final int httpStatus;
     private final String message;

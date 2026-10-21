@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { finalize, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthUserDto } from '../model/auth-user.dto';
+import { isGranted, Permission } from '../security/permissions';
 
 /**
  * Holds the authenticated user. Tokens live in HttpOnly cookies managed by the backend,
@@ -19,6 +20,12 @@ export class SessionService {
 
   readonly user = this.userState.asReadonly();
   readonly isAuthenticated = computed(() => this.userState() !== null);
+  private readonly granted = computed<ReadonlySet<string>>(() => new Set(this.userState()?.permissions ?? []));
+
+  /** Whether the current user holds any of `required` (or ADMIN_ALL). Hides UI; the backend still enforces. */
+  hasAnyPermission(required: readonly Permission[]): boolean {
+    return this.isAuthenticated() && isGranted(this.granted(), required);
+  }
 
   setUser(user: AuthUserDto): void {
     this.userState.set(user);

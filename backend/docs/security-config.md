@@ -263,3 +263,7 @@ Los beans de `Cache<String, Bucket>` y `FilterRegistrationBean<RateLimitFilter>`
 ## Rutas públicas adicionales y excepciones CSRF
 
 Además de las rutas de `/api/v1/auth/*` y `/actuator/health`, `/api/v1/webhooks/whatsapp` está en `permitAll` y excluida de CSRF (`csrf.ignoringRequestMatchers`): Meta no es un navegador y no puede enviar el token. Se autentica con el token de verificación (GET) y la firma HMAC del cuerpo (POST). Ver `whatsapp-webhook.md`.
+
+## Autorización por permiso y administración
+
+La autorización por permiso (`@EnableMethodSecurity`), el 403 uniforme, el rechazo de usuarios deshabilitados en el filtro JWT y el filtro de cambio forzoso de contraseña (`PasswordChangeRequiredFilter`) se describen en [admin-users-roles.md](admin-users-roles.md).

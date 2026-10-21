@@ -92,6 +92,20 @@ whatsapp:
     system-user-token: ${SYSTEM_USER_EMPLOYEE_META:}   # token permanente del usuario del sistema de Meta
     api-version: v26.0
     base-url: https://graph.facebook.com
+    # Codigo de un solo uso (OTP) para crear la contrasena: PLANTILLA de autenticacion aprobada por Meta (el negocio
+    # inicia la conversacion). Sin estos tres valores (token incluido) no se envia nada y la API responde codeSent=false.
+    otp-phone-number-id: ${WHATSAPP_OTP_PHONE_NUMBER_ID:}   # phone_number_id emisor
+    otp-template-name: ${WHATSAPP_OTP_TEMPLATE_NAME:}       # plantilla de autenticacion (codigo en cuerpo y boton)
+    otp-template-language: es
+
+admin:
+  bootstrap:
+    # Usuario existente que recibe el rol ADMIN al arrancar (idempotente). Vacio = no hace nada.
+    # Resuelve el primer admin: despues los admins se gestionan por la API. Ver docs/admin-users-roles.md
+    username: ${BOOTSTRAP_ADMIN_USERNAME:}
+  users:
+    # Solo true en application-dev.yaml: devuelve el codigo OTP en la respuesta cuando WhatsApp no lo entrego.
+    expose-one-time-code: false
 
 security:
   jwt:
@@ -105,6 +119,13 @@ security:
     revocation-cleanup:
       interval-minutes: 5                    # cada cuanto corre el job de limpieza de revoked_access_token
       clock-skew-safety-margin-minutes: 5     # debe ser mayor que la tolerancia de reloj del JwtDecoder (~60s)
+
+  otp:
+    # manual: el codigo se devuelve al admin para que lo pase por su chat. whatsapp: lo envia Meta (requiere negocio verificado).
+    delivery: ${OTP_DELIVERY:manual}
+    # Vigencia del codigo de un solo uso; tras 5 intentos fallidos se invalida antes (OneTimeCode).
+    # Con entrega manual el usuario tarda en canjearlo: 72 h. Con whatsapp conviene bajarlo a 30.
+    ttl-minutes: ${OTP_TTL_MINUTES:4320}
 
   account-lock:
     reset-cleanup:

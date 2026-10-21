@@ -29,7 +29,21 @@ public class WhatsAppCloudProperties {
 
 	private Duration readTimeout = Duration.ofSeconds(10);
 
+	/** Número emisor (phone_number_id) desde el que se envían los códigos de un solo uso. */
+	private String otpPhoneNumberId = "";
+
+	/** Plantilla de autenticación aprobada por Meta: el código va en el cuerpo y en el botón "Copiar código". */
+	private String otpTemplateName = "";
+
+	private String otpTemplateLanguage = "es";
+
 	public boolean isSenderEnabled() {
 		return systemUserToken != null && !systemUserToken.isBlank();
+	}
+
+	public boolean isOtpSenderEnabled() {
+		return isSenderEnabled()
+				&& otpPhoneNumberId != null && !otpPhoneNumberId.isBlank()
+				&& otpTemplateName != null && !otpTemplateName.isBlank();
 	}
 }

@@ -61,6 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(decoded.username());
 
+            // Un usuario deshabilitado pierde acceso de inmediato, sin esperar a que expire su access token.
+            if (!userDetails.isEnabled()) {
+                throw new JwtAuthenticationException(JwtErrorCode.USER_DISABLED);
+            }
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userDetails,

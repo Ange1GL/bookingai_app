@@ -26,8 +26,11 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
     private final PasswordHasher passwordEncoder;
     private final AuthTokenIssuer authTokenIssuer;
     private final AccountBlockedRepository accountBlockedRepository;
+    private final FailedLoginAttempts failedLoginAttempts;
 
-    @Transactional
+    // noRollbackFor: al fallar la contraseña se lanza AuthException tras contar el intento; con el rollback por defecto
+    // ese conteo se deshacía y el bloqueo por intentos nunca se activaba (verificado por HTTP).
+    @Transactional(noRollbackFor = AuthException.class)
     @Override
     public AuthTokenResult authenticate(String username, String rawPassword, String userAgent, String ipAddress) {
         log.info("Login attempt user={}", username);
@@ -38,32 +41,18 @@ public class AuthenticateUserService implements AuthenticateUserUseCase {
             log.warn("Login failed user={} reason=user_disabled", username);
             throw new AuthException(AuthError.USER_DISABLED);
         }
+        if (user.getPassword() == null) {
+            // Cuenta pendiente de crear su contraseña con el código de un solo uso: no se puede iniciar sesión aún.
+            log.warn("Login failed user={} reason=password_not_created", username);
+            throw new AuthException(AuthError.INVALID_CREDENTIALS);
+        }
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.warn("Login failed user={} reason=invalid_credentials", username);
-            registerFailedAttempt(user.getId());
+            failedLoginAttempts.register(user.getId());
             throw new AuthException(AuthError.INVALID_CREDENTIALS);
         }
         accountBlocked.ifPresent(accountBlockedRepository::resetAttempts);
         log.info("Login success user={}", username);
         return authTokenIssuer.issue(user, userAgent, ipAddress).result();
-    }
-
-    // Relee con lock pesimista (en vez de reusar el Optional cargado al inicio
-    // de authenticate()) para que el read-modify-write del contador sea atómico
-    // frente a intentos fallidos concurrentes del mismo usuario.
-    private void registerFailedAttempt(Long userId) {
-        accountBlockedRepository.findByUserIdForUpdate(userId).ifPresentOrElse(
-                blocked -> {
-                    blocked.incrementNumberOfAttempts();
-                    accountBlockedRepository.updateNumberOfAttempts(blocked);
-                    if (blocked.getEndExpiratedAt() != null) {
-                        accountBlockedRepository.updateExpiratedAt(blocked);
-                    }
-                },
-                () -> {
-                    AccountBlocked newBlocked = AccountBlocked.create(userId);
-                    accountBlockedRepository.save(newBlocked);
-                }
-        );
     }
 }

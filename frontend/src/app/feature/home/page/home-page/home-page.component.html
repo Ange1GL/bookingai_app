@@ -15,7 +15,7 @@
   </section>
 
   <div class="grid gap-4 md:grid-cols-2">
-    @for (shortcut of shortcuts; track shortcut.path) {
+    @for (shortcut of shortcuts(); track shortcut.path) {
       <a
         [routerLink]="shortcut.path"
         class="group flex items-center gap-4 rounded-3xl border border-surface bg-surface-0 p-5 no-underline shadow-sm transition hover:shadow-lg active:scale-[0.99] dark:bg-surface-900"

@@ -1,0 +1,31 @@
+package com.github.angellariosacosta.bookingapp.application.port.out;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import com.github.angellariosacosta.bookingapp.application.query.ListPermissionsQuery;
+import com.github.angellariosacosta.bookingapp.application.result.PageResult;
+import com.github.angellariosacosta.bookingapp.domain.model.Permission;
+
+public interface PermissionRepositoryPort {
+
+	/** Ignora los eliminados lógicamente. */
+	Optional<Permission> findById(Long id);
+
+	/** Los permisos (no eliminados) cuyo id está en {@code ids}; los ids desconocidos simplemente no aparecen. */
+	List<Permission> findAllByIds(Collection<Long> ids);
+
+	/** Incluye eliminados: el nombre es único aunque el permiso esté dado de baja. */
+	boolean existsByName(String name);
+
+	/** Alta si {@code id} es null; si no, actualiza descripción y estado del existente. */
+	Permission save(Permission permission);
+
+	PageResult<Permission> findPage(ListPermissionsQuery query);
+
+	/** true si algún rol vigente (no eliminado) tiene el permiso asignado con vínculo activo. */
+	boolean isAssignedToRole(Long permissionId);
+
+	void markDeleted(Long id);
+}

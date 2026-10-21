@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,11 @@ import java.util.Set;
 
 @Slf4j
 @Component
+@Order(DataInitializer.ORDER)
 @RequiredArgsConstructor
 public class DataInitializer implements ApplicationRunner {
+
+    static final int ORDER = 1;
 
     private final JpaRepositoryPermission permissionRepository;
     private final JpaRepositoryRole roleRepository;
@@ -38,7 +42,7 @@ public class DataInitializer implements ApplicationRunner {
         PermissionEntity userDelete = findOrCreate("USER_DELETE", "Delete users");
         PermissionEntity adminAll   = findOrCreate("ADMIN_ALL",   "Full administrative access");
 
-        findOrCreateRole("USER",  "Standard user",  Set.of(userRead, userWrite, appointmentCreate, appointmentDelete, appointmentRead));
+        findOrCreateRole("USER",  "Standard user",  Set.of(appointmentCreate, appointmentDelete, appointmentRead));
         findOrCreateRole("ADMIN", "Administrator",  Set.of(userRead, userWrite, userDelete, adminAll));
 
         log.info("Roles and permissions initialized.");
@@ -48,7 +52,7 @@ public class DataInitializer implements ApplicationRunner {
         return permissionRepository.findByName(name).orElseGet(() -> {
             log.info("Creating permission: {}", name);
             return permissionRepository.save(
-                    PermissionEntity.builder().name(name).description(description).build()
+                    PermissionEntity.builder().name(name).description(description).system(true).build()
             );
         });
     }
@@ -57,7 +61,7 @@ public class DataInitializer implements ApplicationRunner {
         RoleEntity role = roleRepository.findByName(name).orElseGet(() -> {
             log.info("Creating role: {}", name);
             return roleRepository.save(
-                    RoleEntity.builder().name(name).description(description).build()
+                    RoleEntity.builder().name(name).description(description).system(true).build()
             );
         });
 
