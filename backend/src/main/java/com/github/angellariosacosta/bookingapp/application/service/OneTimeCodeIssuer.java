@@ -74,7 +74,7 @@ class OneTimeCodeIssuer {
 		String name = requireText("name", command.name());
 		String lastName = requireText("lastName", command.lastName());
 		String email = blankToNull(command.email());
-		String phone = PhoneNumbers.normalizeWithDefaultCountry(command.phone());
+		String phone = PhoneNumbers.normalizeNational(command.phone());
 
 		if (userRepository.existsByUsername(username)) {
 			throw new AuthException(AuthError.USERNAME_ALREADY_IN_USE);

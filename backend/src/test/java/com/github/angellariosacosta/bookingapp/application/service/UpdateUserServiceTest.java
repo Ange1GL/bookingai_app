@@ -35,23 +35,23 @@ class UpdateUserServiceTest {
 		service = new UpdateUserService(new UserFinder(repository), repository);
 		when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		when(repository.findById(ID)).thenReturn(Optional.of(
-				User.builder().id(ID).username("owner").email("old@example.com").name("Old").phone("5215500000000")
+				User.builder().id(ID).username("owner").email("old@example.com").name("Old").phone("5500000000")
 						.active(true).build()));
 	}
 
 	@Test
 	void updatesNameEmailAndNormalizedPhone() {
-		User updated = service.update(new UpdateUserCommand(ID, "  New  ", "L", " new@example.com ", "+52 155 1111 2222"));
+		User updated = service.update(new UpdateUserCommand(ID, "  New  ", "L", " new@example.com ", "55 1111 2222"));
 
 		assertEquals("New", updated.getName());
 		assertEquals("new@example.com", updated.getEmail());
-		assertEquals("5215511112222", updated.getPhone());
+		assertEquals("5511112222", updated.getPhone());
 		assertEquals("owner", updated.getUsername());
 	}
 
 	@Test
 	void nullPhoneKeepsCurrentOne() {
-		assertEquals("5215500000000", service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", null)).getPhone());
+		assertEquals("5500000000", service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", null)).getPhone());
 	}
 
 	@Test
@@ -79,10 +79,10 @@ class UpdateUserServiceTest {
 
 	@Test
 	void rejectsPhoneUsedByAnotherUser() {
-		when(repository.existsByPhone("5215511112222")).thenReturn(true);
+		when(repository.existsByPhone("5511112222")).thenReturn(true);
 
 		assertThrows(DuplicatePhoneException.class,
-				() -> service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", "5215511112222")));
+				() -> service.update(new UpdateUserCommand(ID, "n", "L", "old@example.com", "5511112222")));
 	}
 
 	@Test
@@ -99,11 +99,11 @@ class UpdateUserServiceTest {
 	}
 
 	@Test
-	void updatesLastNameAndTenDigitPhoneGetsTheDefaultCountryCode() {
+	void updatesLastNameAndKeepsTheTenDigitPhone() {
 		User updated = service.update(new UpdateUserCommand(ID, "n", " Ruiz ", "old@example.com", "55 1111 2222"));
 
 		assertEquals("Ruiz", updated.getLastName());
-		assertEquals("525511112222", updated.getPhone());
+		assertEquals("5511112222", updated.getPhone());
 	}
 
 	@Test

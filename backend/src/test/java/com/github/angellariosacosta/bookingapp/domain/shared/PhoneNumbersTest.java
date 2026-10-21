@@ -33,20 +33,23 @@ class PhoneNumbersTest {
 	}
 
 	@Test
-	void tenDigitNationalNumberGetsTheDefaultCountryCode() {
-		assertEquals("525512345678", PhoneNumbers.normalizeWithDefaultCountry("55 1234 5678"));
+	void nationalNumberKeepsOnlyItsTenDigits() {
+		assertEquals("5512345678", PhoneNumbers.normalizeNational(" 55 1234-5678 "));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"", "   ", "551234567", "55123456789", "+525512345678", "55abc45678"})
+	void nationalNumberRejectsAnythingButTenDigits(String raw) {
+		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeNational(raw));
 	}
 
 	@Test
-	void plusPrefixAndLongerNumbersKeepTheirOwnCountry() {
-		assertEquals("14155552671", PhoneNumbers.normalizeWithDefaultCountry("+1 415 555 2671"));
-		assertEquals("525512345678", PhoneNumbers.normalizeWithDefaultCountry("525512345678"));
-		assertEquals("5215512345678", PhoneNumbers.normalizeWithDefaultCountry("+52 1 55 1234 5678"));
+	void nationalNumberRejectsNull() {
+		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeNational(null));
 	}
 
 	@Test
-	void defaultCountryNormalizationStillRejectsInvalidNumbers() {
-		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeWithDefaultCountry("abc"));
-		assertThrows(InvalidFieldException.class, () -> PhoneNumbers.normalizeWithDefaultCountry(null));
+	void internationalFormatAddsTheDefaultCountryCode() {
+		assertEquals("525512345678", PhoneNumbers.toInternational("5512345678"));
 	}
 }

@@ -3,7 +3,9 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.m
 import org.springframework.stereotype.Component;
 
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
+import com.github.angellariosacosta.bookingapp.application.result.VerifiedCodeResult;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AuthSuccessResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.VerifyCodeResponse;
 
 @Component
 public class AuthRestMapper {
@@ -11,6 +13,11 @@ public class AuthRestMapper {
 	// Omite accessToken/refreshToken a propósito: los JWT viajan solo en cookies HttpOnly
 	// (AuthController#writeAuthCookies). Exponerlos en el body anularía la mitigación XSS.
 	public AuthSuccessResponse toResponse(AuthTokenResult result) {
-		return new AuthSuccessResponse(result.userId(), result.username(), result.email(), result.roles());
+		return new AuthSuccessResponse(result.userId(), result.username(), result.email(), result.roles(),
+				result.permissions());
+	}
+
+	public VerifyCodeResponse toResponse(VerifiedCodeResult result) {
+		return new VerifyCodeResponse(result.verificationToken(), result.expiresAt());
 	}
 }

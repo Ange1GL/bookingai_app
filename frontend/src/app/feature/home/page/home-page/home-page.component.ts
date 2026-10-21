@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Permission, PERMISSIONS } from '@/core/security/permissions';
 import { SessionService } from '@/core/service/session.service';
 
 const TODAY_FORMAT = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -9,6 +10,7 @@ interface Shortcut {
   description: string;
   icon: string;
   path: string;
+  permissions?: readonly Permission[];
 }
 
 interface UpcomingShortcut {
@@ -41,6 +43,13 @@ const SHORTCUTS: Shortcut[] = [
     icon: 'pi-sparkles',
     path: '/assistant',
   },
+  {
+    label: 'Usuarios',
+    description: 'Da de alta usuarios, entrega códigos de acceso y atiende recuperaciones.',
+    icon: 'pi-id-card',
+    path: '/users',
+    permissions: [PERMISSIONS.USER_READ],
+  },
 ];
 
 const UPCOMING_SHORTCUTS: UpcomingShortcut[] = [
@@ -56,7 +65,9 @@ const UPCOMING_SHORTCUTS: UpcomingShortcut[] = [
 })
 export class HomePageComponent {
   protected readonly session = inject(SessionService);
-  protected readonly shortcuts = SHORTCUTS;
+  protected readonly shortcuts = computed(() =>
+    SHORTCUTS.filter((shortcut) => this.session.hasAnyPermission(shortcut.permissions ?? [])),
+  );
   protected readonly upcoming = UPCOMING_SHORTCUTS;
   protected readonly today = TODAY_FORMAT.format(new Date());
 }

@@ -21,7 +21,7 @@ class UserRestMapperOneTimeCodeTest {
 	private static final String CODE = "483920";
 
 	private final User withoutPassword = User.builder().id(5L).username("u").email("u@example.com")
-			.phone("5215500000000").active(true).roles(Set.of(new Role(1L, "USER", null, true, true, Set.of()))).build();
+			.phone("5500000000").active(true).roles(Set.of(new Role(1L, "USER", null, true, true, Set.of()))).build();
 
 	private UserRestMapper mapperWithExpose(boolean expose) {
 		return mapper(expose, OtpDeliveryProperties.Mode.WHATSAPP);

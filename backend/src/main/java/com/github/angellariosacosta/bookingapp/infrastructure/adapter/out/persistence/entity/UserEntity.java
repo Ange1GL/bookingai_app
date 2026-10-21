@@ -44,7 +44,7 @@ public class UserEntity extends BaseEntity {
     private String password;
     private boolean active;
 
-    @Column(length = 20)
+    @Column(length = 10)
     private String phone;
 
     @Column(name = "password_changed_at")

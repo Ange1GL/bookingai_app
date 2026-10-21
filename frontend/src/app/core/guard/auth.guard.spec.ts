@@ -8,7 +8,7 @@ import { SessionService } from '../service/session.service';
 import { authGuard } from './auth.guard';
 
 const REFRESH_URL = `${environment.apiBaseUrl}/api/v1/auth/refresh`;
-const USER = { userId: 1, username: 'ana', email: 'ana@test.com', roles: [] };
+const USER = { userId: 1, username: 'ana', email: 'ana@test.com', roles: [], permissions: [] };
 
 describe('authGuard', () => {
   let http: HttpTestingController;

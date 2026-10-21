@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.application.command.ChangePasswordCommand;
 import com.github.angellariosacosta.bookingapp.application.command.CreatePasswordCommand;
+import com.github.angellariosacosta.bookingapp.application.command.VerifyCodeCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.AuthenticateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.ChangePasswordUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.CreatePasswordUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.VerifyOneTimeCodeUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.LogoutUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RefreshAccessTokenUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.RegisterUserCase;
@@ -25,6 +27,8 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.an
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AuthSuccessResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChangePasswordRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreatePasswordRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.VerifyCodeRequest;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.VerifyCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.LoginRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.PasswordRecoveryAcceptedResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.RegisterRequest;
@@ -53,6 +57,7 @@ public class AuthController {
     private final LogoutUseCase logoutUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
     private final CreatePasswordUseCase createPasswordUseCase;
+    private final VerifyOneTimeCodeUseCase verifyOneTimeCodeUseCase;
     private final RequestPasswordRecoveryUseCase requestPasswordRecoveryUseCase;
     private final AuthCookieFactory authCookieFactory;
     private final CookieProperties cookieProperties;
@@ -101,7 +106,15 @@ public class AuthController {
         return ResponseEntity.ok(authRestMapper.toResponse(result));
     }
 
-    // Público: quien aún no tiene contraseña canjea el código de un solo uso que recibió por WhatsApp, define su
+    // Público, paso 1 de crear la contraseña: valida usuario + código SIN consumirlo y entrega un comprobante firmado
+    // de corta vida que /create-password exige. Cuenta los intentos fallidos igual que el canje.
+    @PostMapping("/verify-code")
+    public ResponseEntity<VerifyCodeResponse> verifyCode(@Valid @RequestBody VerifyCodeRequest request) {
+        return ResponseEntity.ok(authRestMapper.toResponse(
+                verifyOneTimeCodeUseCase.verify(new VerifyCodeCommand(request.username(), request.code()))));
+    }
+
+    // Público, paso 2: quien aún no tiene contraseña canjea el código de un solo uso que recibió por WhatsApp, define su
     // contraseña y queda con sesión abierta.
     @PostMapping("/create-password")
     public ResponseEntity<AuthSuccessResponse> createPassword(
@@ -109,7 +122,7 @@ public class AuthController {
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse) {
         AuthTokenResult result = createPasswordUseCase.createPassword(new CreatePasswordCommand(
-                request.username(), request.code(), request.newPassword(),
+                request.username(), request.code(), request.newPassword(), request.verificationToken(),
                 httpRequest.getHeader("User-Agent"), clientIpResolver.resolve(httpRequest)));
         writeAuthCookies(httpResponse, result);
         return ResponseEntity.ok(authRestMapper.toResponse(result));

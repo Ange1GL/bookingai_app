@@ -4,6 +4,7 @@ import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResul
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenGenerator;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
+import com.github.angellariosacosta.bookingapp.domain.model.Permission;
 import com.github.angellariosacosta.bookingapp.domain.model.RefreshToken;
 import com.github.angellariosacosta.bookingapp.domain.model.Role;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
@@ -32,6 +33,12 @@ class AuthTokenIssuer {
 
     IssuedTokens issue(User user, String userAgent, String ipAddress) {
         List<String> roles = user.getRoles().stream().map(Role::name).toList();
+        List<String> permissions = user.getRoles().stream()
+                .flatMap(role -> role.permissions().stream())
+                .map(Permission::name)
+                .distinct()
+                .sorted()
+                .toList();
         String accessToken = tokenService.generateToken(user.getId(), user.getUsername());
 
         String rawRefreshToken = refreshTokenGenerator.generateRawToken();
@@ -48,7 +55,7 @@ class AuthTokenIssuer {
         RefreshToken saved = refreshTokenRepositoryPort.save(refreshToken);
 
         AuthTokenResult result = new AuthTokenResult(
-                accessToken, rawRefreshToken, user.getId(), user.getUsername(), user.getEmail(), roles);
+                accessToken, rawRefreshToken, user.getId(), user.getUsername(), user.getEmail(), roles, permissions);
         return new IssuedTokens(result, saved.getId());
     }
 }

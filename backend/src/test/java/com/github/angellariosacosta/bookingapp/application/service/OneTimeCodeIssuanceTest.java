@@ -99,7 +99,7 @@ class OneTimeCodeIssuanceTest {
 	}
 
 	private CreateUserCommand command() {
-		return new CreateUserCommand(" new.user ", " new@example.com ", " New ", " López Pérez ", "+52 155 1234 5678", Set.of(11L));
+		return new CreateUserCommand(" new.user ", " new@example.com ", " New ", " López Pérez ", "55 1234 5678", Set.of(11L));
 	}
 
 	@Test
@@ -115,7 +115,7 @@ class OneTimeCodeIssuanceTest {
 		order.verify(userRepository).save(savedUser.capture());
 		order.verify(codes).consumePending(TARGET, NOW);
 		order.verify(codes).save(savedCode.capture());
-		order.verify(notifier).sendCode("5215512345678", CODE);
+		order.verify(notifier).sendCode("525512345678", CODE);
 
 		User user = savedUser.getValue();
 		assertEquals("new.user", user.getUsername());
@@ -165,7 +165,7 @@ class OneTimeCodeIssuanceTest {
 				assertThrows(AuthException.class, () -> createService.create(command())).getError());
 
 		when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-		when(userRepository.existsByPhone("5215512345678")).thenReturn(true);
+		when(userRepository.existsByPhone("5512345678")).thenReturn(true);
 		assertThrows(DuplicatePhoneException.class, () -> createService.create(command()));
 
 		verify(userRepository, never()).save(any());
@@ -176,34 +176,34 @@ class OneTimeCodeIssuanceTest {
 	@Test
 	void rejectsInvalidInputsAndDisabledRolesWithoutIssuingAnything() {
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("ab", "a@b.co", "N", "L", "5215512345678", Set.of(11L))));
+				new CreateUserCommand("ab", "a@b.co", "N", "L", "5512345678", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
 				new CreateUserCommand("valid", "a@b.co", "N", "L", "12", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", " ", "L", "5215512345678", Set.of(11L))));
+				new CreateUserCommand("valid", "a@b.co", " ", "L", "5512345678", Set.of(11L))));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", "N", "L", "5215512345678", Set.of())));
+				new CreateUserCommand("valid", "a@b.co", "N", "L", "5512345678", Set.of())));
 
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", "N", " ", "5215512345678", Set.of(11L))));
+				new CreateUserCommand("valid", "a@b.co", "N", " ", "5512345678", Set.of(11L))));
 
 		when(roleRepository.findAllByIds(Set.of(12L))).thenReturn(List.of(disabledRole));
 		assertThrows(InvalidFieldException.class, () -> createService.create(
-				new CreateUserCommand("valid", "a@b.co", "N", "L", "5215512345678", Set.of(12L))));
+				new CreateUserCommand("valid", "a@b.co", "N", "L", "5512345678", Set.of(12L))));
 
 		verify(userRepository, never()).save(any());
 		verify(notifier, never()).sendCode(any(), any());
 	}
 
 	@Test
-	void emailIsOptionalAndTenDigitPhoneGetsTheDefaultCountryCode() {
+	void emailIsOptionalAndThePhoneIsKeptAsTenDigits() {
 		when(roleRepository.findAllByIds(Set.of(11L))).thenReturn(List.of(userRole));
 
 		IssuedCodeResult result = createService.create(
 				new CreateUserCommand("new.user", "  ", "Ana", "Ruiz", "55 1234 5678", Set.of(11L)));
 
 		assertNull(result.user().getEmail());
-		assertEquals("525512345678", result.user().getPhone());
+		assertEquals("5512345678", result.user().getPhone());
 		verify(userRepository, never()).existsByEmail(any());
 	}
 
@@ -214,10 +214,10 @@ class OneTimeCodeIssuanceTest {
 
 	@Test
 	void resetClearsThePasswordRevokesSessionsClearsLockAndSendsAResetCode() {
-		existingTarget("5215500000000", "old-hash");
+		existingTarget("5500000000", "old-hash");
 		AccountBlocked blocked = AccountBlocked.create(TARGET);
 		when(accountBlocked.findByUserId(TARGET)).thenReturn(Optional.of(blocked));
-		when(notifier.sendCode("5215500000000", CODE)).thenReturn(true);
+		when(notifier.sendCode("525500000000", CODE)).thenReturn(true);
 
 		IssuedCodeResult result = resetService.reset(ACTOR, TARGET);
 
@@ -235,7 +235,7 @@ class OneTimeCodeIssuanceTest {
 
 	@Test
 	void resendingToAnAccountThatNeverHadAPasswordKeepsTheActivationPurpose() {
-		existingTarget("5215500000000", null);
+		existingTarget("5500000000", null);
 		when(accountBlocked.findByUserId(TARGET)).thenReturn(Optional.empty());
 
 		resetService.reset(ACTOR, TARGET);
@@ -265,7 +265,7 @@ class OneTimeCodeIssuanceTest {
 
 	@Test
 	void failedDeliveryOnResetStillReportsNotDelivered() {
-		existingTarget("5215500000000", "old-hash");
+		existingTarget("5500000000", "old-hash");
 		when(accountBlocked.findByUserId(TARGET)).thenReturn(Optional.empty());
 		when(notifier.sendCode(anyString(), anyString())).thenReturn(false);
 

@@ -30,18 +30,10 @@ descrito en [otp-password-creation.md](otp-password-creation.md), que se conserv
 
 ### Formato del teléfono
 
-Se guarda en formato internacional **solo con dígitos y con prefijo de país** (como lo usa WhatsApp):
-
-| Entrada | Se guarda |
-|---|---|
-| `55 1234 5678` (10 dígitos, sin `+`) | `525512345678` (se antepone 52, México) |
-| `+52 55 1234 5678` | `525512345678` |
-| `+1 415 555 2671` | `14155552671` (con `+` se respeta el país) |
-| `525512345678` (más de 10 dígitos) | tal cual |
-
-Así el sistema no se limita a México: para otro país basta escribirlo con `+` y su prefijo. La migración V26
-antepone `52` a los teléfonos de 10 dígitos que ya existían. El prefijo por defecto es
-`PhoneNumbers.DEFAULT_COUNTRY_CODE`.
+El usuario guarda su **número nacional de 10 dígitos, sin prefijo de país** (`user_app.phone` es `varchar(10)`).
+Se ignoran espacios, guiones y paréntesis (`55 1234-5678` → `5512345678`); cualquier otra cosa se rechaza.
+El prefijo `52` (`PhoneNumbers.DEFAULT_COUNTRY_CODE`) se antepone solo al enviar el código por WhatsApp
+(`PhoneNumbers.toInternational`). La migración V27 quita el `52` a los teléfonos que ya estaban guardados.
 
 ## 2. Recuperación de contraseña (atendida por el administrador)
 
@@ -74,9 +66,14 @@ Usuario                         Backend                                   Admini
 | `OTP_DELIVERY` | `security.otp.delivery` | `manual` (defecto): el código se devuelve al admin. `whatsapp`: lo envía Meta |
 | `OTP_TTL_MINUTES` | `security.otp.ttl-minutes` | 4320 (72 h). Con `whatsapp` conviene 30 |
 
-## 4. Pendiente (no incluido)
+## 4. Frontend y permisos en la sesión
+
+Las pantallas están en [../../docs/users-administration.md](../../docs/users-administration.md). Para poder proteger rutas
+y botones, `AuthSuccessResponse` (login, refresh, create-password) incluye ahora `permissions`: los nombres de permisos
+de sus roles, ordenados y sin repetir. Es solo una ayuda de UI; los endpoints siguen exigiendo `@PreAuthorize`.
+
+## 5. Pendiente (no incluido)
 
 - Registro abierto con solicitud de acceso aprobada por el admin (`onboarding_request`, ver
   [plan-onboarding-registration.md](plan-onboarding-registration.md)); el código muerto de `RegisterUserService`
   sigue sin eliminarse.
-- Pantallas de administración en el frontend (botón "Copiar", bandeja de recuperaciones).

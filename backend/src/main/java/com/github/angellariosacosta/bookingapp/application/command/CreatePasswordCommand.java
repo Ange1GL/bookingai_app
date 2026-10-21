@@ -5,6 +5,7 @@ public record CreatePasswordCommand(
 		String username,
 		String code,
 		String newPassword,
+		String verificationToken,
 		String userAgent,
 		String ipAddress
 ) {

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeNotifierPort;
 import com.github.angellariosacosta.bookingapp.application.result.IssuedCodeResult;
 import com.github.angellariosacosta.bookingapp.domain.model.User;
+import com.github.angellariosacosta.bookingapp.domain.shared.PhoneNumbers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ class OneTimeCodeDelivery {
 
 	IssuedCodeResult deliver(IssuedCode issued) {
 		User user = issued.user();
-		boolean delivered = notifier.sendCode(user.getPhone(), issued.code());
+		boolean delivered = notifier.sendCode(PhoneNumbers.toInternational(user.getPhone()), issued.code());
 		if (!delivered) {
 			log.info("Código no enviado automáticamente userId={}; el admin lo entrega a mano o reintenta con reset-password", user.getId());
 		}

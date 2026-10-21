@@ -51,7 +51,7 @@ public class UpdateUserService implements UpdateUserUseCase {
 		if (rawPhone == null) {
 			return;
 		}
-		String phone = PhoneNumbers.normalizeWithDefaultCountry(rawPhone);
+		String phone = PhoneNumbers.normalizeNational(rawPhone);
 		if (!phone.equals(user.getPhone()) && userRepository.existsByPhone(phone)) {
 			throw new DuplicatePhoneException("Ya existe un usuario con ese teléfono");
 		}

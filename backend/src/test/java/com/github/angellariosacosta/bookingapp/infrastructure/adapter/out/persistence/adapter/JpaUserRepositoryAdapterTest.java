@@ -41,7 +41,7 @@ class JpaUserRepositoryAdapterTest {
 	private User newUser(String username, Role... userRoles) {
 		return users.save(User.builder()
 				.username(username).email(username + "@example.test").name("Zz " + username)
-				.phone("5299" + Math.abs(username.hashCode() % 100000000)).password("hash").active(true)
+				.phone("55" + String.format("%08d", Math.abs(username.hashCode() % 100_000_000))).password("hash").active(true)
 				.roles(Set.of(userRoles)).build());
 	}
 

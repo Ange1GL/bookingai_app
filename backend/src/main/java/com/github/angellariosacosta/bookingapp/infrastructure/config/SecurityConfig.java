@@ -121,6 +121,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/password-recovery", // pide al admin reiniciar la contraseña: sin sesión
+                                "/api/v1/auth/verify-code",       // paso 1 de crear la contraseña: valida el OTP sin sesión
                                 "/api/v1/auth/create-password",   // el usuario sin contraseña canjea su OTP: aún no tiene sesión
                                 "/api/v1/auth/csrf",
                                 "/api/v1/auth/refresh",

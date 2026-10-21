@@ -33,6 +33,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.RefreshToken
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.VerificationTicketPort;
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidFieldException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidOneTimeCodeException;
@@ -47,6 +48,7 @@ class CreatePasswordServiceTest {
 
 	private static final long USER_ID = 4L;
 	private static final String CODE = "483920";
+	private static final String TICKET = "valid-ticket";
 	private static final String NEW_PASSWORD = "Brand-new-pass-1";
 	private static final Instant NOW = Instant.parse("2026-10-18T12:00:00Z");
 
@@ -55,6 +57,7 @@ class CreatePasswordServiceTest {
 	private PasswordHasher hasher;
 	private RefreshTokenRepositoryPort refreshTokens;
 	private AccountBlockedRepository accountBlocked;
+	private VerificationTicketPort tickets;
 	private CreatePasswordService service;
 	private User user;
 	private OneTimeCode pending;
@@ -66,6 +69,7 @@ class CreatePasswordServiceTest {
 		hasher = mock(PasswordHasher.class);
 		refreshTokens = mock(RefreshTokenRepositoryPort.class);
 		accountBlocked = mock(AccountBlockedRepository.class);
+		tickets = mock(VerificationTicketPort.class);
 		TokenService tokenService = mock(TokenService.class);
 		RefreshTokenGenerator generator = mock(RefreshTokenGenerator.class);
 
@@ -81,7 +85,8 @@ class CreatePasswordServiceTest {
 		when(hasher.matches(CODE, "code-hash")).thenReturn(true);
 
 		service = new CreatePasswordService(userRepository, codes, hasher, refreshTokens, accountBlocked,
-				new AuthTokenIssuer(tokenService, generator, refreshTokens), Clock.fixed(NOW, ZoneOffset.UTC));
+				new AuthTokenIssuer(tokenService, generator, refreshTokens), Clock.fixed(NOW, ZoneOffset.UTC),
+				new OneTimeCodeChecker(userRepository, codes, hasher), tickets);
 
 		user = User.builder().id(USER_ID).username("maria").email("m@example.com").active(true)
 				.roles(Set.of(new Role(1L, Role.USER_NAME, null, true, true, Set.of()))).build();
@@ -91,10 +96,11 @@ class CreatePasswordServiceTest {
 		when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		when(codes.findPendingByUserIdForUpdate(USER_ID)).thenReturn(Optional.of(pending));
 		when(accountBlocked.findByUserId(USER_ID)).thenReturn(Optional.empty());
+		when(tickets.isValid(TICKET, USER_ID, pending.getId(), NOW)).thenReturn(true);
 	}
 
 	private CreatePasswordCommand command(String code, String password) {
-		return new CreatePasswordCommand("maria", code, password, "agent", "1.2.3.4");
+		return new CreatePasswordCommand("maria", code, password, TICKET, "agent", "1.2.3.4");
 	}
 
 	@Test
@@ -174,7 +180,7 @@ class CreatePasswordServiceTest {
 	void unknownUserAndUserWithoutPendingCodeGetTheSameError() {
 		when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 		InvalidOneTimeCodeException unknown = assertThrows(InvalidOneTimeCodeException.class,
-				() -> service.createPassword(new CreatePasswordCommand("ghost", CODE, NEW_PASSWORD, "a", "i")));
+				() -> service.createPassword(new CreatePasswordCommand("ghost", CODE, NEW_PASSWORD, TICKET, "a", "i")));
 
 		when(codes.findPendingByUserIdForUpdate(USER_ID)).thenReturn(Optional.empty());
 		InvalidOneTimeCodeException noCode = assertThrows(InvalidOneTimeCodeException.class,
@@ -200,6 +206,17 @@ class CreatePasswordServiceTest {
 		assertEquals(0, pending.getFailedAttempts());
 		verify(codes, never()).findPendingByUserIdForUpdate(any());
 		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	void aCorrectCodeWithoutAValidVerificationTicketIsRejectedAndKeepsTheCodeUsable() {
+		when(tickets.isValid(TICKET, USER_ID, pending.getId(), NOW)).thenReturn(false);
+
+		assertThrows(InvalidOneTimeCodeException.class, () -> service.createPassword(command(CODE, NEW_PASSWORD)));
+
+		assertTrue(pending.isUsable(NOW));
+		verify(userRepository, never()).save(any());
+		verify(refreshTokens, never()).revokeAllByUserId(any());
 	}
 
 	@Test

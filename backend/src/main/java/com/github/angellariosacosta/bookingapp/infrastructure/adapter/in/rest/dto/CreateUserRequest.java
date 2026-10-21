@@ -25,7 +25,7 @@ public record CreateUserRequest(
 		@Size(max = 255, message = "Los apellidos no pueden superar los 255 caracteres")
 		String lastName,
 
-		// 10 dígitos nacionales (se les antepone 52) o formato internacional con "+".
+		// 10 dígitos nacionales, sin prefijo de país.
 		@NotBlank(message = "El teléfono es obligatorio (se usa para entregar el código de acceso por WhatsApp)")
 		@Size(max = 25, message = "El teléfono no puede superar los 25 caracteres")
 		String phone,

@@ -16,7 +16,9 @@ Admin                       Backend                              WhatsApp       
   │ ◄─ {user, codeSent} ──── │                                      │                  │
   │ (le dice su username al usuario por otro medio)                                     │
   │                          │                                                         │
-  │                          │ ◄── POST /auth/create-password {username, code, newPassword} ──┤
+  │                          │ ◄── POST /auth/verify-code {username, code} ─ (paso 1) ────────┤
+  │                          │ ── {verificationToken, expiresAt} ─────────────────────► │
+  │                          │ ◄── POST /auth/create-password {…, verificationToken} ────┤
   │                          │ verifica OTP, define la contraseña, consume el OTP       │
   │                          │ ── cookies de sesión (queda con sesión abierta) ───────► │
 ```
@@ -25,7 +27,9 @@ Admin                       Backend                              WhatsApp       
 - **Reinicio / reenvío** (`POST /api/v1/users/{id}/reset-password`): borra la contraseña actual, cierra sus
   sesiones, limpia un posible bloqueo por intentos y emite un código nuevo. Sirve también para reenviar el código si
   el WhatsApp falló o el usuario no lo usó a tiempo.
-- **Crear contraseña** (`POST /api/v1/auth/create-password`, **público**): lo usa el propio usuario.
+- **Crear contraseña** en dos pasos, ambos **públicos**, los usa el propio usuario: `POST /api/v1/auth/verify-code`
+  (valida usuario + código sin consumirlo y devuelve un comprobante) y `POST /api/v1/auth/create-password`
+  (exige ese comprobante).
 - Una cuenta sin contraseña **no puede iniciar sesión** (responde igual que credenciales inválidas, sin revelar nada).
 
 ## 2. Modelo de datos (normalizado)
@@ -71,11 +75,30 @@ one_time_code ──────────────────────
 
 ## 4. API
 
-### `POST /api/v1/auth/create-password` (público)
+### `POST /api/v1/auth/verify-code` (público, paso 1)
+
+```http
+POST /api/v1/auth/verify-code
+{ "username": "maria.lopez", "code": "483920" }
+
+200 OK
+{ "verificationToken": "<base64url>.<base64url>", "expiresAt": "2026-10-20T12:10:00Z" }
+
+400 Bad Request   { "message": "Código inválido o vencido", … }      ← cualquier causa (igual que create-password)
+```
+
+- No consume el código, pero **cuenta los intentos fallidos igual que el canje** (`OneTimeCodeChecker`, compartido): a
+  los 5 fallos el código se quema. Usuario inexistente, sin código o vencido responden igual (hash señuelo).
+- El comprobante es un ticket sin estado (`HmacVerificationTicketAdapter`): `userId:codeId:expira` firmado con
+  HMAC-SHA256 con una clave derivada del `JWT_SECRET` (etiqueta de dominio propia). Dura 10 min como máximo y nunca más
+  que el propio código. Si se emite otro código o se consume, deja de valer (va atado al id del código).
+
+### `POST /api/v1/auth/create-password` (público, paso 2)
 
 ```http
 POST /api/v1/auth/create-password
-{ "username": "maria.lopez", "code": "483920", "newPassword": "Mi-contraseña-2026" }
+{ "username": "maria.lopez", "code": "483920", "verificationToken": "<el del paso 1>",
+  "newPassword": "Mi-contraseña-2026" }
 
 200 OK  (+ cookies de acceso y refresh)
 { "userId": 7, "username": "maria.lopez", "email": "maria@example.com", "roles": ["USER"] }
@@ -142,9 +165,14 @@ Cómo conseguir la plantilla y el número en Meta: [whatsapp-plantilla-otp.md](w
 
 ## 8. Frontend (`frontend/`, Angular 21 + PrimeNG)
 
-- Ruta pública **`/auth/create-password`** (`CreatePasswordPageComponent` + `CreatePasswordFormComponent`): usuario,
-  código de 6 dígitos (`p-inputotp`, solo enteros), nueva contraseña y confirmación. Al enviar llama a
-  `AuthService.createPassword` → `POST /api/v1/auth/create-password`; con éxito guarda el usuario en `SessionService`
+- Ruta pública **`/auth/create-password`** en dos pasos (`CreatePasswordPageComponent`):
+  1. `VerifyCodeFormComponent`: usuario + código de 6 dígitos (`p-inputotp`, solo enteros). Llama a
+     `AuthService.verifyCode`; solo si el backend lo confirma se muestra el paso 2. Un código rechazado se borra del
+     formulario y, tras 3 fallos seguidos, el botón se bloquea 30 s (cosmético: el límite real es el del backend).
+  2. `CreatePasswordFormComponent`: nueva contraseña + confirmación con la lista de requisitos en vivo. Envía solo
+     la contraseña; la página añade usuario, código y comprobante, que viven únicamente en memoria (se borran al volver
+     atrás, al caducar el comprobante, al fallar o al salir). Si algo falla vuelve al paso 1.
+  Con éxito llama a `AuthService.createPassword` → `POST /api/v1/auth/create-password`; con éxito guarda el usuario en `SessionService`
   y navega a `/home` (el backend ya dejó las cookies de sesión). Los errores (p. ej. "Código inválido o vencido") los
   muestra el `errorInterceptor` como toast.
 - Validación en el cliente igual a la del backend: `shared/validators/password-policy.validator.ts` (10–72

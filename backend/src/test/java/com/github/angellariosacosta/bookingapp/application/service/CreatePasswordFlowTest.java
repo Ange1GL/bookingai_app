@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.angellariosacosta.bookingapp.application.command.CreatePasswordCommand;
 import com.github.angellariosacosta.bookingapp.application.command.CreateUserCommand;
+import com.github.angellariosacosta.bookingapp.application.command.VerifyCodeCommand;
 import com.github.angellariosacosta.bookingapp.application.port.out.RoleRepository;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
@@ -47,6 +48,8 @@ class CreatePasswordFlowTest {
 	@Autowired
 	private CreatePasswordService createPassword;
 	@Autowired
+	private VerifyOneTimeCodeService verifyCode;
+	@Autowired
 	private AuthenticateUserService authenticate;
 	@Autowired
 	private UserRepository userRepository;
@@ -62,7 +65,7 @@ class CreatePasswordFlowTest {
 	void createUserWithoutPassword() {
 		username = "zz_flow_" + UUID.randomUUID().toString().substring(0, 8);
 		Role userRole = roleRepository.findByName(Role.USER_NAME).orElseThrow();
-		String phone = "5299" + String.format("%08d", Math.abs(username.hashCode()) % 100_000_000);
+		String phone = "55" + String.format("%08d", Math.abs(username.hashCode()) % 100_000_000);
 		created = createUser.create(new CreateUserCommand(username, username + "@example.test", "Flow", "Test", phone,
 				Set.of(userRole.id())));
 	}
@@ -77,8 +80,10 @@ class CreatePasswordFlowTest {
 		jdbc.update("delete from user_app where user_id = ?", userId);
 	}
 
+	/** Los dos pasos del flujo: verificar el código (comprobante) y canjearlo con la contraseña nueva. */
 	private AuthTokenResult redeem(String code, String password) {
-		return createPassword.createPassword(new CreatePasswordCommand(username, code, password, "agent", "127.0.0.1"));
+		String ticket = verifyCode.verify(new VerifyCodeCommand(username, code)).verificationToken();
+		return createPassword.createPassword(new CreatePasswordCommand(username, code, password, ticket, "agent", "127.0.0.1"));
 	}
 
 	private AuthTokenResult login(String password) {
@@ -115,6 +120,28 @@ class CreatePasswordFlowTest {
 
 		assertThrows(InvalidOneTimeCodeException.class, () -> redeem(created.code(), PASSWORD));
 		assertNull(userRepository.findByUsername(username).orElseThrow().getPassword());
+	}
+
+	@Test
+	void verifyingTheCodeDoesNotConsumeItButRedeemingWithoutTheTicketFails() {
+		verifyCode.verify(new VerifyCodeCommand(username, created.code()));
+
+		assertThrows(InvalidOneTimeCodeException.class, () -> createPassword.createPassword(
+				new CreatePasswordCommand(username, created.code(), PASSWORD, "forged.ticket", "agent", "127.0.0.1")));
+		assertNull(userRepository.findByUsername(username).orElseThrow().getPassword());
+
+		redeem(created.code(), PASSWORD);
+		assertEquals(username, login(PASSWORD).username());
+	}
+
+	@Test
+	void aTicketIsUselessOnceANewCodeIsIssued() {
+		String ticket = verifyCode.verify(new VerifyCodeCommand(username, created.code())).verificationToken();
+		Long userId = userRepository.findByUsername(username).orElseThrow().getId();
+		IssuedCodeResult second = resetPassword.reset(-1L, userId);
+
+		assertThrows(InvalidOneTimeCodeException.class, () -> createPassword.createPassword(
+				new CreatePasswordCommand(username, second.code(), PASSWORD, ticket, "agent", "127.0.0.1")));
 	}
 
 	@Test

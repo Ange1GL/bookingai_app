@@ -2,8 +2,6 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +13,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.OneTimeCodeR
 import com.github.angellariosacosta.bookingapp.application.port.out.PasswordHasher;
 import com.github.angellariosacosta.bookingapp.application.port.out.RefreshTokenRepositoryPort;
 import com.github.angellariosacosta.bookingapp.application.port.out.UserRepository;
+import com.github.angellariosacosta.bookingapp.application.port.out.VerificationTicketPort;
 import com.github.angellariosacosta.bookingapp.application.result.AuthTokenResult;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidOneTimeCodeException;
 import com.github.angellariosacosta.bookingapp.domain.model.OneTimeCode;
@@ -34,13 +33,13 @@ public class CreatePasswordService implements CreatePasswordUseCase {
 	private final AccountBlockedRepository accountBlockedRepository;
 	private final AuthTokenIssuer authTokenIssuer;
 	private final Clock clock;
-	// Hash de relleno: se compara cuando el usuario/código no existe para que la respuesta tarde lo mismo y no
-	// revele qué usernames existen.
-	private final String decoyHash;
+	private final OneTimeCodeChecker codeChecker;
+	private final VerificationTicketPort verificationTickets;
 
 	CreatePasswordService(UserRepository userRepository, OneTimeCodeRepositoryPort oneTimeCodeRepository,
 			PasswordHasher passwordHasher, RefreshTokenRepositoryPort refreshTokenRepository,
-			AccountBlockedRepository accountBlockedRepository, AuthTokenIssuer authTokenIssuer, Clock clock) {
+			AccountBlockedRepository accountBlockedRepository, AuthTokenIssuer authTokenIssuer, Clock clock, OneTimeCodeChecker codeChecker,
+			VerificationTicketPort verificationTickets) {
 		this.userRepository = userRepository;
 		this.oneTimeCodeRepository = oneTimeCodeRepository;
 		this.passwordHasher = passwordHasher;
@@ -48,7 +47,8 @@ public class CreatePasswordService implements CreatePasswordUseCase {
 		this.accountBlockedRepository = accountBlockedRepository;
 		this.authTokenIssuer = authTokenIssuer;
 		this.clock = clock;
-		this.decoyHash = passwordHasher.hash(UUID.randomUUID().toString());
+		this.codeChecker = codeChecker;
+		this.verificationTickets = verificationTickets;
 	}
 
 	// noRollbackFor: un código incorrecto lanza la excepción tras contar el intento fallido; con el rollback por
@@ -59,21 +59,15 @@ public class CreatePasswordService implements CreatePasswordUseCase {
 		// Antes de tocar el código: una contraseña que no cumple la política no debe gastar un intento.
 		PasswordPolicy.validate(command.newPassword());
 
-		Optional<User> found = userRepository.findByUsername(command.username()).filter(User::isActive);
-		Optional<OneTimeCode> pending = found.flatMap(user -> oneTimeCodeRepository.findPendingByUserIdForUpdate(user.getId()));
 		Instant now = Instant.now(clock);
 
-		if (pending.isEmpty() || !pending.get().isUsable(now)) {
-			passwordHasher.matches(command.code(), decoyHash);
-			throw new InvalidOneTimeCodeException();
-		}
-		User user = found.orElseThrow();
-		OneTimeCode code = pending.get();
+		OneTimeCodeChecker.Verified verified = codeChecker.check(command.username(), command.code(), now);
+		User user = verified.user();
+		OneTimeCode code = verified.code();
 
-		if (!passwordHasher.matches(command.code(), code.getCodeHash())) {
-			code.registerFailure(now);
-			oneTimeCodeRepository.save(code);
-			log.warn("Invalid one-time code user={} failedAttempts={}", user.getUsername(), code.getFailedAttempts());
+		// El paso 1 (verify-code) es obligatorio: sin su comprobante firmado no se canjea el código aunque sea correcto.
+		if (!verificationTickets.isValid(command.verificationToken(), user.getId(), code.getId(), now)) {
+			log.warn("Missing or invalid verification ticket user={}", user.getUsername());
 			throw new InvalidOneTimeCodeException();
 		}
 

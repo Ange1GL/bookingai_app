@@ -13,6 +13,10 @@ public record CreatePasswordRequest(
 		@Pattern(regexp = "\\d{4,15}", message = "El código solo tiene dígitos")
 		String code,
 
+		@NotBlank(message = "El comprobante de verificación es obligatorio")
+		@Size(max = 200, message = "El comprobante de verificación no es válido")
+		String verificationToken,
+
 		@NotBlank(message = "La nueva contraseña es obligatoria")
 		@Size(max = 72, message = "La contraseña no puede superar los 72 caracteres")
 		String newPassword

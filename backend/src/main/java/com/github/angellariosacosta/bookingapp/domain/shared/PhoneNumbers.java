@@ -12,6 +12,7 @@ public final class PhoneNumbers {
 	public static final int NATIONAL_NUMBER_DIGITS = 10;
 	public static final String DEFAULT_COUNTRY_CODE = "52";
 	private static final Pattern SEPARATORS = Pattern.compile("[\\s\\-().]");
+	private static final Pattern NATIONAL = Pattern.compile("\\d{" + NATIONAL_NUMBER_DIGITS + "}");
 	private static final Pattern DIGITS = Pattern.compile("\\d{" + MIN_DIGITS + "," + MAX_DIGITS + "}");
 
 	private PhoneNumbers() {
@@ -31,16 +32,20 @@ public final class PhoneNumbers {
 		return digits;
 	}
 
-	/**
-	 * Como {@link #normalize}, pero un número nacional (exactamente 10 dígitos y sin "+") recibe el prefijo del país
-	 * por defecto. Con "+" o con más de 10 dígitos se respeta tal cual: ya viene en formato internacional.
-	 */
-	public static String normalizeWithDefaultCountry(String rawPhone) {
-		String digits = normalize(rawPhone);
-		boolean explicitInternational = rawPhone.strip().startsWith("+");
-		if (!explicitInternational && digits.length() == NATIONAL_NUMBER_DIGITS) {
-			return DEFAULT_COUNTRY_CODE + digits;
+	/** Número nacional de un usuario: exactamente 10 dígitos, sin prefijo de país (se ignoran espacios, guiones y paréntesis). */
+	public static String normalizeNational(String rawPhone) {
+		if (rawPhone == null || rawPhone.isBlank()) {
+			throw new InvalidFieldException("phone", "must not be null or blank");
+		}
+		String digits = SEPARATORS.matcher(rawPhone.strip()).replaceAll("");
+		if (!NATIONAL.matcher(digits).matches()) {
+			throw new InvalidFieldException("phone", "must contain exactly " + NATIONAL_NUMBER_DIGITS + " digits");
 		}
 		return digits;
+	}
+
+	/** Formato internacional (E.164 sin "+") que exige WhatsApp: el prefijo del país por defecto más el número nacional. */
+	public static String toInternational(String nationalPhone) {
+		return DEFAULT_COUNTRY_CODE + nationalPhone;
 	}
 }

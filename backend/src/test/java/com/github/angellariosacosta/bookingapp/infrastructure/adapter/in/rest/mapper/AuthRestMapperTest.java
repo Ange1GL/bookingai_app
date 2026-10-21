@@ -16,12 +16,13 @@ class AuthRestMapperTest {
 
 	@Test
 	void exposesTheProfileButNeverTheTokens() {
-		AuthTokenResult result = new AuthTokenResult("access", "refresh", 1L, "maria", "m@example.com", List.of("USER"));
+		AuthTokenResult result = new AuthTokenResult("access", "refresh", 1L, "maria", "m@example.com", List.of("USER"), List.of("USER_READ"));
 
 		AuthSuccessResponse response = mapper.toResponse(result);
 
 		assertEquals("maria", response.username());
 		assertEquals(List.of("USER"), response.roles());
+		assertEquals(List.of("USER_READ"), response.permissions());
 		assertFalse(response.toString().contains("access"));
 		assertFalse(response.toString().contains("refresh"));
 	}
