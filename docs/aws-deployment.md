@@ -14,7 +14,9 @@ con `workflow_dispatch`).
 1. `npm ci` y `npm run build -- --configuration production` (salida: `frontend/dist/diamond-ng/browser`). Sin tests por ahora.
 2. Credenciales temporales por OIDC asumiendo el rol `aglacita-frontend-deploy` (sin llaves guardadas).
 3. `aws s3 sync ... --delete --exclude index.html` con `Cache-Control: public, max-age=31536000, immutable`
-   (los archivos de Angular llevan hash en el nombre).
+   (los archivos de Angular llevan hash en el nombre). Se excluyen el service worker (`ngsw.json`, `ngsw-worker.js`,
+   `safety-worker.js`, `worker-basic.min.js`) y `manifest.webmanifest`: no llevan hash, así que se suben aparte con
+   `Cache-Control: no-cache` (si no, los navegadores se quedan con un service worker viejo). Ver `docs/push-notifications.md`.
 4. `index.html` se sube **al final** con `Cache-Control: no-cache`, para que nadie vea un `index.html` que
    apunte a archivos aun no subidos.
 5. Invalidación de CloudFront `/*` y espera a que termine (`invalidation-completed`), para que el cambio sea

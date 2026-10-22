@@ -90,6 +90,10 @@ public class AppointmentEntity {
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
 	private Instant createdAt;
+
+	// null = el recordatorio push aún no se envió; al reagendar vuelve a null. Ver docs/push-reminders.md.
+	@Column(name = "reminder_sent_at")
+	private Instant reminderSentAt;
 	
 	
 	

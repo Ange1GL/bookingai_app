@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { RouterLink } from '@angular/router';
 import { Permission, PERMISSIONS } from '@/core/security/permissions';
 import { SessionService } from '@/core/service/session.service';
+import { PushNotificationsCardComponent } from '@/shared/components/push-notifications-card/push-notifications-card.component';
 
 const TODAY_FORMAT = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -59,7 +60,7 @@ const UPCOMING_SHORTCUTS: UpcomingShortcut[] = [
 
 @Component({
   selector: 'app-home-page',
-  imports: [RouterLink],
+  imports: [RouterLink, PushNotificationsCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home-page.component.html',
 })

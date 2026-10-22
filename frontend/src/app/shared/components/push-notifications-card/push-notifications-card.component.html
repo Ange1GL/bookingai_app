@@ -1,0 +1,93 @@
+@if (status() !== 'unsupported') {
+  <section
+    class="flex flex-col gap-3 rounded-3xl border border-surface bg-surface-0 p-5 shadow-sm dark:bg-surface-900"
+    aria-labelledby="push-card-title"
+  >
+    <div class="flex items-start gap-4">
+      <span
+        class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary dark:bg-primary-500/15"
+        aria-hidden="true"
+      >
+        <i class="pi text-xl" [class]="status() === 'on' ? 'pi-bell' : 'pi-bell-slash'"></i>
+      </span>
+      <div class="flex min-w-0 flex-1 flex-col gap-1">
+        <h2 id="push-card-title" class="m-0 text-lg font-semibold">Recordatorios de citas</h2>
+
+        @switch (status()) {
+          @case ('on') {
+            <p class="m-0 text-sm text-muted-color">
+              Activados en este dispositivo: te avisaremos {{ leadMinutes }} minutos antes de cada cita, aunque tengas la app cerrada.
+            </p>
+          }
+          @case ('blocked') {
+            <p class="m-0 text-sm text-muted-color">
+              Bloqueaste las notificaciones de este sitio. Para activarlas, abre los ajustes del sitio en tu navegador (el candado
+              junto a la dirección), permite las <strong>Notificaciones</strong> y vuelve aquí.
+            </p>
+          }
+          @case ('needs-install') {
+            <p class="m-0 text-sm text-muted-color">
+              En iPhone y iPad las notificaciones solo funcionan con la app instalada. Toca
+              <strong>Compartir</strong> <i class="pi pi-share-alt text-xs" aria-hidden="true"></i>, elige
+              <strong>Añadir a pantalla de inicio</strong>, abre AglaCita desde ese ícono y activa aquí los recordatorios.
+            </p>
+          }
+          @default {
+            <p class="m-0 text-sm text-muted-color">
+              Recibe un aviso {{ leadMinutes }} minutos antes de cada cita con quién es y a qué hora, aunque tengas la app cerrada.
+            </p>
+          }
+        }
+      </div>
+    </div>
+
+    @switch (status()) {
+      @case ('off') {
+        <p-button
+          label="Activar recordatorios"
+          icon="pi pi-bell"
+          [rounded]="true"
+          [loading]="busy()"
+          styleClass="w-full sm:w-fit"
+          (onClick)="enable()"
+        />
+      }
+      @case ('on') {
+        <div class="flex flex-wrap gap-2">
+          <p-button
+            label="Enviar prueba"
+            icon="pi pi-send"
+            [rounded]="true"
+            [outlined]="true"
+            size="small"
+            [loading]="busy()"
+            (onClick)="sendTest()"
+          />
+          <p-button
+            label="Desactivar"
+            icon="pi pi-bell-slash"
+            severity="secondary"
+            [rounded]="true"
+            [text]="true"
+            size="small"
+            [disabled]="busy()"
+            (onClick)="disable()"
+          />
+        </div>
+      }
+    }
+
+    @if (feedback(); as message) {
+      @if (message.text) {
+        <p
+          class="m-0 text-sm"
+          [class.text-green-600]="message.tone === 'success'"
+          [class.text-red-500]="message.tone === 'error'"
+          [attr.role]="message.tone === 'error' ? 'alert' : 'status'"
+        >
+          {{ message.text }}
+        </p>
+      }
+    }
+  </section>
+}

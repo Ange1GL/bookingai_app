@@ -175,6 +175,18 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
 	}
 
+	@ExceptionHandler(InvalidPushSubscriptionException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorResponse handleInvalidPushSubscription(InvalidPushSubscriptionException ex) {
+		return errorBody(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(PushNotConfiguredException.class)
+	@ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+	public ErrorResponse handlePushNotConfigured(PushNotConfiguredException ex) {
+		return errorBody(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+	}
+
 	@ExceptionHandler(AiQuotaExceededException.class)
 	@ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
 	public ErrorResponse handleAiQuotaExceeded(AiQuotaExceededException ex) {
