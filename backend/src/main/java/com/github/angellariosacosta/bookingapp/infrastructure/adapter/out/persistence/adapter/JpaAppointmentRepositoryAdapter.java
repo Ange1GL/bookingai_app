@@ -82,6 +82,8 @@ public class JpaAppointmentRepositoryAdapter implements AppointmentRepositoryPor
 		AppointmentEntity entity = findEntityByIdAndUserId(id, userId);
 		entity.setStartTime(newStart);
 		entity.setEndTime(newEnd);
+		// La cita cambió de hora: el recordatorio debe volver a enviarse para el nuevo horario.
+		entity.setReminderSentAt(null);
 		return mapper.toDomain(jpaRepository.save(entity));
 	}
 

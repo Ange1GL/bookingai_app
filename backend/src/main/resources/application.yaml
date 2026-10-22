@@ -172,6 +172,21 @@ app:
   # Es la unica referencia de "ahora" para validaciones, jobs y la IA (ver ClockConfig).
   timezone: America/Mexico_City
 
+  # Recordatorios push de citas. Sin claves VAPID el push queda desactivado y la app arranca igual.
+  # Generarlas una vez con: node scripts/generate-vapid-keys.mjs. Ver docs/push-reminders.md
+  push:
+    vapid-public-key: ${VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:}      # mailto:tu-correo o https://tu-dominio
+    lead-minutes: 5                 # cuantos minutos antes de la cita se avisa
+    job-interval-seconds: 30        # cada cuanto se revisan las citas por empezar
+    # El servidor hace POST a cada endpoint suscrito: solo servicios push conocidos (evita SSRF).
+    allowed-endpoint-hosts:
+      - fcm.googleapis.com                  # Chrome, Edge y navegadores Chromium en Android/escritorio
+      - push.services.mozilla.com           # Firefox (updates.push.services.mozilla.com)
+      - push.apple.com                      # Safari / iOS (web.push.apple.com)
+      - notify.windows.com                  # Edge en Windows (WNS)
+
 cors:
   allowed-origins:
     - http://localhost:4200

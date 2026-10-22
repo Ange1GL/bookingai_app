@@ -146,6 +146,36 @@
 			<version>${mapstruct.version}</version>
 		</dependency>
 
+		<!-- Web Push (recordatorios de citas). Trae bcprov-jdk15on 1.70 (sin soporte): se excluye y se
+		     reemplaza por bcprov-jdk18on, que conserva los mismos paquetes. -->
+		<dependency>
+			<groupId>nl.martijndwars</groupId>
+			<artifactId>web-push</artifactId>
+			<version>5.1.2</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- web-push lo trae solo en runtime; el adaptador lee el código HTTP de su respuesta (HttpResponse). -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+		</dependency>
+		<!-- web-push firma el JWT de VAPID con jose4j; se sube de 0.7.9 (runtime) a la versión vigente. -->
+		<dependency>
+			<groupId>org.bitbucket.b_c</groupId>
+			<artifactId>jose4j</artifactId>
+			<version>0.9.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.86</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>

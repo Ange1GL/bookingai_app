@@ -137,6 +137,7 @@ En qa/producción exporta `SPRING_PROFILES_ACTIVE=qa`; si no se sobreescribe, la
 - [CLAUDE.md](CLAUDE.md) — arquitectura hexagonal, convenciones de código y checklist para agentes AI
 - [docs/jwt-spring-security-guide.md](docs/jwt-spring-security-guide.md) — implementación de JWT + Spring Security
 - [docs/security-config.md](docs/security-config.md) — guía de `SecurityConfig` (filtros, CORS, CSRF, beans)
+- [docs/push-reminders.md](docs/push-reminders.md) — recordatorios push de citas (Web Push): endpoints `/api/v1/push`, job, claves VAPID y seguridad
 - [docs/ai-credits.md](docs/ai-credits.md) — créditos diarios de AI del asistente (`GET /api/v1/agent/credits`, `429` al agotarse): cobro por tokens reales, tope global y configuración
 - [docs/voice-transcription.md](docs/voice-transcription.md) — dictado por voz del asistente (`POST /api/v1/agent/transcriptions`): cuotas, control de gasto y configuración
 - [docs/jwt-secret.md](docs/jwt-secret.md) — secreto HS256 del JWT (`JWT_SECRET`): generación, carga, Parameter Store y rotación
