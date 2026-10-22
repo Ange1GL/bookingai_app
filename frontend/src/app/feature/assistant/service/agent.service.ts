@@ -5,8 +5,9 @@ import { environment } from '../../../../environments/environment';
 import { SKIP_ERROR_TOAST } from '@/core/interceptor/error.interceptor';
 import { SKIP_LOADER } from '@/core/interceptor/loader.interceptor';
 import { ChatRequestDto, ChatResponseDto, SessionResponseDto } from '../models/chat.model';
+import { CreditsDto } from '../models/credits.model';
 import { AUDIO_EXTENSIONS } from '../models/voice.const';
-import { TranscriptionResponseDto } from '../models/voice.model';
+import { TranscriptionResponseDto, VoiceQuotaDto } from '../models/voice.model';
 
 const AUDIO_PART = 'audio';
 const AUDIO_FILE_BASE_NAME = 'voice';
@@ -24,9 +25,17 @@ export class AgentService {
     return this.http.post<SessionResponseDto>(`${this.url}/session`, null, this.options).pipe(map((r) => r.sessionId));
   }
 
-  chat(sessionId: string, message: string): Observable<string> {
+  chat(sessionId: string, message: string): Observable<ChatResponseDto> {
     const body: ChatRequestDto = { sessionId, message };
-    return this.http.post<ChatResponseDto>(`${this.url}/chat`, body, this.options).pipe(map((r) => r.reply));
+    return this.http.post<ChatResponseDto>(`${this.url}/chat`, body, this.options);
+  }
+
+  credits(): Observable<CreditsDto> {
+    return this.http.get<CreditsDto>(`${this.url}/credits`, this.options);
+  }
+
+  voiceQuota(): Observable<VoiceQuotaDto> {
+    return this.http.get<VoiceQuotaDto>(`${this.url}/transcriptions/quota`, this.options);
   }
 
   /** Uploads a recording; Content-Type is left to the browser so it adds the multipart boundary. */

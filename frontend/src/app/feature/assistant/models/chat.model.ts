@@ -1,12 +1,15 @@
+import { CreditsDto } from './credits.model';
+
 /** Mirrors the backend ChatRequest record. */
 export interface ChatRequestDto {
   sessionId: string;
   message: string;
 }
 
-/** Mirrors the backend ChatResponse record. */
+/** Mirrors the backend AssistantChatResponse record. */
 export interface ChatResponseDto {
   reply: string;
+  credits: CreditsDto;
 }
 
 /** Mirrors the backend SessionResponse record. */
@@ -19,8 +22,11 @@ export const AGENT_REPLY_TIMEOUT_MS = 45_000;
 
 export type ChatRole = 'user' | 'assistant';
 
-/** `error` only applies to user messages whose delivery failed and can be retried. */
-export type ChatMessageState = 'sent' | 'error';
+/**
+ * `error` only applies to user messages whose delivery failed and can be retried;
+ * `quota` is a message rejected because the daily AI credits ran out (retrying is pointless).
+ */
+export type ChatMessageState = 'sent' | 'error' | 'quota';
 
 export interface ChatMessage {
   id: number;

@@ -26,6 +26,10 @@
     </button>
   </header>
 
+  @if (store.credits(); as credits) {
+    <app-credits-meter [credits]="credits" (expired)="store.loadCredits()" />
+  }
+
   <div
     #messageList
     class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-surface-50 p-4 dark:bg-surface-950"
@@ -65,12 +69,36 @@
   </div>
 
   <footer class="flex flex-col gap-2 border-t border-surface bg-surface-0 p-3 dark:bg-surface-900">
-    @if (store.messages().length > 0) {
-      <app-suggestion-chips [suggestions]="replyChips" [disabled]="store.sending()" (chosen)="run($event)" />
+    @if (store.exhausted()) {
+      <div
+        class="flex flex-col gap-2 rounded-2xl bg-rose-50 p-3 text-sm leading-relaxed text-rose-800 dark:bg-rose-500/10 dark:text-rose-300"
+        role="alert"
+      >
+        <p class="m-0">
+          Agotaste tus créditos de AI de hoy. Se recargan a las {{ store.credits()?.resetsAt | date: 'shortTime' }}:
+          vuelve más tarde o agenda la cita tú mismo.
+        </p>
+        <button
+          type="button"
+          class="flex min-h-11 w-fit cursor-pointer items-center gap-1.5 rounded-full bg-rose-100 px-4 font-medium text-rose-900 dark:bg-rose-500/20 dark:text-rose-200"
+          (click)="createManually()"
+        >
+          <i class="pi pi-calendar-plus text-xs" aria-hidden="true"></i>
+          Crear la cita manualmente
+        </button>
+      </div>
+    } @else {
+      @if (store.messages().length > 0) {
+        <app-suggestion-chips [suggestions]="replyChips" [disabled]="store.sending()" (chosen)="run($event)" />
+      }
+      @if (voiceSupported && voiceQuota.quota(); as quota) {
+        <app-voice-quota-meter [quota]="quota" (expired)="voiceQuota.load()" />
+      }
+      <app-chat-composer
+        [disabled]="store.sending()"
+        [voiceBlocked]="voiceQuota.exhausted()"
+        (sent)="store.send($event)"
+      />
     }
-    <app-chat-composer
-      [disabled]="store.sending()"
-      (sent)="store.send($event)"
-    />
   </footer>
 </div>

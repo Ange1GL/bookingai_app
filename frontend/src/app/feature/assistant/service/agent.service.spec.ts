@@ -4,7 +4,16 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { SKIP_ERROR_TOAST } from '@/core/interceptor/error.interceptor';
 import { SKIP_LOADER } from '@/core/interceptor/loader.interceptor';
+import { CreditsDto } from '../models/credits.model';
 import { AgentService } from './agent.service';
+
+const CREDITS: CreditsDto = {
+  dailyLimit: 60000,
+  used: 1000,
+  remaining: 59000,
+  percentUsed: 1,
+  resetsAt: '2026-10-23T00:00:00-06:00',
+};
 
 const BASE = `${environment.apiBaseUrl}/api/v1/agent`;
 
@@ -29,12 +38,31 @@ describe('AgentService', () => {
 
   it('posts the message with its session and returns the reply', () => {
     let reply = '';
-    service.chat('s-1', 'hola').subscribe((value) => (reply = value));
+    service.chat('s-1', 'hola').subscribe((value) => (reply = value.reply));
     const req = http.expectOne(`${BASE}/chat`);
     expect(req.request.body).toEqual({ sessionId: 's-1', message: 'hola' });
     expect(req.request.context.get(SKIP_ERROR_TOAST)).toBe(true);
-    req.flush({ reply: 'Hola, ¿en qué te ayudo?' });
+    req.flush({ reply: 'Hola, ¿en qué te ayudo?', credits: CREDITS });
     expect(reply).toBe('Hola, ¿en qué te ayudo?');
+  });
+
+  it('loads the daily credits', () => {
+    let credits: CreditsDto | undefined;
+    service.credits().subscribe((value) => (credits = value));
+    const req = http.expectOne(`${BASE}/credits`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.context.get(SKIP_ERROR_TOAST)).toBe(true);
+    req.flush(CREDITS);
+    expect(credits).toEqual(CREDITS);
+  });
+
+  it('loads the daily dictation quota', () => {
+    let remaining = -1;
+    service.voiceQuota().subscribe((value) => (remaining = value.remaining));
+    const req = http.expectOne(`${BASE}/transcriptions/quota`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ dailyLimit: 40, used: 12, remaining: 28, percentUsed: 30, monthlyExhausted: false, resetsAt: '2026-10-23T00:00:00-06:00' });
+    expect(remaining).toBe(28);
   });
 
   it('uploads the recording as multipart with an extension that matches its type', () => {

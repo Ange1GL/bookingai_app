@@ -1,0 +1,36 @@
+<div class="flex flex-col gap-1 px-1 text-[11px] text-muted-color">
+  @if (quota().monthlyExhausted) {
+    <p class="m-0 flex items-center gap-1.5" role="status">
+      <i class="pi pi-microphone" aria-hidden="true"></i>
+      El dictado por voz alcanzó su límite de este mes. Puedes seguir escribiendo.
+    </p>
+  } @else {
+    <div class="flex items-center justify-between gap-3">
+      <span class="flex items-center gap-1.5 font-medium" [class.text-rose-600]="exhausted()" [class.text-amber-600]="low()">
+        <i class="pi pi-microphone" aria-hidden="true"></i>
+        @if (exhausted()) {
+          Sin dictados por hoy
+        } @else {
+          {{ quota().used }} de {{ quota().dailyLimit }} dictados hoy
+        }
+      </span>
+      <span class="shrink-0">
+        @if (exhausted()) {
+          Se recargan en {{ timeUntilReset() }}
+        } @else {
+          {{ quota().remaining }} restantes · recarga en {{ timeUntilReset() }}
+        }
+      </span>
+    </div>
+    <div
+      class="h-1 w-full overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700"
+      role="progressbar"
+      aria-label="Dictados por voz usados hoy"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="quota().percentUsed"
+    >
+      <div class="h-full rounded-full transition-all" [class]="barClass()" [style.width.%]="quota().percentUsed"></div>
+    </div>
+  }
+</div>

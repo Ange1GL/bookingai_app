@@ -3,9 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input
 import { outputFromObservable, takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { ErrorHandlerService } from '@/core/service/error-handler.service';
+import { QUOTA_EXCEEDED_STATUS } from '../../models/credits.const';
 import { LOW_QUOTA_WARNING, VOICE_MAX_SECONDS, VOICE_WARNING_SECONDS } from '../../models/voice.const';
 import { RecordingOutcome, VoiceError, VoiceRecording } from '../../models/voice.model';
 import { AgentService } from '../../service/agent.service';
+import { VoiceQuotaStore } from '../../service/voice-quota.store';
 import { VoiceRecorderService } from '../../service/voice-recorder.service';
 
 /** Relative height of each level-meter bar; the middle ones react the most. */
@@ -42,6 +44,7 @@ const MESSAGES = {
 export class VoiceInputComponent {
   private readonly recorder = inject(VoiceRecorderService);
   private readonly agent = inject(AgentService);
+  private readonly quota = inject(VoiceQuotaStore);
   private readonly errorHandler = inject(ErrorHandlerService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -145,9 +148,13 @@ export class VoiceInputComponent {
         next: (response) => {
           this.lastRecording = null;
           this.remainingToday.set(response.remainingToday);
+          this.quota.applyRemaining(response.remainingToday);
           this.transcribed.emit(response.text);
         },
         error: (error: HttpErrorResponse) => {
+          if (error.status === QUOTA_EXCEEDED_STATUS) {
+            this.quota.load();
+          }
           const retryable = isRetryable(error);
           if (!retryable) {
             this.lastRecording = null;

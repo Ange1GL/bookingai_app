@@ -23,7 +23,7 @@
     <span class="self-center pr-1 text-xs tabular-nums text-muted-color">{{ length() }}/{{ maxLength }}</span>
   }
   <app-voice-input
-    [disabled]="disabled()"
+    [disabled]="disabled() || voiceBlocked()"
     (transcribed)="appendTranscription($event)"
     (recordingChange)="recording.set($event)"
   />

@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { ChatMessage } from '../../models/chat.model';
+import { QUOTA_EXCEEDED_NOTE } from '../../models/credits.const';
 import { AssistantAvatarComponent } from '../assistant-avatar/assistant-avatar.component';
 
 @Component({
@@ -14,6 +15,7 @@ export class MessageBubbleComponent {
   readonly retry = output<number>();
   readonly createManually = output<void>();
 
+  protected readonly quotaNote = QUOTA_EXCEEDED_NOTE;
   protected readonly isUser = computed(() => this.message().role === 'user');
   protected readonly bubbleClass = computed(() =>
     this.isUser()
