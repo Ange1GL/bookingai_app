@@ -49,6 +49,8 @@ Cada usuario tiene un presupuesto diario de tokens de DeepSeek (ver `backend/doc
 - **Agotados**: el campo de texto, el micrófono y las respuestas rápidas se reemplazan por un aviso `role="alert"` con la hora de recarga y el botón **Crear la cita manualmente**. `ChatStore.send/retry` también se niegan a enviar.
 - **429 en `/chat`** (otro dispositivo gastó el saldo, o tope global): el mensaje queda en estado `quota` (sin *Reintentar*, con la nota y el botón manual) y se recarga el saldo.
 
+> Recordatorios push de citas (permiso de notificaciones, PWA): ver `docs/push-notifications.md`.
+
 ## Si el asistente no responde
 Cuando el envío falla (error de red/5xx del agente, respuesta vacía o más de 45 s sin respuesta, `AGENT_REPLY_TIMEOUT_MS`), el mensaje queda marcado como fallido y debajo aparece, además de *Reintentar*, un aviso: "El asistente no respondió. Puedes reintentar, consultar con el administrador o agendar la cita tú mismo" con el botón **Crear la cita manualmente**. El botón navega a `/appointments?nueva=true` (`shared/navigation/appointment-links.ts`); el calendario abre el formulario de nueva cita y quita el parámetro de la URL. Las peticiones del chat usan `SKIP_ERROR_TOAST`: el error se muestra en línea, no como toast. Al reintentar con éxito, el aviso desaparece.
 

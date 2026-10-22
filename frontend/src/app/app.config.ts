@@ -1,5 +1,12 @@
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
-import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  ErrorHandler,
+  isDevMode,
+  provideBrowserGlobalErrorListeners,
+  provideZoneChangeDetection,
+} from '@angular/core';
+import { provideServiceWorker } from '@angular/service-worker';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { definePreset } from '@primeuix/themes';
@@ -44,5 +51,8 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({ translation: PRIMENG_ES, theme: { preset: VioletPreset, options: { darkModeSelector: '.app-dark' } } }),
     MessageService,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+    // Service worker de Angular: recibe las notificaciones push con la web cerrada. Solo en producción:
+    // en `ng serve` no hay service worker (probar con `ng build` + servidor estático o desplegado, con HTTPS).
+    provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode(), registrationStrategy: 'registerWhenStable:30000' }),
   ],
 };
