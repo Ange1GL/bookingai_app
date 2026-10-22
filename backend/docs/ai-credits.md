@@ -67,7 +67,7 @@ está acotado por `max-tokens` por respuesta. Si DeepSeek falla no se cobra. `ra
 ```yaml
 assistant:
   credits:
-    daily-token-limit-per-user: 60000
+    daily-token-limit-per-user: 150000   # 150 créditos en la UI
     global-daily-token-limit: 400000
 spring.ai.deepseek.chat.options.max-tokens: 600
 ```
@@ -75,5 +75,11 @@ spring.ai.deepseek.chat.options.max-tokens: 600
 Calibrar: `tokens disponibles ≈ saldo_USD / precio_por_millón × 1_000_000` (precio vigente en la página de
 DeepSeek) y `global-daily-token-limit ≈ tokens disponibles / días de prueba`. El saldo prepago de DeepSeek sigue
 siendo el techo absoluto: no activar recarga automática.
+
+Precios de `deepseek-flash` (oct. 2026, por millón de tokens): entrada sin caché $0.15 (pico $0.30), entrada con
+caché $0.003, salida $0.60 (pico $1.20). Pico = lun-vie 01-04 y 06-10 UTC. Estimación (sin medir): una cita completa
+gasta ~13,000 tokens (4-6 llamadas internas que reenvían prompt + historial), ≈ $0.004 en el peor caso. Con 150,000
+por usuario y 400,000 globales el gasto máximo es ≈ $0.06/usuario/día y ≈ $0.16/día en total (≈ $4.7/mes).
+Reemplazar esta estimación con datos reales del log DEBUG.
 
 Para ver cuánto cuesta un mensaje: nivel `DEBUG` de `SpringAiAssistantChatAdapter` loguea `userId` y tokens.

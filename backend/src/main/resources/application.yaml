@@ -78,7 +78,8 @@ spring:
 assistant:
   # Creditos de AI de texto (DeepSeek), en tokens reales por dia de negocio (app.timezone). Ver docs/ai-credits.md
   credits:
-    daily-token-limit-per-user: 60000
+    # 150000 tokens ~ 11 citas completas (~13000 tokens c/u); peor caso ~0.06 USD/usuario/dia con deepseek-flash
+    daily-token-limit-per-user: 150000
     # Tope GLOBAL diario: acota el gasto aunque todos los usuarios agoten su cuota. Calibrar con el saldo de DeepSeek.
     global-daily-token-limit: 400000
   voice:
