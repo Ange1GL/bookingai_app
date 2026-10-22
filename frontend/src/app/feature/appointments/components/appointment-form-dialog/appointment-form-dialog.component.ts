@@ -4,11 +4,11 @@ import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } fr
 import { catchError, finalize, of, Subject, switchMap } from 'rxjs';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
-import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { CustomerFormDialogComponent } from '@/shared/components/customer-form-dialog/customer-form-dialog.component';
 import { CreateCustomerRequestDto } from '@/shared/models/customer-input.model';
+import { DateTimeFieldComponent } from '../date-time-field/date-time-field.component';
 import { CreateAppointmentRequestDto } from '../../models/appointment.dto';
 import { AppointmentForm } from '../../models/appointment-form.model';
 import { CustomerOptionDto, ServiceOptionDto } from '../../models/booking-options.model';
@@ -17,11 +17,11 @@ import {
   addMinutes,
   DEFAULT_DURATION_MINUTES,
   endAfterStart,
+  endFollowingStart,
   suggestedStart,
   toCreateRequest,
 } from '../../utils/appointment-form.util';
-
-const MINUTE_STEP = 15;
+import { notBefore } from '../../utils/date-time.util';
 
 @Component({
   selector: 'app-appointment-form-dialog',
@@ -31,7 +31,7 @@ const MINUTE_STEP = 15;
     ButtonModule,
     AutoCompleteModule,
     SelectModule,
-    DatePickerModule,
+    DateTimeFieldComponent,
     CustomerFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +42,7 @@ export class AppointmentFormDialogComponent {
   private readonly lookup = inject(BookingLookupService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly customerQuery = new Subject<string>();
+  private lastStart: Date | null = null;
 
   readonly visible = model(false);
   readonly saving = input(false);
@@ -49,7 +50,6 @@ export class AppointmentFormDialogComponent {
   readonly day = input<Date>(new Date());
   readonly submitted = output<CreateAppointmentRequestDto>();
 
-  protected readonly minuteStep = MINUTE_STEP;
   protected readonly minDate = signal(new Date());
   protected readonly customers = signal<CustomerOptionDto[]>([]);
   protected readonly services = signal<ServiceOptionDto[]>([]);
@@ -61,7 +61,7 @@ export class AppointmentFormDialogComponent {
     {
       customer: this.fb.control<CustomerOptionDto | null>(null, Validators.required),
       service: this.fb.control<ServiceOptionDto | null>(null, Validators.required),
-      start: this.fb.control<Date | null>(null, Validators.required),
+      start: this.fb.control<Date | null>(null, [Validators.required, notBefore(() => this.minDate())]),
       end: this.fb.control<Date | null>(null, Validators.required),
     },
     { validators: endAfterStart },
@@ -76,13 +76,16 @@ export class AppointmentFormDialogComponent {
       )
       .subscribe((found) => this.customers.set(found));
 
-    this.form.controls.start.valueChanges.pipe(takeUntilDestroyed()).subscribe((start) => this.suggestEnd(start));
+    this.form.controls.start.valueChanges.pipe(takeUntilDestroyed()).subscribe((start) => this.moveEnd(start));
   }
 
   protected onShow(): void {
     const now = new Date();
+    // Start of the current minute: a start before the moment the dialog opened is in the past.
+    now.setSeconds(0, 0);
     this.minDate.set(now);
     const start = suggestedStart(this.day(), now);
+    this.lastStart = start;
     this.form.reset({ start, end: addMinutes(start, DEFAULT_DURATION_MINUTES) });
     this.customers.set([]);
     this.loadServices();
@@ -134,11 +137,16 @@ export class AppointmentFormDialogComponent {
       });
   }
 
-  /** Picking a start fills a default end unless the user already chose a valid one. */
-  private suggestEnd(start: Date | null): void {
-    const { end } = this.form.controls;
-    if (start && (!end.value || end.value <= start)) {
-      end.setValue(addMinutes(start, DEFAULT_DURATION_MINUTES));
+  /**
+   * The end keeps its duration when the start changes. This also fires on every keystroke while typing a time
+   * ("5", "5:1", "5:13"): shifting by a fixed duration lands on the right end whatever the intermediate values.
+   */
+  private moveEnd(start: Date | null): void {
+    if (!start) {
+      return;
     }
+    const { end } = this.form.controls;
+    end.setValue(endFollowingStart(this.lastStart, start, end.value));
+    this.lastStart = start;
   }
 }

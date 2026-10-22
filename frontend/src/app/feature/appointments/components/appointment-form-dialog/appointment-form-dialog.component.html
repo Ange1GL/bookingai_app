@@ -74,42 +74,29 @@
       }
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-4">
       <div class="flex flex-col gap-2">
         <label for="appointment-start" class="text-sm font-medium">Inicio</label>
-        <p-datepicker
-          inputId="appointment-start"
-          formControlName="start"
-          dateFormat="dd/mm/yy"
-          hourFormat="24"
-          [showTime]="true"
-          [stepMinute]="minuteStep"
-          [minDate]="minDate()"
-          [touchUI]="true"
-          [fluid]="true"
-          appendTo="body"
-        />
-        @if (form.controls.start.touched && form.controls.start.hasError('required')) {
-          <small class="text-red-500">La hora de inicio es obligatoria.</small>
+        <app-date-time-field inputId="appointment-start" timeLabel="Hora de inicio" formControlName="start" [minDate]="minDate()" />
+        @if (form.controls.start.touched && form.controls.start.hasError('required') && !form.controls.start.hasError('invalidTime')) {
+          <small class="text-red-500">La fecha y hora de inicio son obligatorias.</small>
+        }
+        @if (form.controls.start.hasError('invalidTime')) {
+          <small class="text-red-500">Escribe una hora válida, de 00:00 a 23:59.</small>
+        }
+        @if (form.controls.start.hasError('inPast')) {
+          <small class="text-red-500">La cita no puede empezar en el pasado.</small>
         }
       </div>
 
       <div class="flex flex-col gap-2">
         <label for="appointment-end" class="text-sm font-medium">Fin</label>
-        <p-datepicker
-          inputId="appointment-end"
-          formControlName="end"
-          dateFormat="dd/mm/yy"
-          hourFormat="24"
-          [showTime]="true"
-          [stepMinute]="minuteStep"
-          [minDate]="form.controls.start.value ?? minDate()"
-          [touchUI]="true"
-          [fluid]="true"
-          appendTo="body"
-        />
-        @if (form.controls.end.touched && form.controls.end.hasError('required')) {
-          <small class="text-red-500">La hora de fin es obligatoria.</small>
+        <app-date-time-field inputId="appointment-end" timeLabel="Hora de fin" formControlName="end" [minDate]="form.controls.start.value ?? minDate()" />
+        @if (form.controls.end.touched && form.controls.end.hasError('required') && !form.controls.end.hasError('invalidTime')) {
+          <small class="text-red-500">La fecha y hora de fin son obligatorias.</small>
+        }
+        @if (form.controls.end.hasError('invalidTime')) {
+          <small class="text-red-500">Escribe una hora válida, de 00:00 a 23:59.</small>
         }
       </div>
     </div>
