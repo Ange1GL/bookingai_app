@@ -1,0 +1,28 @@
+<div class="flex items-center gap-2" [formGroup]="parts">
+  <p-datepicker
+    class="min-w-0 flex-1"
+    [inputId]="inputId()"
+    formControlName="date"
+    dateFormat="dd/mm/yy"
+    [minDate]="minDate()"
+    [touchUI]="true"
+    [fluid]="true"
+    appendTo="body"
+    (onBlur)="markTouched()"
+  />
+  <!-- The input fills its wrapper (fluid): PrimeNG's own width would otherwise win over a Tailwind class. -->
+  <div class="w-24 shrink-0">
+    <p-inputmask
+      formControlName="time"
+      mask="99:99"
+      slotChar="_"
+      placeholder="HH:mm"
+      type="tel"
+      autocomplete="off"
+      [autoClear]="true"
+      [fluid]="true"
+      [ariaLabel]="timeLabel()"
+      (onBlur)="markTouched()"
+    />
+  </div>
+</div>

@@ -4,11 +4,11 @@ import { FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators } fr
 import { catchError, finalize, of, Subject, switchMap } from 'rxjs';
 import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
 import { ButtonModule } from 'primeng/button';
-import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { SelectModule } from 'primeng/select';
 import { CustomerFormDialogComponent } from '@/shared/components/customer-form-dialog/customer-form-dialog.component';
 import { CreateCustomerRequestDto } from '@/shared/models/customer-input.model';
+import { DateTimeFieldComponent } from '../date-time-field/date-time-field.component';
 import { CreateAppointmentRequestDto } from '../../models/appointment.dto';
 import { AppointmentForm } from '../../models/appointment-form.model';
 import { CustomerOptionDto, ServiceOptionDto } from '../../models/booking-options.model';
@@ -21,9 +21,7 @@ import {
   suggestedStart,
   toCreateRequest,
 } from '../../utils/appointment-form.util';
-
-/** Any minute can be picked (5:11, 5:13...); the spinner arrows move one minute at a time. */
-const MINUTE_STEP = 1;
+import { notBefore } from '../../utils/date-time.util';
 
 @Component({
   selector: 'app-appointment-form-dialog',
@@ -33,7 +31,7 @@ const MINUTE_STEP = 1;
     ButtonModule,
     AutoCompleteModule,
     SelectModule,
-    DatePickerModule,
+    DateTimeFieldComponent,
     CustomerFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +50,6 @@ export class AppointmentFormDialogComponent {
   readonly day = input<Date>(new Date());
   readonly submitted = output<CreateAppointmentRequestDto>();
 
-  protected readonly minuteStep = MINUTE_STEP;
   protected readonly minDate = signal(new Date());
   protected readonly customers = signal<CustomerOptionDto[]>([]);
   protected readonly services = signal<ServiceOptionDto[]>([]);
@@ -64,7 +61,7 @@ export class AppointmentFormDialogComponent {
     {
       customer: this.fb.control<CustomerOptionDto | null>(null, Validators.required),
       service: this.fb.control<ServiceOptionDto | null>(null, Validators.required),
-      start: this.fb.control<Date | null>(null, Validators.required),
+      start: this.fb.control<Date | null>(null, [Validators.required, notBefore(() => this.minDate())]),
       end: this.fb.control<Date | null>(null, Validators.required),
     },
     { validators: endAfterStart },
@@ -84,6 +81,8 @@ export class AppointmentFormDialogComponent {
 
   protected onShow(): void {
     const now = new Date();
+    // Start of the current minute: a start before the moment the dialog opened is in the past.
+    now.setSeconds(0, 0);
     this.minDate.set(now);
     const start = suggestedStart(this.day(), now);
     this.lastStart = start;
