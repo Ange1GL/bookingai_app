@@ -60,7 +60,8 @@ feature/assistant/
 - Los fallos del modelo devuelven `502` con mensaje genérico.
 - Lista negra: si el cliente está bloqueado el agente no agenda, avisa y pregunta si se quita o se mantiene; también puede bloquear/desbloquear con confirmación (ver `backend/docs/customer-blacklist.md`).
 - Dictado: ver `backend/docs/voice-transcription.md`.
-- Pendiente de decidir: restringir `/agent/raw-chat` fuera de `dev`.
+- Créditos de AI: límite diario de tokens por usuario y tope global (`429` al agotarse, `GET /agent/credits`); ver `backend/docs/ai-credits.md`. La UI de créditos está pendiente.
+- `/agent/raw-chat` solo existe en el perfil `dev` (no pasa por los créditos).
 
 ## Pruebas
 Specs (Vitest):

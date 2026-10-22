@@ -3,12 +3,9 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.c
 import java.io.IOException;
 import java.util.UUID;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,37 +14,33 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.angellariosacosta.bookingapp.application.command.TranscribeVoiceCommand;
+import com.github.angellariosacosta.bookingapp.application.port.in.ChatWithAssistantUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.GetAiCreditsUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.TranscribeVoiceUseCase;
 import com.github.angellariosacosta.bookingapp.application.result.VoiceTranscriptionResult;
-import com.github.angellariosacosta.bookingapp.domain.exception.AssistantUnavailableException;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidVoiceAudioException;
-
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.annotation.CurrentUserId;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.AssistantChatResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChatRequest;
-import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.ChatResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreditsResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.SessionResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.TranscriptionResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AssistantRestMapper;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/agent")
+@RequiredArgsConstructor
 public class AgentController {
 
 	private static final String UNREADABLE_AUDIO = "No se pudo leer el audio";
 
-	private final ChatClient chatClient;
-	private final ChatClient rawChatClient;
+	private final ChatWithAssistantUseCase chatWithAssistantUseCase;
+	private final GetAiCreditsUseCase getAiCreditsUseCase;
 	private final TranscribeVoiceUseCase transcribeVoiceUseCase;
-
-	public AgentController(ChatClient chatClient,
-	                       @Qualifier("rawChatClient") ChatClient rawChatClient,
-	                       TranscribeVoiceUseCase transcribeVoiceUseCase) {
-		this.chatClient = chatClient;
-		this.rawChatClient = rawChatClient;
-		this.transcribeVoiceUseCase = transcribeVoiceUseCase;
-	}
+	private final AssistantRestMapper assistantMapper;
 
 	@PostMapping("/session")
 	public ResponseEntity<SessionResponse> createSession() {
@@ -55,18 +48,15 @@ public class AgentController {
 	}
 
 	@PostMapping("/chat")
-	public ResponseEntity<ChatResponse> chat(@Valid @RequestBody ChatRequest request, @CurrentUserId Long userId) {
-		try {
-			String reply = chatClient.prompt()
-					.user(request.message())
-					.advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, conversationId(userId, request.sessionId())))
-					.call()
-					.content();
-			return ResponseEntity.ok(new ChatResponse(reply));
-		} catch (Exception ex) {
-			log.error("Error processing chat request: {}", ex.getMessage(), ex);
-			throw new AssistantUnavailableException(ex);
-		}
+	public ResponseEntity<AssistantChatResponse> chat(@Valid @RequestBody ChatRequest request, @CurrentUserId Long userId) {
+		return ResponseEntity.ok(assistantMapper.toResponse(
+				chatWithAssistantUseCase.chat(assistantMapper.toCommand(request, userId))));
+	}
+
+	// Saldo de créditos de AI del día; el frontend lo consulta al abrir el asistente y tras un 429.
+	@GetMapping("/credits")
+	public ResponseEntity<CreditsResponse> credits(@CurrentUserId Long userId) {
+		return ResponseEntity.ok(assistantMapper.toResponse(getAiCreditsUseCase.getCredits(userId)));
 	}
 
 	// Dictado por voz: devuelve el texto para que el usuario lo revise en la caja del chat antes de enviarlo.
@@ -78,30 +68,11 @@ public class AgentController {
 		return ResponseEntity.ok(new TranscriptionResponse(result.text(), result.remainingToday()));
 	}
 
-	@PostMapping("/raw-chat")
-	public ResponseEntity<ChatResponse> rawChat(@Valid @RequestBody ChatRequest request) {
-		try {
-			String reply = rawChatClient.prompt()
-					.user(request.message())
-					.call()
-					.content();
-			return ResponseEntity.ok(new ChatResponse(reply));
-		} catch (Exception ex) {
-			log.error("Error in raw-chat endpoint: {}", ex.getMessage(), ex);
-			throw new AssistantUnavailableException(ex);
-		}
-	}
-
 	private static byte[] readBytes(MultipartFile audio) {
 		try {
 			return audio.getBytes();
 		} catch (IOException ex) {
 			throw new InvalidVoiceAudioException(UNREADABLE_AUDIO, ex);
 		}
-	}
-
-	// La memoria se indexa por usuario + sesión: un sessionId ajeno nunca resuelve la conversación de otro usuario.
-	private static String conversationId(Long userId, String sessionId) {
-		return userId + ":" + sessionId;
 	}
 }

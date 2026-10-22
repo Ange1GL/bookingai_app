@@ -175,6 +175,12 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
 	}
 
+	@ExceptionHandler(AiQuotaExceededException.class)
+	@ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+	public ErrorResponse handleAiQuotaExceeded(AiQuotaExceededException ex) {
+		return errorBody(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+	}
+
 	// El detalle del proveedor ya quedó en el log del adaptador; al cliente solo un mensaje genérico.
 	@ExceptionHandler(SpeechToTextUnavailableException.class)
 	@ResponseStatus(HttpStatus.BAD_GATEWAY)

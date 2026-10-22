@@ -58,6 +58,8 @@ spring:
         options:
           model: deepseek-flash
           temperature: 0.7
+          # Tope de tokens por respuesta del modelo: acota el peor caso de cada llamada. Ver docs/ai-credits.md
+          max-tokens: 600
     openai:
       # Sin valor por defecto a proposito: si falta, la app no arranca. Ver docs/voice-transcription.md
       api-key: ${API_OPENAI_KEY}
@@ -74,6 +76,11 @@ spring:
           timeout: 15s
 
 assistant:
+  # Creditos de AI de texto (DeepSeek), en tokens reales por dia de negocio (app.timezone). Ver docs/ai-credits.md
+  credits:
+    daily-token-limit-per-user: 60000
+    # Tope GLOBAL diario: acota el gasto aunque todos los usuarios agoten su cuota. Calibrar con el saldo de DeepSeek.
+    global-daily-token-limit: 400000
   voice:
     min-audio-bytes: 1024          # menos que esto es un blob vacio o corrupto
     max-audio-bytes: 524288        # 512 KB: 30 s de opus ~110 KB; Safari (AAC) pesa mas
