@@ -1,0 +1,12 @@
+{
+  "name": "push-spike",
+  "private": true,
+  "type": "module",
+  "description": "Spike de Web Push (fase 0 de .plans/appointment-push-reminders.md). No es código de producción.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}

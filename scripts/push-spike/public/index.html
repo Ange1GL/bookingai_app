@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spike de push</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; max-width: 32rem; }
+    button { font-size: 1rem; padding: 12px 16px; margin: 4px 0; width: 100%; border-radius: 12px; border: 0; background: #7c3aed; color: #fff; }
+    button:disabled { background: #bbb; }
+    pre { background: #f4f4f5; padding: 12px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body>
+  <h1>Spike de push</h1>
+  <p>Fase 0: confirma que llega una notificación del sistema con la web cerrada.</p>
+  <button id="enable">1. Activar notificaciones</button>
+  <button id="send">2. Enviar prueba en 10 s</button>
+  <p>Después del paso 2 <strong>cierra la app o bloquea la pantalla</strong> y espera.</p>
+  <h2>Diagnóstico</h2>
+  <pre id="log"></pre>
+  <script>
+    const log = document.getElementById('log')
+    const write = (line) => { log.textContent += line + '\n' }
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+
+    write('Plataforma iOS: ' + isIos)
+    write('Instalada en pantalla de inicio: ' + standalone)
+    write('HTTPS / contexto seguro: ' + window.isSecureContext)
+    write('serviceWorker: ' + ('serviceWorker' in navigator))
+    write('PushManager: ' + ('PushManager' in window))
+    write('Permiso actual: ' + ('Notification' in window ? Notification.permission : 'sin API'))
+    if (isIos && !standalone) {
+      write('>>> En iPhone hay que abrir esta página desde el icono de pantalla de inicio (Compartir > Añadir a pantalla de inicio).')
+    }
+
+    function urlBase64ToUint8Array(base64) {
+      const padded = (base64 + '='.repeat((4 - (base64.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/')
+      return Uint8Array.from(atob(padded), (char) => char.charCodeAt(0))
+    }
+
+    document.getElementById('enable').addEventListener('click', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js')
+        await navigator.serviceWorker.ready
+        const permission = await Notification.requestPermission()
+        write('Permiso: ' + permission)
+        if (permission !== 'granted') return
+        const { publicKey } = await (await fetch('/api/public-key')).json()
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        })
+        const stored = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription),
+        })
+        write('Suscripción guardada (' + stored.status + ') en ' + new URL(subscription.endpoint).host)
+      } catch (error) {
+        write('ERROR: ' + error.name + ': ' + error.message)
+      }
+    })
+
+    document.getElementById('send').addEventListener('click', async () => {
+      const response = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ delaySeconds: 10 }),
+      })
+      write('Envío programado: ' + JSON.stringify(await response.json()))
+    })
+  </script>
+</body>
+</html>
