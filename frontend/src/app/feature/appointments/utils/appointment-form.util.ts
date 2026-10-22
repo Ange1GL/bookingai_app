@@ -26,6 +26,16 @@ export const suggestedStart = (day: Date, now: Date): Date => {
   return new Date(day.getFullYear(), day.getMonth(), day.getDate(), DEFAULT_START_HOUR);
 };
 
+/**
+ * New end after the start moved from `previousStart` to `start`: keeps the duration the user already had
+ * (or the default one when there was none), so the end follows the start instead of staying behind.
+ */
+export const endFollowingStart = (previousStart: Date | null, start: Date, end: Date | null): Date => {
+  const hadDuration = previousStart && end && end > previousStart;
+  const durationMs = hadDuration ? end.getTime() - previousStart.getTime() : DEFAULT_DURATION_MINUTES * MS_PER_MINUTE;
+  return new Date(start.getTime() + durationMs);
+};
+
 /** Group validator: the end must come after the start. */
 export const endAfterStart = (group: AbstractControl): ValidationErrors | null => {
   const start = group.get('start')?.value as Date | null;

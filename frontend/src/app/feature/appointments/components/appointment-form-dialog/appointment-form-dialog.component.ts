@@ -17,11 +17,13 @@ import {
   addMinutes,
   DEFAULT_DURATION_MINUTES,
   endAfterStart,
+  endFollowingStart,
   suggestedStart,
   toCreateRequest,
 } from '../../utils/appointment-form.util';
 
-const MINUTE_STEP = 15;
+/** Any minute can be picked (5:11, 5:13...); the spinner arrows move one minute at a time. */
+const MINUTE_STEP = 1;
 
 @Component({
   selector: 'app-appointment-form-dialog',
@@ -42,6 +44,7 @@ export class AppointmentFormDialogComponent {
   private readonly lookup = inject(BookingLookupService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly customerQuery = new Subject<string>();
+  private lastStart: Date | null = null;
 
   readonly visible = model(false);
   readonly saving = input(false);
@@ -76,13 +79,14 @@ export class AppointmentFormDialogComponent {
       )
       .subscribe((found) => this.customers.set(found));
 
-    this.form.controls.start.valueChanges.pipe(takeUntilDestroyed()).subscribe((start) => this.suggestEnd(start));
+    this.form.controls.start.valueChanges.pipe(takeUntilDestroyed()).subscribe((start) => this.moveEnd(start));
   }
 
   protected onShow(): void {
     const now = new Date();
     this.minDate.set(now);
     const start = suggestedStart(this.day(), now);
+    this.lastStart = start;
     this.form.reset({ start, end: addMinutes(start, DEFAULT_DURATION_MINUTES) });
     this.customers.set([]);
     this.loadServices();
@@ -134,11 +138,16 @@ export class AppointmentFormDialogComponent {
       });
   }
 
-  /** Picking a start fills a default end unless the user already chose a valid one. */
-  private suggestEnd(start: Date | null): void {
-    const { end } = this.form.controls;
-    if (start && (!end.value || end.value <= start)) {
-      end.setValue(addMinutes(start, DEFAULT_DURATION_MINUTES));
+  /**
+   * The end keeps its duration when the start changes. This also fires on every keystroke while typing a time
+   * ("5", "5:1", "5:13"): shifting by a fixed duration lands on the right end whatever the intermediate values.
+   */
+  private moveEnd(start: Date | null): void {
+    if (!start) {
+      return;
     }
+    const { end } = this.form.controls;
+    end.setValue(endFollowingStart(this.lastStart, start, end.value));
+    this.lastStart = start;
   }
 }
