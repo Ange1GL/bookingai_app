@@ -1,0 +1,54 @@
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-4 md:gap-6">
+  <header class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="m-0 text-2xl font-bold tracking-tight">Recuperar contraseña</h1>
+      <p class="m-0 text-sm text-muted-color">{{ totalLabel() }}</p>
+    </div>
+    <a routerLink="/users" class="no-underline" aria-label="Volver a usuarios">
+      <p-button label="Usuarios" icon="pi pi-arrow-left" severity="secondary" [rounded]="true" tabindex="-1" />
+    </a>
+  </header>
+
+  <p class="m-0 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+    Antes de generar el código, confirma que quien lo pide es realmente el dueño de la cuenta y envíalo al teléfono registrado.
+  </p>
+
+  @if (failed()) {
+    <div
+      class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+      role="alert"
+    >
+      <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudieron cargar las solicitudes.</span>
+      <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="reload()" />
+    </div>
+  }
+
+  <section aria-label="Solicitudes pendientes" [attr.aria-busy]="loading()">
+    @if (requests().length === 0) {
+      @if (loading()) {
+        <div class="flex flex-col gap-2">
+          @for (row of skeletonRows; track row) {
+            <p-skeleton height="6rem" borderRadius="1rem" />
+          }
+        </div>
+      } @else if (!failed()) {
+        <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-surface px-4 py-10 text-center text-muted-color">
+          <span class="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary dark:bg-primary-500/10">
+            <i class="pi pi-inbox text-xl" aria-hidden="true"></i>
+          </span>
+          <p class="m-0 font-medium">No hay solicitudes pendientes</p>
+        </div>
+      }
+    } @else {
+      <ul class="m-0 flex list-none flex-col gap-2 p-0 transition-opacity" [class.opacity-60]="loading()">
+        @for (request of requests(); track request.requestId) {
+          <li>
+            <app-recovery-request-card [request]="request" (attendRequested)="attend($event)" />
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+<app-reset-password-flow [target]="resetTarget()" [(confirmVisible)]="resetVisible" (issued)="reload()" />

@@ -1,0 +1,56 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-5" novalidate>
+  <div class="flex flex-col gap-2">
+    <label for="username" class="text-sm font-medium">Usuario</label>
+    <p-iconfield>
+      <p-inputicon class="pi pi-user" />
+      <input
+        pInputText
+        id="username"
+        formControlName="username"
+        autocomplete="username"
+        placeholder="NombreUsuario"
+        class="w-full"
+        [attr.maxlength]="usernameMaxLength"
+        [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid"
+      />
+    </p-iconfield>
+    @if (form.controls.username.touched) {
+      @if (form.controls.username.hasError('required')) {
+        <small class="text-red-500">El usuario es obligatorio.</small>
+      } @else if (form.controls.username.hasError('pattern')) {
+        <small class="text-red-500">El usuario no puede contener espacios.</small>
+      }
+    }
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <span id="code-label" class="text-sm font-medium">Código de verificación</span>
+    <p-inputotp
+      formControlName="code"
+      [length]="otpLength"
+      [integerOnly]="true"
+      [invalid]="form.controls.code.touched && form.controls.code.invalid"
+      aria-labelledby="code-label"
+    />
+    <small class="text-surface-500">Te lo enviamos por WhatsApp. Escribe los {{ otpLength }} dígitos.</small>
+    @if (form.controls.code.touched && form.controls.code.invalid) {
+      <small class="text-red-500">Escribe el código de {{ otpLength }} dígitos.</small>
+    }
+  </div>
+
+  @if (cooldownSeconds() > 0) {
+    <p class="m-0 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300" role="status">
+      Demasiados intentos. Espera {{ cooldownSeconds() }} s antes de volver a intentarlo.
+    </p>
+  }
+
+  <p-button
+    type="submit"
+    label="Continuar"
+    icon="pi pi-arrow-right"
+    iconPos="right"
+    [loading]="loading()"
+    [disabled]="cooldownSeconds() > 0"
+    styleClass="w-full border-0 bg-linear-to-r from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800"
+  />
+</form>

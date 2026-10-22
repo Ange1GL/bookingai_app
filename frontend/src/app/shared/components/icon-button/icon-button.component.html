@@ -1,0 +1,12 @@
+<p-button
+  type="button"
+  [icon]="'pi ' + icon()"
+  [text]="true"
+  [rounded]="true"
+  [severity]="severity()"
+  [disabled]="disabled()"
+  [pTooltip]="tooltip()"
+  tooltipPosition="top"
+  [attr.aria-label]="tooltip()"
+  (onClick)="clicked.emit()"
+/>

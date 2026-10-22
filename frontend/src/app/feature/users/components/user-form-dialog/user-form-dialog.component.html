@@ -1,0 +1,142 @@
+<p-dialog
+  [(visible)]="visible"
+  header="Nuevo usuario"
+  [modal]="true"
+  [draggable]="false"
+  [closable]="!saving()"
+  [closeOnEscape]="!saving()"
+  [style]="{ width: '30rem', maxWidth: '94vw' }"
+  (onHide)="form.reset()"
+>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+    <div class="flex flex-col gap-2">
+      <label for="user-username" class="text-sm font-medium">Usuario</label>
+      <input
+        pInputText
+        id="user-username"
+        formControlName="username"
+        autocomplete="off"
+        placeholder="maria.lopez"
+        [attr.maxlength]="usernameMaxLength"
+        [attr.aria-invalid]="form.controls.username.touched && form.controls.username.invalid"
+      />
+      @if (form.controls.username.touched) {
+        @if (form.controls.username.hasError('required')) {
+          <small class="text-red-500">El usuario es obligatorio.</small>
+        } @else if (form.controls.username.hasError('minlength')) {
+          <small class="text-red-500">Debe tener al menos 3 caracteres.</small>
+        } @else if (form.controls.username.hasError('pattern')) {
+          <small class="text-red-500">El usuario no puede contener espacios.</small>
+        }
+      }
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-2">
+        <label for="user-name" class="text-sm font-medium">Nombre</label>
+        <input
+          pInputText
+          id="user-name"
+          formControlName="name"
+          autocomplete="off"
+          placeholder="María"
+          [attr.maxlength]="nameMaxLength"
+          [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+        />
+        @if (form.controls.name.touched && form.controls.name.hasError('required')) {
+          <small class="text-red-500">El nombre es obligatorio.</small>
+        }
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="user-last-name" class="text-sm font-medium">Apellidos</label>
+        <input
+          pInputText
+          id="user-last-name"
+          formControlName="lastName"
+          autocomplete="off"
+          placeholder="López Pérez"
+          [attr.maxlength]="nameMaxLength"
+          [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid"
+        />
+        @if (form.controls.lastName.touched && form.controls.lastName.hasError('required')) {
+          <small class="text-red-500">Los apellidos son obligatorios.</small>
+        }
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="user-phone" class="text-sm font-medium">Teléfono</label>
+      <input
+        pInputText
+        id="user-phone"
+        type="tel"
+        formControlName="phone"
+        autocomplete="off"
+        placeholder="5512345678"
+        [attr.maxlength]="phoneLength"
+        inputmode="numeric"
+        [attr.aria-invalid]="form.controls.phone.touched && form.controls.phone.invalid"
+      />
+      @if (form.controls.phone.touched) {
+        @if (form.controls.phone.hasError('required')) {
+          <small class="text-red-500">El teléfono es obligatorio.</small>
+        } @else if (form.controls.phone.hasError('pattern')) {
+          <small class="text-red-500">Escribe exactamente 10 dígitos.</small>
+        }
+      } @else {
+        <small class="text-muted-color">10 dígitos, sin prefijo de país.</small>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="user-email" class="text-sm font-medium">Correo <span class="text-muted-color">(opcional)</span></label>
+      <input
+        pInputText
+        id="user-email"
+        type="email"
+        formControlName="email"
+        autocomplete="off"
+        placeholder="maria@ejemplo.com"
+        [attr.maxlength]="emailMaxLength"
+        [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+      />
+      @if (form.controls.email.touched && form.controls.email.hasError('email')) {
+        <small class="text-red-500">El correo no es válido.</small>
+      }
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="user-roles" class="text-sm font-medium">Roles</label>
+      <p-multiselect
+        inputId="user-roles"
+        formControlName="roleIds"
+        [options]="roleOptions()"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Selecciona al menos un rol"
+        display="chip"
+        appendTo="body"
+        styleClass="w-full"
+        [loading]="rolesLoading()"
+        [showClear]="false"
+      />
+      @if (rolesFailed()) {
+        <small class="text-red-500">
+          No se pudieron cargar los roles.
+          <button type="button" class="cursor-pointer border-0 bg-transparent p-0 text-primary underline" (click)="reloadRoles()">Reintentar</button>
+        </small>
+      } @else if (form.controls.roleIds.touched && form.controls.roleIds.hasError('required')) {
+        <small class="text-red-500">Elige al menos un rol.</small>
+      }
+    </div>
+
+    <p class="m-0 text-sm text-muted-color">
+      Al guardar se genera un código de acceso de un solo uso que le pasarás al usuario para que cree su contraseña.
+    </p>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <p-button label="Cancelar" severity="secondary" [text]="true" [disabled]="saving()" (onClick)="visible.set(false)" />
+      <p-button type="submit" label="Crear usuario" icon="pi pi-check" [loading]="saving()" />
+    </div>
+  </form>
+</p-dialog>

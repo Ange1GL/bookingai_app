@@ -1,0 +1,29 @@
+<article
+  class="flex items-start gap-4 rounded-3xl border border-surface bg-surface-0 p-4 shadow-sm transition hover:border-primary-200 hover:shadow-md dark:bg-surface-900 dark:hover:border-primary-700"
+>
+  <span
+    class="flex size-12 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+    aria-hidden="true"
+  >
+    <i class="pi pi-lock text-lg"></i>
+  </span>
+
+  <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+    <div class="min-w-0">
+      <p class="m-0 truncate text-base font-semibold leading-tight">{{ displayName() }}</p>
+      <p class="m-0 truncate text-sm text-primary">&#64;{{ request().username }}</p>
+    </div>
+    @if (request().phone) {
+      <p class="m-0 flex items-center gap-2 truncate text-sm text-muted-color">
+        <i class="pi pi-phone text-xs" aria-hidden="true"></i>{{ request().phone }}
+      </p>
+    }
+    <p class="m-0 flex items-center gap-2 text-xs text-muted-color">
+      <i class="pi pi-clock text-xs" aria-hidden="true"></i>Solicitado el {{ requestedAt() }}
+    </p>
+  </div>
+
+  <ng-container *appHasPermission="writePermissions">
+    <app-icon-button icon="pi-key" [tooltip]="attendTooltip()" (clicked)="attendRequested.emit(request())" />
+  </ng-container>
+</article>
