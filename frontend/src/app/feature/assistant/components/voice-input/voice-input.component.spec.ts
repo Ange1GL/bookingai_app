@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable, of, throwError } from 'rxjs';
+import { EMPTY, Observable, of, throwError } from 'rxjs';
 import { ErrorHandlerService } from '@/core/service/error-handler.service';
 import { RecordingOutcome, TranscriptionResponseDto, VoiceRecording } from '../../models/voice.model';
 import { AgentService } from '../../service/agent.service';
@@ -46,7 +46,7 @@ describe('VoiceInputComponent', () => {
     TestBed.configureTestingModule({
       imports: [VoiceInputComponent],
       providers: [
-        { provide: AgentService, useValue: { transcribe } },
+        { provide: AgentService, useValue: { transcribe, voiceQuota: () => EMPTY } },
         { provide: ErrorHandlerService, useValue: { extractMessage: (e: HttpErrorResponse) => e.error.message } },
       ],
     });

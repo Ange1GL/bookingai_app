@@ -36,6 +36,16 @@ quedan hoy al usuario.
 Formatos aceptados (MIME + magic bytes): `audio/webm` (Chrome, Edge, Firefox, Android), `audio/ogg`
 (Firefox) y `audio/mp4` (Safari/iOS). Los parámetros como `;codecs=opus` se ignoran.
 
+`GET /api/v1/agent/transcriptions/quota` — dictados de hoy, para el medidor del chat:
+
+```json
+{ "dailyLimit": 40, "used": 12, "remaining": 28, "percentUsed": 30, "monthlyExhausted": false,
+  "resetsAt": "2026-10-23T00:00:00-06:00" }
+```
+
+`monthlyExhausted: true` = el tope mensual global se agotó (`remaining` es 0 para todos). El día se reinicia a la
+medianoche de `app.timezone`.
+
 ## Arquitectura (hexagonal)
 
 | Pieza | Rol |
@@ -76,6 +86,12 @@ Reembolsos:
 
 El frontend agrega otra capa (ver `docs/assistant-chat.md`): no sube grabaciones canceladas, de menos de
 0.8 s o en las que no detectó voz, y corta sola tras 2 s de silencio.
+
+**Límite conocido:** el backend acota el audio por **tamaño** (512 KB), no por duración; un cliente que se salte
+el frontend podría subir audio de más de 30 s con un bitrate muy bajo. Solo afecta a usuarios autenticados y queda
+acotado por las cuotas y por el saldo prepago. Mitigación futura: leer la duración del contenedor o bajar `max-audio-bytes`.
+
+Precio verificado (oct. 2026): `gpt-4o-mini-transcribe` ≈ $0.003/min. Peor caso configurado: 1500 × 30 s ≈ $2.25/mes.
 
 **Garantía final:** en OpenAI usa créditos prepagados **con la recarga automática desactivada**; así el
 gasto nunca puede superar el saldo, pase lo que pase en la app.

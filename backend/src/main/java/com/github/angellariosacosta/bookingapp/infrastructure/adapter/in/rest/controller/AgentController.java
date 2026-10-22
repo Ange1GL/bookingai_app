@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.angellariosacosta.bookingapp.application.command.TranscribeVoiceCommand;
 import com.github.angellariosacosta.bookingapp.application.port.in.ChatWithAssistantUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.GetAiCreditsUseCase;
+import com.github.angellariosacosta.bookingapp.application.port.in.GetVoiceQuotaUseCase;
 import com.github.angellariosacosta.bookingapp.application.port.in.TranscribeVoiceUseCase;
 import com.github.angellariosacosta.bookingapp.application.result.VoiceTranscriptionResult;
 import com.github.angellariosacosta.bookingapp.domain.exception.InvalidVoiceAudioException;
@@ -25,6 +26,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.CreditsResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.SessionResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.TranscriptionResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.VoiceQuotaResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.AssistantRestMapper;
 
 import jakarta.validation.Valid;
@@ -40,6 +42,7 @@ public class AgentController {
 	private final ChatWithAssistantUseCase chatWithAssistantUseCase;
 	private final GetAiCreditsUseCase getAiCreditsUseCase;
 	private final TranscribeVoiceUseCase transcribeVoiceUseCase;
+	private final GetVoiceQuotaUseCase getVoiceQuotaUseCase;
 	private final AssistantRestMapper assistantMapper;
 
 	@PostMapping("/session")
@@ -66,6 +69,12 @@ public class AgentController {
 		VoiceTranscriptionResult result = transcribeVoiceUseCase.transcribe(
 				new TranscribeVoiceCommand(userId, readBytes(audio), audio.getContentType()));
 		return ResponseEntity.ok(new TranscriptionResponse(result.text(), result.remainingToday()));
+	}
+
+	// Dictados usados hoy y hora de recarga, para el medidor del chat.
+	@GetMapping("/transcriptions/quota")
+	public ResponseEntity<VoiceQuotaResponse> voiceQuota(@CurrentUserId Long userId) {
+		return ResponseEntity.ok(assistantMapper.toResponse(getVoiceQuotaUseCase.getQuota(userId)));
 	}
 
 	private static byte[] readBytes(MultipartFile audio) {

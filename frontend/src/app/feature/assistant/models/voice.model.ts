@@ -27,3 +27,14 @@ export interface VoiceError {
   message: string;
   retryable: boolean;
 }
+
+/** Mirrors the backend VoiceQuotaResponse record (dictations, not tokens). */
+export interface VoiceQuotaDto {
+  dailyLimit: number;
+  used: number;
+  remaining: number;
+  percentUsed: number;
+  /** The global monthly cap ran out: nobody can dictate until the 1st, whatever their daily balance. */
+  monthlyExhausted: boolean;
+  resetsAt: string;
+}

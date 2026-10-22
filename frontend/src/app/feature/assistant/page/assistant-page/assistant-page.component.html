@@ -91,8 +91,12 @@
       @if (store.messages().length > 0) {
         <app-suggestion-chips [suggestions]="replyChips" [disabled]="store.sending()" (chosen)="run($event)" />
       }
+      @if (voiceSupported && voiceQuota.quota(); as quota) {
+        <app-voice-quota-meter [quota]="quota" (expired)="voiceQuota.load()" />
+      }
       <app-chat-composer
         [disabled]="store.sending()"
+        [voiceBlocked]="voiceQuota.exhausted()"
         (sent)="store.send($event)"
       />
     }

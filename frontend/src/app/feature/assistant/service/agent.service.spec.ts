@@ -56,6 +56,15 @@ describe('AgentService', () => {
     expect(credits).toEqual(CREDITS);
   });
 
+  it('loads the daily dictation quota', () => {
+    let remaining = -1;
+    service.voiceQuota().subscribe((value) => (remaining = value.remaining));
+    const req = http.expectOne(`${BASE}/transcriptions/quota`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ dailyLimit: 40, used: 12, remaining: 28, percentUsed: 30, monthlyExhausted: false, resetsAt: '2026-10-23T00:00:00-06:00' });
+    expect(remaining).toBe(28);
+  });
+
   it('uploads the recording as multipart with an extension that matches its type', () => {
     const audio = new Blob(['audio'], { type: 'audio/mp4' });
     let text = '';

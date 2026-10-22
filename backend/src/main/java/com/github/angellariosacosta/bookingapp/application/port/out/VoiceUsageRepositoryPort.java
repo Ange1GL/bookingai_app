@@ -18,4 +18,6 @@ public interface VoiceUsageRepositoryPort {
 	void refundDaily(Long userId, LocalDate day);
 
 	int dailyCount(Long userId, LocalDate day);
+
+	int monthlyCount(LocalDate firstDayOfMonth);
 }

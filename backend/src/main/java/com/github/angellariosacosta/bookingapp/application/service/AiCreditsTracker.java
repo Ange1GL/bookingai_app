@@ -2,7 +2,6 @@ package com.github.angellariosacosta.bookingapp.application.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +25,8 @@ public class AiCreditsTracker {
 	private final Clock clock;
 
 	public AiCredits snapshot(Long userId) {
-		LocalDate today = LocalDate.now(clock);
-		OffsetDateTime resetsAt = today.plusDays(1).atStartOfDay(clock.getZone()).toOffsetDateTime();
-		return new AiCredits(policy.dailyTokenLimitPerUser(), usage.usedByUser(userId, today), resetsAt);
+		return new AiCredits(policy.dailyTokenLimitPerUser(), usage.usedByUser(userId, BusinessDay.today(clock)),
+				BusinessDay.nextStart(clock));
 	}
 
 	/** Pre-chequeo: el costo real se conoce hasta después de la respuesta, así que solo se exige saldo disponible. */

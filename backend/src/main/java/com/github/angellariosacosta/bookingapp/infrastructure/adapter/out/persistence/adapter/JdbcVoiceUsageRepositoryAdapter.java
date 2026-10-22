@@ -42,6 +42,10 @@ public class JdbcVoiceUsageRepositoryAdapter implements VoiceUsageRepositoryPort
 			WHERE user_id = :userId AND usage_date = :day
 			""";
 
+	private static final String MONTHLY_COUNT = """
+			SELECT COALESCE(MAX(request_count), 0) FROM voice_usage_monthly WHERE usage_month = :month
+			""";
+
 	private final JdbcClient jdbcClient;
 
 	@Override
@@ -67,6 +71,14 @@ public class JdbcVoiceUsageRepositoryAdapter implements VoiceUsageRepositoryPort
 				.param("userId", userId)
 				.param("day", day)
 				.update();
+	}
+
+	@Override
+	public int monthlyCount(LocalDate firstDayOfMonth) {
+		return jdbcClient.sql(MONTHLY_COUNT)
+				.param("month", firstDayOfMonth)
+				.query(Integer.class)
+				.single();
 	}
 
 	@Override

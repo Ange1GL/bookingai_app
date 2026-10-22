@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
-import { CREDITS_TICK_MS } from '../../models/credits.const';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CreditsDto } from '../../models/credits.model';
-import { creditsLevel, formatTimeUntil, limitCredits, remainingCredits, usedCredits } from '../../models/credits.util';
+import { creditsLevel, limitCredits, remainingCredits, usedCredits } from '../../models/credits.util';
+import { resetCountdown } from '../../service/reset-countdown';
 
 /** Daily AI credits: used / limit, a colour-coded bar and the countdown to the next reset. */
 @Component({
@@ -16,26 +16,15 @@ export class CreditsMeterComponent {
   /** The reset moment passed: the parent should reload the balance. */
   readonly expired = output<void>();
 
-  private readonly now = signal(Date.now());
-
   protected readonly level = computed(() => creditsLevel(this.credits()));
   protected readonly used = computed(() => usedCredits(this.credits()));
   protected readonly limit = computed(() => limitCredits(this.credits()));
   protected readonly remaining = computed(() => remainingCredits(this.credits()));
-  protected readonly timeUntilReset = computed(() => formatTimeUntil(Date.parse(this.credits().resetsAt) - this.now()));
+  protected readonly timeUntilReset = resetCountdown(
+    () => this.credits().resetsAt,
+    () => this.expired.emit(),
+  );
   protected readonly barClass = computed(() => BAR_CLASSES[this.level()]);
-
-  constructor() {
-    const timer = setInterval(() => this.tick(), CREDITS_TICK_MS);
-    inject(DestroyRef).onDestroy(() => clearInterval(timer));
-  }
-
-  private tick(): void {
-    this.now.set(Date.now());
-    if (this.now() >= Date.parse(this.credits().resetsAt)) {
-      this.expired.emit();
-    }
-  }
 }
 
 const BAR_CLASSES = {

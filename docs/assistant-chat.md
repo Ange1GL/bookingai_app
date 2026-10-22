@@ -8,6 +8,7 @@ Chat, pensado para móvil, que conversa con el agente del backend (`/api/v1/agen
 - **Mensajes**: burbujas violeta (usuario) / gris (asistente) con avatar del asistente, hora y marca de enviado; separador "Hoy"; indicador de "escribiendo…"; si falla el envío, botón *Reintentar*.
 - **Respuestas rápidas** sobre el campo de texto, con scroll horizontal: Sí, confirmar · No · Hoy · Mañana · Citas de hoy (el agente pide confirmación antes de cancelar o mover).
 - **Medidor de créditos** bajo la cabecera: "26 de 60 créditos usados hoy · 34 restantes", barra verde / ámbar (≥ 80 %) / roja (agotado) y "Se recarga a las 12:00 a. m. (en 5 h 12 min)". Ver *Créditos de AI*.
+- **Medidor de dictados** sobre la caja de texto (solo si el navegador soporta voz): "12 de 40 dictados hoy · 28 restantes · recarga en 5 h 12 min". Ámbar con pocos, rojo sin dictados (el micrófono se deshabilita pero se puede escribir) y aviso propio si se agotó el tope mensual global.
 - **Campo de texto** que crece solo (máx. 500 caracteres, contador desde 400): Enter envía, Shift+Enter agrega línea; auto-scroll al último mensaje.
 - **Botón de micrófono** (dictado por voz), junto a Enviar. Ver abajo.
 
@@ -31,7 +32,7 @@ Como el botón 🎤 de ChatGPT/Gemini/Claude: graba, transcribe en el backend (`
 | Opus a 24 kbps (30 s ≈ 110 KB) | `AUDIO_BITS_PER_SECOND` |
 | **Sin reintentos automáticos**: tras un error de red/5xx se ofrece *Reintentar* (vuelve a subir la misma grabación, sin regrabar); 4xx (cuota, audio inválido) no se reintenta | — |
 
-El backend aplica además la cuota diaria por usuario y el tope mensual global. Cuando quedan 5 dictados o menos en el día, el micrófono muestra el número restante.
+`VoiceQuotaStore` (`GET /agent/transcriptions/quota`) guarda el saldo; cada dictado exitoso lo actualiza con `remainingToday`, sin otra petición, y un 429 lo recarga. El backend aplica además la cuota diaria por usuario y el tope mensual global. Cuando quedan 5 dictados o menos en el día, el micrófono muestra el número restante.
 
 **Errores** (aviso en línea sobre el micrófono, `role="alert"`, sin toast global gracias a `SKIP_ERROR_TOAST`): permiso denegado, sin micrófono, muy corto, sin voz, cuota agotada (429), no se entendió (422), servicio no disponible (502, con *Reintentar*).
 
@@ -58,7 +59,7 @@ feature/assistant/
   models/{chat.model,composer-form.model,credits.const,credits.model,credits.util,quick-actions.const,voice.const,voice.model}.ts
   service/{agent.service,chat.store,voice-recorder.service}.ts
   page/assistant-page/
-  components/{assistant-avatar,credits-meter,message-bubble,quick-actions,suggestion-chips,chat-composer,voice-input}/
+  components/{assistant-avatar,credits-meter,voice-quota-meter,message-bubble,quick-actions,suggestion-chips,chat-composer,voice-input}/
 ```
 - `VoiceRecorderService`: graba con `MediaRecorder`, mide el volumen y resuelve `record()` con `recorded | cancelled | too-short | no-speech`; siempre libera el micrófono. Lo provee `voice-input` (una instancia por componente).
 - `VoiceInputComponent`: botón, barra de grabación, subida (`AgentService.transcribe`) y errores; emite `transcribed` y `recordingChange`.

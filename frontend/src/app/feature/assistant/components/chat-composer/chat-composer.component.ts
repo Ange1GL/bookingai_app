@@ -19,6 +19,8 @@ export class ChatComposerComponent {
   private readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('messageInput');
 
   readonly disabled = input(false);
+  /** Dictation quota ran out: the microphone is disabled but typing still works. */
+  readonly voiceBlocked = input(false);
   readonly placeholder = input('Escribe un mensaje…');
   readonly sent = output<string>();
 
