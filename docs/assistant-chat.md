@@ -7,6 +7,7 @@ Chat, pensado para móvil, que conversa con el agente del backend (`/api/v1/agen
 - **Pantalla de bienvenida** con avatar grande, saludo y 4 tarjetas de acción rápida (Agendar cita, Citas de hoy, Mover cita, Cancelar cita) y aviso para revisar los datos antes de confirmar.
 - **Mensajes**: burbujas violeta (usuario) / gris (asistente) con avatar del asistente, hora y marca de enviado; separador "Hoy"; indicador de "escribiendo…"; si falla el envío, botón *Reintentar*.
 - **Respuestas rápidas** sobre el campo de texto, con scroll horizontal: Sí, confirmar · No · Hoy · Mañana · Citas de hoy (el agente pide confirmación antes de cancelar o mover).
+- **Medidor de créditos** bajo la cabecera: "26 de 60 créditos usados hoy · 34 restantes", barra verde / ámbar (≥ 80 %) / roja (agotado) y "Se recarga a las 12:00 a. m. (en 5 h 12 min)". Ver *Créditos de AI*.
 - **Campo de texto** que crece solo (máx. 500 caracteres, contador desde 400): Enter envía, Shift+Enter agrega línea; auto-scroll al último mensaje.
 - **Botón de micrófono** (dictado por voz), junto a Enviar. Ver abajo.
 
@@ -38,6 +39,15 @@ El backend aplica además la cuota diaria por usuario y el tope mensual global. 
 
 **Privacidad**: el audio solo viaja al backend (nunca directo al proveedor; la API key no llega al navegador) y no se guarda.
 
+## Créditos de AI
+Cada usuario tiene un presupuesto diario de tokens de DeepSeek (ver `backend/docs/ai-credits.md`). La UI habla de **créditos** (`TOKENS_PER_CREDIT` = 1000 tokens en `models/credits.const.ts`).
+
+- `ChatStore` carga el saldo al abrir la página (`GET /agent/credits`) y lo actualiza con el `credits` de cada respuesta de `/chat`. Si la carga falla, el chat sigue funcionando (el backend aplica el límite igual).
+- `CreditsMeterComponent` muestra el uso y la cuenta regresiva (se recalcula cada 30 s, `CREDITS_TICK_MS`); al llegar a la hora de recarga emite `expired` y el store vuelve a pedir el saldo.
+- **Pocos créditos** (≥ 80 %, `LOW_CREDITS_PERCENT`): el medidor pasa a ámbar y avisa; no bloquea.
+- **Agotados**: el campo de texto, el micrófono y las respuestas rápidas se reemplazan por un aviso `role="alert"` con la hora de recarga y el botón **Crear la cita manualmente**. `ChatStore.send/retry` también se niegan a enviar.
+- **429 en `/chat`** (otro dispositivo gastó el saldo, o tope global): el mensaje queda en estado `quota` (sin *Reintentar*, con la nota y el botón manual) y se recarga el saldo.
+
 ## Si el asistente no responde
 Cuando el envío falla (error de red/5xx del agente, respuesta vacía o más de 45 s sin respuesta, `AGENT_REPLY_TIMEOUT_MS`), el mensaje queda marcado como fallido y debajo aparece, además de *Reintentar*, un aviso: "El asistente no respondió. Puedes reintentar, consultar con el administrador o agendar la cita tú mismo" con el botón **Crear la cita manualmente**. El botón navega a `/appointments?nueva=true` (`shared/navigation/appointment-links.ts`); el calendario abre el formulario de nueva cita y quita el parámetro de la URL. Las peticiones del chat usan `SKIP_ERROR_TOAST`: el error se muestra en línea, no como toast. Al reintentar con éxito, el aviso desaparece.
 
@@ -45,10 +55,10 @@ Cuando el envío falla (error de red/5xx del agente, respuesta vacía o más de 
 ```
 feature/assistant/
   assistant.routes.ts          # provee ChatStore a nivel de ruta
-  models/{chat.model,composer-form.model,quick-actions.const,voice.const,voice.model}.ts
+  models/{chat.model,composer-form.model,credits.const,credits.model,credits.util,quick-actions.const,voice.const,voice.model}.ts
   service/{agent.service,chat.store,voice-recorder.service}.ts
   page/assistant-page/
-  components/{assistant-avatar,message-bubble,quick-actions,suggestion-chips,chat-composer,voice-input}/
+  components/{assistant-avatar,credits-meter,message-bubble,quick-actions,suggestion-chips,chat-composer,voice-input}/
 ```
 - `VoiceRecorderService`: graba con `MediaRecorder`, mide el volumen y resuelve `record()` con `recorded | cancelled | too-short | no-speech`; siempre libera el micrófono. Lo provee `voice-input` (una instancia por componente).
 - `VoiceInputComponent`: botón, barra de grabación, subida (`AgentService.transcribe`) y errores; emite `transcribed` y `recordingChange`.
@@ -60,13 +70,14 @@ feature/assistant/
 - Los fallos del modelo devuelven `502` con mensaje genérico.
 - Lista negra: si el cliente está bloqueado el agente no agenda, avisa y pregunta si se quita o se mantiene; también puede bloquear/desbloquear con confirmación (ver `backend/docs/customer-blacklist.md`).
 - Dictado: ver `backend/docs/voice-transcription.md`.
-- Créditos de AI: límite diario de tokens por usuario y tope global (`429` al agotarse, `GET /agent/credits`); ver `backend/docs/ai-credits.md`. La UI de créditos está pendiente.
+- Créditos de AI: límite diario de tokens por usuario y tope global (`429` al agotarse, `GET /agent/credits`); ver `backend/docs/ai-credits.md`.
 - `/agent/raw-chat` solo existe en el perfil `dev` (no pasa por los créditos).
 
 ## Pruebas
 Specs (Vitest):
-- `agent.service` (chat y subida multipart del audio).
-- `chat.store` (envío, sesión única, bloqueo en vuelo, reintento, nueva conversación).
+- `agent.service` (chat, saldo de créditos y subida multipart del audio).
+- `chat.store` (envío, sesión única, bloqueo en vuelo, reintento, nueva conversación, créditos: carga, actualización, 429 sin reintento, bloqueo al agotarse).
+- `credits-meter` y `credits.util` (textos, niveles, barra, cuenta regresiva y `expired`).
 - `voice-recorder.service` (MIME y bitrate, corte por silencio, sin voz, tope de 30 s, muy corto, cancelar, liberar micrófono, permiso denegado).
 - `voice-input` (sube solo grabaciones con voz, reintento manual con el mismo blob, sin reintento en 429, cuota baja, Escape).
 - `chat-composer` (agrega el dictado sin enviarlo, respeta 500 caracteres, oculta la caja al grabar).

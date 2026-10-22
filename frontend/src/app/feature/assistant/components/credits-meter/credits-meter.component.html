@@ -1,0 +1,24 @@
+<div class="flex flex-col gap-1.5 border-b border-surface bg-surface-0 px-4 py-2.5 dark:bg-surface-900">
+  <div class="flex items-center justify-between gap-3 text-xs">
+    <span class="font-medium">
+      {{ used() }} de {{ limit() }} créditos usados hoy
+      @if (level() === 'low') {
+        <span class="text-amber-600 dark:text-amber-400"> · te quedan pocos</span>
+      }
+    </span>
+    <span class="shrink-0 text-muted-color">{{ remaining() }} restantes</span>
+  </div>
+  <div
+    class="h-2 w-full overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700"
+    role="progressbar"
+    aria-label="Créditos de AI usados hoy"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-valuenow]="credits().percentUsed"
+  >
+    <div class="h-full rounded-full transition-all" [class]="barClass()" [style.width.%]="credits().percentUsed"></div>
+  </div>
+  <p class="m-0 text-[11px] text-muted-color">
+    Se recarga a las {{ credits().resetsAt | date: 'shortTime' }} (en {{ timeUntilReset() }})
+  </p>
+</div>
