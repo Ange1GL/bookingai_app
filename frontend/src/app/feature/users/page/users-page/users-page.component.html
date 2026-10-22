@@ -1,0 +1,70 @@
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-4 md:gap-6">
+  <header class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="m-0 text-2xl font-bold tracking-tight">Usuarios</h1>
+      <p class="m-0 text-sm text-muted-color">{{ totalLabel() }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a routerLink="/users/recovery-requests" class="no-underline" aria-label="Ver solicitudes de recuperación de contraseña">
+        <p-button label="Solicitudes" icon="pi pi-inbox" severity="secondary" [rounded]="true" tabindex="-1" />
+      </a>
+      <ng-container *appHasPermission="writePermissions">
+        <p-button label="Nuevo" icon="pi pi-plus" [rounded]="true" (onClick)="formVisible.set(true)" />
+      </ng-container>
+    </div>
+  </header>
+
+  <app-user-filters [status]="query().status" (searchChange)="setSearch($event)" (statusChange)="setStatus($event)" />
+
+  @if (failed()) {
+    <div
+      class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+      role="alert"
+    >
+      <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudieron cargar los usuarios.</span>
+      <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="reload()" />
+    </div>
+  }
+
+  <section aria-label="Listado de usuarios" [attr.aria-busy]="loading()">
+    @if (users().length === 0) {
+      @if (loading()) {
+        <div class="flex flex-col gap-2">
+          @for (row of skeletonRows; track row) {
+            <p-skeleton height="6rem" borderRadius="1rem" />
+          }
+        </div>
+      } @else if (!failed()) {
+        <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-surface px-4 py-10 text-center text-muted-color">
+          <span class="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary dark:bg-primary-500/10">
+            <i class="pi pi-users text-xl" aria-hidden="true"></i>
+          </span>
+          <p class="m-0 font-medium">{{ hasFilters() ? 'Sin resultados' : 'Aún no hay usuarios' }}</p>
+          <p class="m-0 text-sm">{{ hasFilters() ? 'Prueba con otra búsqueda o filtro.' : 'Crea el primero con el botón Nuevo.' }}</p>
+        </div>
+      }
+    } @else {
+      <ul class="m-0 flex list-none flex-col gap-2 p-0 transition-opacity" [class.opacity-60]="loading()">
+        @for (user of users(); track user.id) {
+          <li>
+            <app-user-card [user]="user" (detailRequested)="showDetail($event)" (resetRequested)="askReset($event)" />
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  <app-pager
+    [page]="query().page"
+    [pageSize]="pageSize"
+    [total]="totalRecords()"
+    [disabled]="loading()"
+    (pageChange)="changePage($event)"
+  />
+</div>
+
+<app-user-form-dialog [(visible)]="formVisible" [saving]="creating()" (submitted)="create($event)" />
+
+<app-reset-password-flow [target]="resetTarget()" [(confirmVisible)]="resetVisible" (issued)="reload()" />
+
+<app-user-detail-dialog [userId]="detailUserId()" [(visible)]="detailVisible" />

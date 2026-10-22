@@ -1,0 +1,19 @@
+<app-detail-dialog
+  [(visible)]="visible"
+  header="Detalle del usuario"
+  [title]="title()"
+  [initials]="initials()"
+  [fields]="fields()"
+  [loading]="loading()"
+  [failed]="failed()"
+  (retry)="retry()"
+>
+  @if (roles().length > 0) {
+    <div class="flex flex-wrap items-center gap-1.5">
+      <span class="mr-1 text-xs text-muted-color">Roles</span>
+      @for (role of roles(); track role.id) {
+        <span class="rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary dark:bg-primary-500/10">{{ role.name }}</span>
+      }
+    </div>
+  }
+</app-detail-dialog>

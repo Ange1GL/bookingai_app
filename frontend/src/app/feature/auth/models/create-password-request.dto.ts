@@ -1,7 +1,11 @@
-/** Mirrors the backend CreatePasswordRequest: the one-time code received by WhatsApp plus the chosen password. */
+/**
+ * Mirrors the backend CreatePasswordRequest: the one-time code received by WhatsApp, the signed ticket that step 1
+ * (verify-code) returned, and the chosen password.
+ */
 export interface CreatePasswordRequestDto {
   username: string;
   code: string;
+  verificationToken: string;
   newPassword: string;
 }
 

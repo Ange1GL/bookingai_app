@@ -1,0 +1,11 @@
+<p-button
+  type="button"
+  [label]="text()"
+  [icon]="icon()"
+  [size]="size()"
+  [outlined]="outlined()"
+  [rounded]="true"
+  [severity]="copied() ? 'success' : 'primary'"
+  [attr.aria-label]="ariaLabel()"
+  (onClick)="copy()"
+/>

@@ -1,0 +1,42 @@
+<p-dialog
+  [(visible)]="visible"
+  header="Código de acceso"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{ width: '28rem', maxWidth: '94vw' }"
+>
+  @if (result(); as current) {
+    <div class="flex flex-col gap-4">
+      <p class="m-0 text-sm text-muted-color">
+        Acceso para <strong class="text-color">{{ displayName() }}</strong> (&#64;{{ current.user.username }}). Envíalo al teléfono
+        <strong class="text-color">{{ current.user.phone }}</strong> por tu chat.
+      </p>
+
+      @if (current.oneTimeCode && current.shareMessage) {
+        <div class="flex items-center justify-between gap-3 rounded-2xl bg-surface-100 px-4 py-3 dark:bg-surface-800">
+          <pre class="m-0 min-w-0 whitespace-pre-wrap break-all font-mono text-sm" data-testid="share-message">{{ current.shareMessage }}</pre>
+          <app-copy-button [value]="current.shareMessage" label="Copiar" ariaLabel="Copiar mensaje con usuario y código de acceso" />
+        </div>
+
+        <p class="m-0 flex items-start gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-500/10 dark:text-amber-300" role="note">
+          <i class="pi pi-info-circle mt-0.5" aria-hidden="true"></i>
+          El código es de un solo uso y solo se muestra ahora. Si lo pierdes, genera uno nuevo desde el listado.
+        </p>
+      } @else if (current.codeSent) {
+        <p class="m-0 flex items-start gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300" role="status">
+          <i class="pi pi-check-circle mt-0.5" aria-hidden="true"></i>
+          El código se envió por WhatsApp al usuario.
+        </p>
+      } @else {
+        <p class="m-0 flex items-start gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300" role="alert">
+          <i class="pi pi-exclamation-triangle mt-0.5" aria-hidden="true"></i>
+          No se pudo entregar el código. Genera uno nuevo desde el listado de usuarios.
+        </p>
+      }
+
+      <div class="flex justify-end pt-1">
+        <p-button label="Listo" icon="pi pi-check" (onClick)="visible.set(false)" />
+      </div>
+    </div>
+  }
+</p-dialog>

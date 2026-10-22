@@ -1,0 +1,66 @@
+<p-dialog
+  [(visible)]="visible"
+  [header]="header()"
+  [modal]="true"
+  [draggable]="false"
+  [dismissableMask]="true"
+  [style]="{ width: '26rem', maxWidth: '94vw' }"
+>
+  <div class="flex flex-col gap-5" [attr.aria-busy]="loading()">
+    @if (failed()) {
+      <div
+        class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+        role="alert"
+      >
+        <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudo cargar el detalle.</span>
+        <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="retry.emit()" />
+      </div>
+    } @else if (loading()) {
+      <div class="flex items-center gap-4">
+        <p-skeleton shape="circle" size="3.5rem" />
+        <p-skeleton height="1.5rem" width="10rem" />
+      </div>
+      <div class="flex flex-col gap-2">
+        @for (row of skeletonRows; track row) {
+          <p-skeleton height="3.5rem" borderRadius="1rem" />
+        }
+      </div>
+    } @else {
+      @if (title()) {
+        <div class="flex items-center gap-4 rounded-3xl bg-linear-to-br from-primary-50 to-transparent p-4 dark:from-primary-500/10">
+          @if (initials()) {
+            <span
+              class="flex size-14 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary-400 to-primary-700 text-lg font-semibold text-white shadow-md"
+              aria-hidden="true"
+            >
+              {{ initials() }}
+            </span>
+          }
+          <p class="m-0 min-w-0 break-words text-xl font-bold leading-tight tracking-tight">{{ title() }}</p>
+        </div>
+      }
+
+      <dl class="m-0 flex flex-col gap-2">
+        @for (field of fields(); track field.label) {
+          <div class="flex items-center gap-3 rounded-2xl bg-surface-50 px-3 py-2.5 dark:bg-surface-800/60">
+            @if (field.icon) {
+              <span class="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary dark:bg-primary-500/10">
+                <i class="pi text-sm" [class]="field.icon" aria-hidden="true"></i>
+              </span>
+            }
+            <div class="min-w-0">
+              <dt class="text-xs text-muted-color">{{ field.label }}</dt>
+              <dd class="m-0 break-words text-sm font-medium">{{ field.value || '—' }}</dd>
+            </div>
+          </div>
+        }
+      </dl>
+
+      <ng-content />
+    }
+
+    <div class="flex justify-end">
+      <p-button label="Cerrar" severity="secondary" [rounded]="true" (onClick)="visible.set(false)" />
+    </div>
+  </div>
+</p-dialog>

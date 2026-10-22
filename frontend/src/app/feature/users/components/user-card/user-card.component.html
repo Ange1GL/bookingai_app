@@ -1,0 +1,44 @@
+<article
+  class="group flex items-start gap-4 rounded-3xl border border-surface bg-surface-0 p-4 shadow-sm transition hover:border-primary-200 hover:shadow-md dark:bg-surface-900 dark:hover:border-primary-700"
+  [class.opacity-60]="busy()"
+>
+  <span
+    class="flex size-12 shrink-0 items-center justify-center rounded-full text-base font-semibold text-white"
+    [class]="user().active ? 'bg-linear-to-br from-primary-400 to-primary-700' : 'bg-surface-400'"
+    aria-hidden="true"
+  >
+    {{ initials() }}
+  </span>
+
+  <div class="flex min-w-0 flex-1 flex-col gap-2">
+    <div class="min-w-0">
+      <p class="m-0 truncate text-base font-semibold leading-tight">{{ displayName() }}</p>
+      @if (user().phone) {
+        <p class="m-0 mt-0.5 flex items-center gap-1.5 truncate text-sm text-muted-color">
+          <i class="pi pi-phone text-xs" aria-hidden="true"></i>
+          <span class="truncate">{{ user().phone }}</span>
+        </p>
+      }
+    </div>
+
+    <div class="flex flex-wrap gap-1.5">
+      @for (role of user().roles; track role.id) {
+        <span class="rounded-full bg-primary-50 px-2.5 py-0.5 text-xs font-medium text-primary dark:bg-primary-500/10">{{ role.name }}</span>
+      }
+      @if (!user().active) {
+        <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">Inactivo</span>
+      }
+      @if (!user().passwordSet) {
+        <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+          Sin contraseña
+        </span>
+      }
+    </div>
+  </div>
+
+  <app-icon-button icon="pi-eye" [tooltip]="detailTooltip()" (clicked)="detailRequested.emit(user())" />
+
+  <ng-container *appHasPermission="writePermissions">
+    <app-icon-button icon="pi-key" [tooltip]="resetTooltip()" [disabled]="busy()" (clicked)="resetRequested.emit(user())" />
+  </ng-container>
+</article>

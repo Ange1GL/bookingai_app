@@ -1,11 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CreatePasswordRequestDto } from '../../models/create-password-request.dto';
 import { CreatePasswordFormComponent } from './create-password-form.component';
 
 interface FormAccess {
   form: {
-    controls: Record<'username' | 'code' | 'newPassword' | 'confirmPassword', { setValue(value: string): void }>;
-    valid: boolean;
+    controls: Record<'newPassword' | 'confirmPassword', { setValue(value: string): void }>;
     hasError(error: string): boolean;
   };
   submit(): void;
@@ -14,29 +12,20 @@ interface FormAccess {
 describe('CreatePasswordFormComponent', () => {
   let fixture: ComponentFixture<CreatePasswordFormComponent>;
   let component: FormAccess;
-  let emitted: CreatePasswordRequestDto[];
+  let emitted: string[];
 
   beforeEach(() => {
     TestBed.configureTestingModule({ imports: [CreatePasswordFormComponent] });
     fixture = TestBed.createComponent(CreatePasswordFormComponent);
     emitted = [];
-    fixture.componentInstance.submitted.subscribe((request) => emitted.push(request));
+    fixture.componentInstance.submitted.subscribe((password) => emitted.push(password));
     component = fixture.componentInstance as unknown as FormAccess;
     fixture.detectChanges();
   });
 
-  function fill(values: Partial<Record<'username' | 'code' | 'newPassword' | 'confirmPassword', string>>): void {
-    const complete = {
-      username: 'maria.lopez',
-      code: '483920',
-      newPassword: 'Mi-clave-2026',
-      confirmPassword: 'Mi-clave-2026',
-      ...values,
-    };
-    component.form.controls.username.setValue(complete.username);
-    component.form.controls.code.setValue(complete.code);
-    component.form.controls.newPassword.setValue(complete.newPassword);
-    component.form.controls.confirmPassword.setValue(complete.confirmPassword);
+  function fill(newPassword: string, confirmPassword: string): void {
+    component.form.controls.newPassword.setValue(newPassword);
+    component.form.controls.confirmPassword.setValue(confirmPassword);
   }
 
   it('does not emit while the form is empty', () => {
@@ -45,25 +34,16 @@ describe('CreatePasswordFormComponent', () => {
     expect(emitted).toEqual([]);
   });
 
-  it('emits username, code and password (without the confirmation) when valid', () => {
-    fill({});
+  it('emits only the password (never the confirmation) when valid', () => {
+    fill('Mi-clave-2026', 'Mi-clave-2026');
 
     component.submit();
 
-    expect(emitted).toEqual([{ username: 'maria.lopez', code: '483920', newPassword: 'Mi-clave-2026' }]);
-  });
-
-  it('rejects a code that is not exactly six digits', () => {
-    fill({ code: '1234' });
-    component.submit();
-    fill({ code: '12345a' });
-    component.submit();
-
-    expect(emitted).toEqual([]);
+    expect(emitted).toEqual(['Mi-clave-2026']);
   });
 
   it('rejects passwords that do not match', () => {
-    fill({ confirmPassword: 'Otra-clave-2026' });
+    fill('Mi-clave-2026', 'Otra-clave-2026');
 
     expect(component.form.hasError('fieldsMismatch')).toBe(true);
     component.submit();
@@ -71,18 +51,28 @@ describe('CreatePasswordFormComponent', () => {
   });
 
   it('rejects a password that breaks the policy', () => {
-    fill({ newPassword: 'corta1', confirmPassword: 'corta1' });
+    fill('corta1', 'corta1');
 
     component.submit();
 
     expect(emitted).toEqual([]);
   });
 
-  it('rejects usernames with spaces', () => {
-    fill({ username: 'maria lopez' });
+  it('does not emit while a request is in flight', () => {
+    fixture.componentRef.setInput('loading', true);
+    fill('Mi-clave-2026', 'Mi-clave-2026');
 
     component.submit();
 
     expect(emitted).toEqual([]);
+  });
+
+  it('emits back when the user returns to step 1', () => {
+    let backs = 0;
+    fixture.componentInstance.back.subscribe(() => backs++);
+
+    fixture.componentInstance.back.emit();
+
+    expect(backs).toBe(1);
   });
 });
