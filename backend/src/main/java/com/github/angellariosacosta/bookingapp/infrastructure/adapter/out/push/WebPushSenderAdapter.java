@@ -2,6 +2,7 @@ package com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.push;
 
 import java.security.GeneralSecurityException;
 import java.security.Security;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpResponse;
@@ -33,6 +34,8 @@ public class WebPushSenderAdapter implements WebPushSenderPort {
 	private static final int SEND_TIMEOUT_SECONDS = 10;
 	private static final int STATUS_GONE = 410;
 	private static final int STATUS_NOT_FOUND = 404;
+	private static final String CLICK_OPERATION = "navigateLastFocusedOrOpen";
+	private static final String ICON_PATH = "/icons/icon-192.png";
 
 	private final PushService pushService;
 	private final JsonMapper jsonMapper;
@@ -57,7 +60,7 @@ public class WebPushSenderAdapter implements WebPushSenderPort {
 					.endpoint(subscription.endpoint())
 					.userPublicKey(subscription.p256dh())
 					.userAuth(subscription.auth())
-					.payload(jsonMapper.writeValueAsBytes(message))
+					.payload(jsonMapper.writeValueAsBytes(toPayload(message)))
 					.ttl(TTL_SECONDS)
 					.urgency(Urgency.HIGH)
 					.build();
@@ -72,6 +75,22 @@ public class WebPushSenderAdapter implements WebPushSenderPort {
 			log.error("Fallo al enviar la push: {}", ex.getClass().getSimpleName());
 			return PushDeliveryStatus.FAILED;
 		}
+	}
+
+	/**
+	 * Formato que entiende el service worker de Angular (@angular/service-worker): él muestra la notificación y,
+	 * al tocarla, enfoca o abre la web en {@code url}. Sin esta envoltura {@code notification} no mostraría nada.
+	 */
+	static Payload toPayload(PushMessage message) {
+		Map<String, Object> onClick = Map.of("default", Map.of("operation", CLICK_OPERATION, "url", message.url()));
+		return new Payload(new NotificationPayload(message.title(), message.body(), message.tag(), ICON_PATH,
+				Map.of("onActionClick", onClick)));
+	}
+
+	record Payload(NotificationPayload notification) {
+	}
+
+	record NotificationPayload(String title, String body, String tag, String icon, Map<String, Object> data) {
 	}
 
 	private static PushDeliveryStatus toStatus(int httpStatus) {

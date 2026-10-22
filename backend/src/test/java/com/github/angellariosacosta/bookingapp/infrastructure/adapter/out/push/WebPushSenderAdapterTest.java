@@ -79,6 +79,19 @@ class WebPushSenderAdapterTest {
 	}
 
 	@Test
+	@DisplayName("el contenido usa el formato del service worker de Angular, con la ruta a abrir al tocarla")
+	void payloadMatchesAngularServiceWorkerFormat() throws Exception {
+		String json = JsonMapper.builder().build().writeValueAsString(WebPushSenderAdapter.toPayload(MESSAGE));
+
+		var notification = JsonMapper.builder().build().readTree(json).get("notification");
+		assertEquals("En 5 min: Juan", notification.get("title").asString());
+		assertEquals("appointment-1", notification.get("tag").asString());
+		var click = notification.get("data").get("onActionClick").get("default");
+		assertEquals("navigateLastFocusedOrOpen", click.get("operation").asString());
+		assertEquals("/appointments", click.get("url").asString());
+	}
+
+	@Test
 	@DisplayName("404 y 410 significan que el dispositivo ya no existe")
 	void goneStatuses() throws Exception {
 		WebPushSenderAdapter adapter = adapter();
