@@ -21,12 +21,36 @@
       <p class="m-0 text-sm">Disfruta tu tiempo libre.</p>
     </div>
   } @else {
-    <ul class="m-0 flex list-none flex-col gap-2 p-0">
-      @for (appointment of appointments(); track appointment.id) {
-        <li>
-          <app-appointment-card [appointment]="appointment" (selected)="selected.emit($event)" />
-        </li>
-      }
-    </ul>
+    @for (section of sections(); track section.id) {
+      <div class="flex flex-col gap-2" [attr.data-section]="section.id">
+        @if (section.collapsible) {
+          <button
+            type="button"
+            class="flex min-h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-transparent px-1 text-left text-sm font-semibold text-muted-color"
+            [attr.aria-expanded]="finishedOpen()"
+            [attr.aria-controls]="finishedOpen() ? 'agenda-' + section.id : null"
+            (click)="toggleFinished()"
+          >
+            <span>{{ section.title }} ({{ section.appointments.length }})</span>
+            <i class="pi text-xs" [class]="finishedOpen() ? 'pi-chevron-up' : 'pi-chevron-down'" aria-hidden="true"></i>
+          </button>
+        } @else if (section.showHeader) {
+          <h3 class="m-0 flex items-baseline justify-between px-1 text-sm font-semibold text-muted-color">
+            {{ section.title }}
+            <span class="font-normal">{{ section.appointments.length }}</span>
+          </h3>
+        }
+
+        @if (isOpen(section)) {
+          <ul class="m-0 flex list-none flex-col gap-2 p-0" [id]="'agenda-' + section.id">
+            @for (appointment of section.appointments; track appointment.id) {
+              <li>
+                <app-appointment-card [appointment]="appointment" (selected)="selected.emit($event)" />
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
   }
 </section>
