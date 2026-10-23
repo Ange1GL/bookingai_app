@@ -1,6 +1,7 @@
 <button
   type="button"
   class="flex min-h-16 w-full cursor-pointer items-stretch gap-3 rounded-2xl border border-surface bg-surface-0 p-3 text-left shadow-sm transition active:scale-[0.99] dark:bg-surface-900"
+  [class.opacity-70]="appointment().status === 'finished'"
   [attr.aria-label]="ariaLabel()"
   (click)="selected.emit(appointment())"
 >

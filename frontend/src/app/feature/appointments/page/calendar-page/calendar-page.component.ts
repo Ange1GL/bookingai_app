@@ -27,6 +27,8 @@ import {
 } from '../../utils/calendar-date.util';
 import { formatLongDay, formatPeriodTitle, formatTime } from '../../utils/calendar-format.util';
 
+/** Statuses are derived from the clock, so they are re-derived every minute (a visit can stay open for hours). */
+const CLOCK_REFRESH_MS = 60_000;
 const SWIPE_MIN_DISTANCE_PX = 60;
 const SWIPE_MAX_VERTICAL_DRIFT_PX = 50;
 
@@ -71,6 +73,7 @@ export class CalendarPageComponent {
   protected readonly detail = signal<CalendarAppointment | null>(null);
   protected readonly detailVisible = signal(false);
 
+  private readonly now = signal(new Date());
   private swipeStart: { x: number; y: number } | null = null;
 
   /** Only changes when the visible period changes, so picking a day inside it never refetches. */
@@ -83,6 +86,8 @@ export class CalendarPageComponent {
 
   constructor() {
     this.openFormFromLink();
+    const clock = setInterval(() => this.now.set(new Date()), CLOCK_REFRESH_MS);
+    this.destroyRef.onDestroy(() => clearInterval(clock));
   }
 
   protected readonly loading = this.resource.isLoading;
@@ -93,7 +98,7 @@ export class CalendarPageComponent {
   protected readonly weekDays = computed(() => buildWeek(this.selectedDate()));
 
   protected readonly groups = computed(() => {
-    const now = new Date();
+    const now = this.now();
     return groupByDay((this.resource.value() ?? []).map((dto) => toCalendarAppointment(dto, now)));
   });
   protected readonly dayAppointments = computed(() => this.groups().get(dateKey(this.selectedDate())) ?? []);
