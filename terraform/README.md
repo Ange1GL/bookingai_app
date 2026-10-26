@@ -29,7 +29,7 @@ terraform destroy
 |---|---|---|
 | 0 | [Preparación y ciclo de Terraform](docs/00-preparacion.md) | Lista |
 | 1 | [S3 privado](docs/01-s3-privado.md) | Lista |
-| 2 | CloudFront + OAC | Pendiente |
+| 2 | [CloudFront + OAC](docs/02-cloudfront-oac.md) | Lista |
 | 3 | Red y security groups | Pendiente |
 | 4 | Secretos en SSM | Pendiente |
 | 5 | ECS Fargate + Cloud Map + logs | Pendiente |

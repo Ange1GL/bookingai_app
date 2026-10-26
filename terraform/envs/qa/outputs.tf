@@ -11,6 +11,16 @@ output "front_bucket_name" {
 }
 
 output "front_bucket_arn" {
-  description = "ARN del bucket (lo usará la política de CloudFront en la lección 2)."
+  description = "ARN del bucket."
   value       = aws_s3_bucket.front.arn
+}
+
+output "front_distribution_id" {
+  description = "Id de la distribución (sirve para invalidar caché en los despliegues)."
+  value       = aws_cloudfront_distribution.front.id
+}
+
+output "front_url" {
+  description = "URL pública del front."
+  value       = "https://${aws_cloudfront_distribution.front.domain_name}"
 }

@@ -9,6 +9,8 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
 
 ## Estructura
 - `envs/qa/`: root module que se ejecuta (`versions.tf`, `providers.tf`, `variables.tf`, `main.tf`, `outputs.tf`).
+  Cada bloque de la arquitectura vive en su propio archivo: `main.tf` (S3), `cloudfront.tf` (CloudFront + OAC).
+- `envs/qa/site/`: página de prueba que se sube al bucket (hasta que se despliegue el build de Angular).
 - `modules/`: módulos reutilizables (se introducen en la lección 7).
 - `docs/`: una lección por archivo (concepto, código, comandos, qué observar).
 
