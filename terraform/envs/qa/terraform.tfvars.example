@@ -1,0 +1,5 @@
+# Copia este archivo a terraform.tfvars (ignorado por git) y ajusta.
+# Terraform lo lee automáticamente.
+
+# Para el tutorial: permite destruir el bucket aunque tenga archivos.
+front_force_destroy = true

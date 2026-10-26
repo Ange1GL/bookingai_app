@@ -1,0 +1,17 @@
+# State: contiene datos reales de tu cuenta (a veces secretos). Nunca va a git.
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Providers descargados por `terraform init`
+.terraform/
+
+# Valores reales de variables (pueden contener secretos). El .example sí se versiona.
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Planes guardados con -out
+*.tfplan
+
+# El lock file SÍ se versiona (.terraform.lock.hcl): fija las versiones de providers.
