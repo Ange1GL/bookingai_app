@@ -48,6 +48,8 @@ public class TranscribeVoiceService implements TranscribeVoiceUseCase {
 	public VoiceTranscriptionResult transcribe(TranscribeVoiceCommand command) {
 		VoiceAudioFormat format = validatedFormat(command);
 		LocalDate today = LocalDate.now(clock);
+		//Casi. LocalDate.now(clock) obtiene la fecha de hoy a partir de un Clock inyectado, y es ese Clock el que define la zona horaria.
+
 		consumeQuota(command.userId(), today);
 
 		String text = callProvider(command, format, today).strip();

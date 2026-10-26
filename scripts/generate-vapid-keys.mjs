@@ -13,7 +13,9 @@ function toBase64Url(buffer) {
 const ecdh = createECDH(CURVE)
 ecdh.generateKeys()
 
+
+const correoAdmin = "lariosacostaa@gmail.com"
 console.log('# Claves VAPID — guárdalas como secretos; la privada no se comparte ni se commitea.')
 console.log(`VAPID_PUBLIC_KEY=${toBase64Url(ecdh.getPublicKey())}`)
 console.log(`VAPID_PRIVATE_KEY=${toBase64Url(ecdh.getPrivateKey())}`)
-console.log('VAPID_SUBJECT=mailto:tu-correo@ejemplo.com')
+console.log(`VAPID_SUBJECT=mailto:${correoAdmin}`)
