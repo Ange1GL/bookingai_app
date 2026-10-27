@@ -15,16 +15,23 @@ servicios, logs, permisos y el servicio que mantiene la tarea viva. El código e
                               Cloud Map  api.aglacita-tf.local  (lo consume API Gateway en la lección 6)
 ```
 
-## El orden importa: Terraform crea, tú subes la imagen
+## Desplegar la API en 4 pasos
 
-Terraform crea el repositorio ECR **vacío**. Si el servicio pidiera una tarea sin imagen, ECS fallaría y
-reintentaría sin parar. Por eso `api_desired_count` vale `0` por defecto: el servicio y todo lo demás
-existen, pero no arranca ninguna tarea. Cuando la imagen y los secretos reales estén listos, lo subes a `1`.
+```bash
+cd terraform/envs/qa && terraform apply                  # 1. crea todo (0 tareas, repositorio ECR vacío)
+node ../../scripts/deploy-api.mjs                        # 2. construye y sube la imagen (necesita Docker abierto)
+node ../../scripts/load-ssm-from-env.mjs --apply         # 3. carga los secretos reales (lección 4)
+```
 
-1. `terraform apply` → infraestructura creada, 0 tareas.
-2. Construyes y subes la imagen a ECR.
-3. Cargas los secretos reales (script de la lección 4).
-4. `api_desired_count = 1` y `api_image_tag = "<etiqueta>"` → `terraform apply` → la tarea arranca.
+4. El paso 2 imprime dos líneas; pégalas en `terraform.tfvars` y repite `terraform apply`:
+
+```hcl
+api_image_tag     = "<hash del commit>"
+api_desired_count = 1
+```
+
+¿Por qué `desired_count = 0` al inicio? El repositorio nace vacío: una tarea sin imagen ni secretos reales
+fallaría y ECS reintentaría sin parar.
 
 ## Conceptos de Terraform
 
