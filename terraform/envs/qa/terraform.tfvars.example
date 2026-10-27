@@ -3,3 +3,9 @@
 
 # Para el tutorial: permite destruir el bucket aunque tenga archivos.
 front_force_destroy = true
+
+# Acceso directo temporal a la API desde tus IPs (solo para depurar; nunca 0.0.0.0/0).
+# api_debug_cidrs = ["203.0.113.7/32"]
+
+# Vacía el SG `default` de la VPC compartida. Verifica antes que nada lo use (lección 3).
+# harden_default_sg = true
