@@ -19,10 +19,14 @@ const show = (cmd, args, options = {}) =>
 
 function imageExists(repositoryName, tag) {
   try {
-    run('aws', ['ecr', 'describe-images', '--region', REGION, '--repository-name', repositoryName, '--image-ids', `imageTag=${tag}`])
+    run('aws', ['ecr', 'describe-images', '--region', REGION, '--repository-name', repositoryName, '--image-ids', `imageTag=${tag}`], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
     return true
-  } catch {
-    return false
+  } catch (error) {
+    // "No existe" es una respuesta normal; cualquier otro fallo (permisos, red) sí debe verse.
+    if (String(error.stderr).includes('ImageNotFoundException')) return false
+    throw error
   }
 }
 
