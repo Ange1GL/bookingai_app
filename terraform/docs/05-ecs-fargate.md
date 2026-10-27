@@ -85,7 +85,7 @@ Genera el JSON de una política desde bloques HCL (`statement`, `actions`, `reso
 | `aws_iam_role` + attachment + política en línea | Rol de ejecución: baja la imagen, escribe logs, lee los 10 parámetros. |
 | `aws_service_discovery_private_dns_namespace` + `_service` | `aglacita-tf.local` y su servicio `api` (registros SRV, TTL 15). |
 | `aws_ecs_cluster` | Contenedor lógico, sin Container Insights (tiene costo). |
-| `aws_ecs_task_definition` | Receta: 1 vCPU, 2 GB, imagen, secretos, logs, health check. |
+| `aws_ecs_task_definition` | Receta: 0,25 vCPU, 512 MB (mínimo de Fargate), imagen, secretos, logs, health check. |
 | `aws_ecs_service` | Mantiene `desired_count` tareas; circuit breaker; se registra en Cloud Map. |
 
 ## Decisiones de seguridad y por qué
@@ -314,11 +314,31 @@ Solo cambia la definición de tarea (nueva revisión) y el `desired_count` del s
 6. Sube `api_image_tag` a una etiqueta que **no existe** y mira cómo el circuit breaker marca el despliegue
    como fallido y conserva la revisión que funcionaba.
 
-## Costo
+## Costo y tamaño de la tarea
 
 Con la tarea apagada (`desired_count = 0`) el costo es casi cero: ECR, logs y Cloud Map cobran por uso
-mínimo. Encendida (1 vCPU, 2 GB, IP pública) son unos **~40 USD/mes** (~1,3 USD/día); la palanca principal
-es volver a `0` cuando QA no se use. Los costos de ECR y de Cloud Map no se midieron.
+mínimo. Los costos de ECR y de Cloud Map no se midieron.
+
+Encendida, el costo depende del tamaño (24/7, tarifas del documento de arquitectura, más ~3,65 USD de IP pública):
+
+| CPU | Memoria | Aprox. al mes |
+|---|---|---|
+| 0,25 vCPU | 512 MB (**por defecto**, el mínimo) | ~9 USD |
+| 0,5 vCPU | 1 GB | ~18 USD |
+| 1 vCPU | 2 GB (el QA manual) | ~36 USD |
+
+El mínimo es arriesgado para Spring Boot: el `Dockerfile` reserva el 75 % de la memoria para el heap
+(~384 MB) y con 0,25 vCPU el arranque puede tardar minutos. Por eso `api_start_period_seconds` vale 240.
+Señales de que se queda corto: la tarea muere con `OutOfMemoryError` en los logs o el health check falla
+durante el arranque. En ese caso súbelo en `terraform.tfvars` y haz `apply` (crea una revisión nueva):
+
+```hcl
+api_cpu    = 512
+api_memory = 1024
+```
+
+`api_memory` valida la combinación con `api_cpu` en el `plan`, así que una pareja que Fargate no admite
+falla antes de tocar AWS. La palanca mayor sigue siendo volver a `desired_count = 0` cuando QA no se use.
 
 ## Limpiar
 
@@ -333,8 +353,8 @@ con imágenes. Si prefieres apagar sin destruir: `api_desired_count = 0` y `terr
 
 1. Cambia `api_cpu`/`api_memory` a `512`/`1024`. ¿Qué recursos reemplaza el `plan`? (Pista: una revisión nueva
    de la definición de tarea y la actualización del servicio; no se destruye el clúster.)
-2. Pon `api_memory = 3000` con `api_cpu = 1024`. Fargate solo admite ciertas combinaciones: ¿en qué momento
-   falla, en `plan` o en `apply`? ¿Cómo lo moverías a una `validation`?
+2. Pon `api_memory = 3000` con `api_cpu = 1024`. ¿En qué momento falla y por qué? (Mira la `validation` de
+   `api_memory`: una variable puede leer a otra.)
 3. Fargate Spot es ~70 % más barato. Investiga `aws_ecs_cluster_capacity_providers` y
    `capacity_provider_strategy`, y cambia `launch_type` por una estrategia con `FARGATE_SPOT`. ¿Qué pasa
    con la tarea si AWS recupera la capacidad?

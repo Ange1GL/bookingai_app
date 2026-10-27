@@ -90,9 +90,9 @@ variable "api_desired_count" {
 }
 
 variable "api_cpu" {
-  description = "Unidades de CPU de la tarea Fargate (1024 = 1 vCPU)."
+  description = "Unidades de CPU de la tarea Fargate (1024 = 1 vCPU). 256 es el mínimo de Fargate."
   type        = number
-  default     = 1024
+  default     = 256
 
   validation {
     condition     = contains([256, 512, 1024, 2048, 4096], var.api_cpu)
@@ -101,9 +101,21 @@ variable "api_cpu" {
 }
 
 variable "api_memory" {
-  description = "Memoria de la tarea Fargate en MiB. Debe ser una combinación válida con api_cpu."
+  description = "Memoria de la tarea Fargate en MiB. 512 es el mínimo de Fargate; debe ser una combinación válida con api_cpu."
   type        = number
-  default     = 2048
+  default     = 512
+
+  # Combinaciones que admite Fargate (Linux) para cada CPU.
+  validation {
+    condition = contains(lookup({
+      256  = [512, 1024, 2048]
+      512  = [1024, 2048, 3072, 4096]
+      1024 = [2048, 3072, 4096, 5120, 6144, 7168, 8192]
+      2048 = [for gb in range(4, 17) : gb * 1024]
+      4096 = [for gb in range(8, 31) : gb * 1024]
+    }, var.api_cpu, []), var.api_memory)
+    error_message = "api_memory: combinación no válida con api_cpu en Fargate (p. ej. 256 de CPU admite 512, 1024 o 2048 MiB)."
+  }
 }
 
 variable "api_container_healthcheck" {
@@ -115,7 +127,7 @@ variable "api_container_healthcheck" {
 variable "api_start_period_seconds" {
   description = "Segundos de gracia tras arrancar el contenedor durante los cuales los fallos del health check no cuentan. Spring Boot tarda en iniciar."
   type        = number
-  default     = 90
+  default     = 240 # 0,25 vCPU arranca Spring Boot despacio
 
   validation {
     condition     = var.api_start_period_seconds >= 0 && var.api_start_period_seconds <= 300
