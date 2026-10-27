@@ -40,6 +40,11 @@ output "api_security_group_id" {
   value       = aws_security_group.api.id
 }
 
+output "ssm_parameter_path" {
+  description = "Ruta de los parámetros de la API (el rol de ECS leerá solo esta ruta)."
+  value       = local.ssm_path
+}
+
 output "front_url" {
   description = "URL pública del front."
   value       = "https://${aws_cloudfront_distribution.front.domain_name}"

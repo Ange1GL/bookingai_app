@@ -8,7 +8,8 @@ Plan completo: [`../.plans/terraform-aglacita-qa.md`](../.plans/terraform-aglaci
 
 ## Requisitos
 
-- Terraform >= 1.9 (`terraform version`)
+- Terraform >= 1.11 (`terraform version`)
+- Node.js (para `scripts/load-ssm-from-env.mjs`, que carga los secretos en SSM)
 - AWS CLI v2 con credenciales válidas (`aws sts get-caller-identity`)
 - Una cuenta de AWS; el entorno completo cuesta ~40 USD/mes encendido (consulta `destroy` al terminar)
 
@@ -31,7 +32,7 @@ terraform destroy
 | 1 | [S3 privado](docs/01-s3-privado.md) | Lista |
 | 2 | [CloudFront + OAC](docs/02-cloudfront-oac.md) | Lista |
 | 3 | [Red y security groups](docs/03-red-security-groups.md) | Lista |
-| 4 | Secretos en SSM | Pendiente |
+| 4 | [Secretos en SSM](docs/04-secretos-ssm.md) | Lista |
 | 5 | ECS Fargate + Cloud Map + logs | Pendiente |
 | 6 | API Gateway + VPC Link | Pendiente |
 | 7 | Módulos, remote state e import | Pendiente |

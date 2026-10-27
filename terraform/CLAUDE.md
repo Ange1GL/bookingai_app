@@ -10,7 +10,9 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
 ## Estructura
 - `envs/qa/`: root module que se ejecuta (`versions.tf`, `providers.tf`, `variables.tf`, `main.tf`, `outputs.tf`).
   Cada bloque de la arquitectura vive en su propio archivo: `main.tf` (S3), `cloudfront.tf` (CloudFront + OAC),
-  `network.tf` (VPC default y subredes como `data`), `security_groups.tf` (`vpclink-sg`, `api-sg`).
+  `network.tf` (VPC default y subredes como `data`), `security_groups.tf` (`vpclink-sg`, `api-sg`),
+  `ssm.tf` (parámetros `/aglacita-tf/qa/*`).
+- `scripts/`: utilidades Node `.mjs`. `load-ssm-from-env.mjs` carga los secretos reales en SSM (simulacro por defecto, `--apply` escribe).
 - `envs/qa/site/`: página de prueba que se sube al bucket (hasta que se despliegue el build de Angular).
 - `modules/`: módulos reutilizables (se introducen en la lección 7).
 - `docs/`: una lección por archivo (concepto, código, comandos, qué observar).
@@ -24,6 +26,7 @@ Desde `envs/qa/`: `terraform fmt`, `init`, `validate`, `plan`, `apply`, `destroy
 - Sin secretos en `.tf`; `*.tfstate` y `*.tfvars` fuera de git; `.terraform.lock.hcl` sí se versiona.
 - La VPC default es compartida con el QA manual: se lee con `data`, nunca se modifica el SG `default` salvo con `harden_default_sg`.
 - Las reglas de security group son recursos `aws_vpc_security_group_*_rule` (uno por regla), no bloques inline.
+- Los secretos reales NUNCA pasan por Terraform: los parámetros SecureString usan `value_wo` (relleno `CHANGE_ME`, no queda en el state) y el valor se carga con el script. Requiere Terraform >= 1.11.
 - Los recursos S3 se declaran como recursos separados (patrón del provider v4+).
 - Scripts auxiliares en Node `.mjs`, no shell.
 - Comentarios de los `.tf` en español y explican el porqué, por ser material didáctico.
