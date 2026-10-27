@@ -45,6 +45,31 @@ output "ssm_parameter_path" {
   value       = local.ssm_path
 }
 
+output "ecr_repository_url" {
+  description = "Repositorio ECR donde subes la imagen de la API."
+  value       = aws_ecr_repository.api.repository_url
+}
+
+output "ecs_cluster_name" {
+  description = "Clúster ECS de la API."
+  value       = aws_ecs_cluster.main.name
+}
+
+output "ecs_service_name" {
+  description = "Servicio ECS de la API."
+  value       = aws_ecs_service.api.name
+}
+
+output "api_log_group" {
+  description = "Grupo de CloudWatch con los logs de la API."
+  value       = aws_cloudwatch_log_group.api.name
+}
+
+output "cloud_map_service_arn" {
+  description = "Servicio de Cloud Map donde se registra la API (lo consumirá API Gateway)."
+  value       = aws_service_discovery_service.api.arn
+}
+
 output "front_url" {
   description = "URL pública del front."
   value       = "https://${aws_cloudfront_distribution.front.domain_name}"

@@ -7,5 +7,15 @@ front_force_destroy = true
 # Acceso directo temporal a la API desde tus IPs (solo para depurar; nunca 0.0.0.0/0).
 # api_debug_cidrs = ["203.0.113.7/32"]
 
+# Para el tutorial: permite destruir el repositorio ECR aunque tenga imágenes.
+ecr_force_delete = true
+
+# Etiqueta de la imagen subida a ECR (el repositorio es inmutable: una etiqueta por despliegue).
+# api_image_tag = "abc1234"
+
+# 0 = el servicio existe pero no arranca tareas. Súbelo a 1 tras subir la imagen
+# y cargar los secretos reales (lección 5).
+# api_desired_count = 1
+
 # Vacía el SG `default` de la VPC compartida. Verifica antes que nada lo use (lección 3).
 # harden_default_sg = true
