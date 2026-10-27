@@ -156,7 +156,10 @@ adjúntala a `angel`:
 				"logs:PutRetentionPolicy",
 				"logs:TagResource",
 				"logs:UntagResource",
-				"logs:ListTagsForResource"
+				"logs:ListTagsForResource",
+				"logs:TagLogGroup",
+				"logs:UntagLogGroup",
+				"logs:ListTagsLogGroup"
 			],
 			"Resource": "arn:aws:logs:*:*:log-group:/ecs/aglacita-tf-*"
 		},
@@ -221,7 +224,10 @@ adjúntala a `angel`:
 				"ecs:ListTasks",
 				"ecs:DescribeTasks",
 				"ecs:RegisterTaskDefinition",
-				"ecs:DeregisterTaskDefinition"
+				"ecs:DeregisterTaskDefinition",
+				"ecs:DeleteTaskDefinitions",
+				"ecs:ListTaskDefinitions",
+				"ecs:ListServices"
 			],
 			"Resource": "*"
 		},
