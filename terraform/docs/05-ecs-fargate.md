@@ -206,7 +206,8 @@ adjúntala a `angel`:
 			],
 			"Resource": [
 				"arn:aws:ecs:*:*:cluster/aglacita-tf-*",
-				"arn:aws:ecs:*:*:service/aglacita-tf-*/*"
+				"arn:aws:ecs:*:*:service/aglacita-tf-*/*",
+				"arn:aws:ecs:*:*:task-definition/aglacita-tf-*:*"
 			]
 		},
 		{
