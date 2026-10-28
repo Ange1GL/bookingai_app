@@ -76,7 +76,9 @@ function deploy() {
       run('docker', ['login', '--username', 'AWS', '--password-stdin', registry], { input: password })
     })
     step('Falló docker build. ¿Está Docker abierto? Revisa el error de arriba.', () =>
-      show('docker', ['build', '--platform', 'linux/amd64', '-t', image, '.'], { cwd: BACKEND_DIR }),
+      // Sin atestaciones: con ellas Docker Desktop genera un índice de manifiestos y empuja dos
+      // veces la misma etiqueta, y ECR (inmutable) rechaza la segunda aunque la imagen ya esté subida.
+      show('docker', ['build', '--platform', 'linux/amd64', '--provenance=false', '--sbom=false', '-t', image, '.'], { cwd: BACKEND_DIR }),
     )
     step('Falló docker push. Revisa el error de arriba.', () => show('docker', ['push', image]))
   }
