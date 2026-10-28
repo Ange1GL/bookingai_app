@@ -17,7 +17,7 @@ manual. Este plan los alinea con lo que Terraform creó (`aglacita-tf-qa-*`). Es
 | `secrets[].valueFrom` | `parameter/DB_URL`, etc. | `parameter/aglacita-tf/qa/DB_URL`, etc. |
 | `environment` | `HOST_CORS`, `SPRING_PROFILES_ACTIVE` fijos | vacío: ambos ya viven en SSM (`/aglacita-tf/qa/HOST_CORS` sale del dominio de CloudFront) |
 | `logConfiguration` | grupo `/ecs/aglacita-task-qa-useast`, `awslogs-create-group` | grupo `/ecs/aglacita-tf-qa-api`, prefijo `api`, **sin** `create-group` (lo crea Terraform con retención) |
-| `healthCheck` | no tiene | `curl` a `/actuator/health`, `startPeriod` 240 s, como en `ecs.tf` |
+| `healthCheck` | no tiene | **ninguno por ahora**: la imagen no trae `curl` y el health check de `ecs.tf` está apagado (`api_container_healthcheck = false`). Al instalar `curl` en el Dockerfile, vuelve a activarse en los dos sitios |
 | `portMappings` | con `name` y `appProtocol` | solo `containerPort: 8082`, como en Terraform |
 
 Secretos: se añade `WHATSAPP_VERIFY_TOKEN` (la app lo exige y el JSON manual no lo tenía) y `HOST_CORS`.
