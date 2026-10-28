@@ -31,6 +31,7 @@ Desde `envs/qa/`: `terraform fmt`, `init`, `validate`, `plan`, `apply`, `destroy
 - La VPC default es compartida con el QA manual: se lee con `data`, nunca se modifica el SG `default` salvo con `harden_default_sg`.
 - Las reglas de security group son recursos `aws_vpc_security_group_*_rule` (uno por regla), no bloques inline.
 - Los secretos reales NUNCA pasan por Terraform: los parámetros SecureString usan `value_wo` (relleno `CHANGE_ME`, no queda en el state) y el valor se carga con el script. Requiere Terraform >= 1.11.
+- `aws_ecs_service.api` ignora `task_definition` (`lifecycle.ignore_changes`): el CI despliega las revisiones. Un cambio en `ecs.tf`/`ssm.tf` exige reflejarlo en `.aws/task-definition-backend.json` y desplegar con el CI.
 - El servicio ECS arranca con `api_desired_count = 0`: se sube a 1 solo tras subir la imagen a ECR y cargar los secretos reales. ECR es inmutable (una etiqueta nueva por despliegue, `api_image_tag`).
 - La tarea no tiene rol de tarea (la API no llama a AWS); el rol de ejecución lee solo los ARN de los parámetros de la API.
 - Los recursos S3 se declaran como recursos separados (patrón del provider v4+).

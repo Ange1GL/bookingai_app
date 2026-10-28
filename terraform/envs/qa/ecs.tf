@@ -192,4 +192,13 @@ resource "aws_ecs_service" "api" {
     aws_iam_role_policy_attachment.api_execution_managed,
     aws_iam_role_policy.api_execution_ssm,
   ]
+
+  # El CI (GitHub Actions) registra revisiones nuevas de la tarea y actualiza el servicio.
+  # Sin esto, el siguiente `terraform apply` lo devolvería a la revisión que Terraform conoce.
+  # Consecuencia: un cambio en la definición de tarea (imagen, CPU, secretos...) ya NO llega al
+  # servicio por sí solo con `apply`: Terraform registra la revisión, pero el despliegue lo hace el CI
+  # (o `aws ecs update-service`). Mantén .aws/task-definition-backend.json sincronizado con este archivo.
+  lifecycle {
+    ignore_changes = [task_definition]
+  }
 }

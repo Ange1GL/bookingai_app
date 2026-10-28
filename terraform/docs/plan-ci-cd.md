@@ -2,7 +2,7 @@
 
 Hoy los dos workflows de GitHub Actions están **comentados por completo** y apuntan al QA manual
 (`aglacita-qa-*`). El JSON de la tarea (`.aws/task-definition-backend.json`) es una copia de la tarea
-manual. Este plan los alinea con lo que Terraform creó (`aglacita-tf-qa-*`). Estado: **paso 1 hecho** (JSON y variables de los workflows, aún comentados). El `ignore_changes` de A1 (paso 3) NO se aplicó: con él, `terraform apply` registraría la tarea con la imagen nueva pero el servicio seguiría en la revisión anterior (`:initial`, inexistente); solo debe añadirse cuando el CI sea quien despliega.
+manual. Este plan los alinea con lo que Terraform creó (`aglacita-tf-qa-*`). Estado: **paso 1 hecho** (JSON y variables de los workflows, aún comentados). El `ignore_changes` de A1 (paso 3) **ya está aplicado en `ecs.tf`**; antes NO lo estaba: con él, `terraform apply` registraría la tarea con la imagen nueva pero el servicio seguiría en la revisión anterior (`:initial`, inexistente); solo debe añadirse cuando el CI sea quien despliega.
 
 ## Qué cambia, archivo por archivo
 
