@@ -66,6 +66,7 @@ La ruta es `/aglacita-tf/qa/<NOMBRE>`, y el nombre coincide con la variable de `
 | `JWT_SECRET` | SecureString | **nuevo**, generado por el script (no se reutiliza el de desarrollo) |
 | `DEEPSEEK_API_KEY`, `API_OPENAI_KEY` | SecureString | copiados de `backend/.env` |
 | `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET` | SecureString | copiados de `backend/.env` |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `SYSTEM_USER_EMPLOYEE_META` | SecureString | copiados de `backend/.env`; **opcionales** (la app arranca sin ellos, pero sin las notificaciones push) |
 | `SPRING_PROFILES_ACTIVE` | String | `qa` |
 | `HOST_CORS` | String | `https://<dominio de CloudFront>` |
 
@@ -119,13 +120,13 @@ cd terraform/envs/qa
 terraform plan
 ```
 
-Esperado: `Plan: 10 to add, 0 to change, 0 to destroy.` (8 SecureString y 2 String).
+Esperado: `Plan: 14 to add, 0 to change, 0 to destroy.` (12 SecureString y 2 String).
 
 ```bash
 terraform apply     # escribe yes
 ```
 
-Los parámetros existen, pero los 8 secretos valen `CHANGE_ME`. **La app no debe usarlos todavía.**
+Los parámetros existen, pero los 12 secretos valen `CHANGE_ME`. **La app no debe usarlos todavía.**
 
 ### Cargar los valores reales
 

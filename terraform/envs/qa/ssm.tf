@@ -23,6 +23,16 @@ locals {
     "WHATSAPP_APP_SECRET",
   ])
 
+  # Opcionales (valor vacío por defecto en application.yaml): sin ellas la app arranca, pero las
+  # notificaciones push quedan desactivadas. Terraform no conoce sus valores, así que van como
+  # SecureString y las carga el mismo script que los secretos.
+  optional_secret_parameters = toset([
+    "VAPID_PUBLIC_KEY",
+    "VAPID_PRIVATE_KEY",
+    "VAPID_SUBJECT",
+    "SYSTEM_USER_EMPLOYEE_META",
+  ])
+
   # No son secretos y Terraform ya conoce su valor, así que los gestiona completos.
   # HOST_CORS sale del dominio de CloudFront (lección 2): sin copiar nada a mano.
   plain_parameters = {
@@ -34,7 +44,7 @@ locals {
 # `for_each` sobre un conjunto: un recurso por cada nombre, con la clave en el state
 # (aws_ssm_parameter.secret["JWT_SECRET"]).
 resource "aws_ssm_parameter" "secret" {
-  for_each = local.secret_parameters
+  for_each = setunion(local.secret_parameters, local.optional_secret_parameters)
 
   name        = "${local.ssm_path}/${each.key}"
   description = "Secreto ${each.key} de la API. Valor cargado fuera de Terraform."

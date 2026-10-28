@@ -24,7 +24,17 @@ const PLACEHOLDER_VERSION = 1 // versión de un parámetro que aún tiene el rel
 const JWT_SECRET_BYTES = 32 // HS256 exige >= 32 bytes decodificados
 
 // Se copian tal cual del .env: son credenciales de servicios externos, iguales en QA.
-const COPY_FROM_ENV = ['DEEPSEEK_API_KEY', 'API_OPENAI_KEY', 'WHATSAPP_VERIFY_TOKEN', 'WHATSAPP_APP_SECRET']
+const COPY_FROM_ENV = [
+  'DEEPSEEK_API_KEY',
+  'API_OPENAI_KEY',
+  'WHATSAPP_VERIFY_TOKEN',
+  'WHATSAPP_APP_SECRET',
+  // Opcionales en la app (notificaciones push y usuario de sistema), pero presentes en el .env.
+  'VAPID_PUBLIC_KEY',
+  'VAPID_PRIVATE_KEY',
+  'VAPID_SUBJECT',
+  'SYSTEM_USER_EMPLOYEE_META',
+]
 // Las variables DB_* activas del .env son de desarrollo (localhost) y no sirven en QA.
 // Se toman del bloque comentado "Base de datos qa"; si falta, se piden en la terminal.
 const FROM_QA_BLOCK = ['DB_URL', 'DB_USERNAME', 'DB_PASSWORD']
