@@ -5,6 +5,8 @@
 //   node scripts/load-ssm-from-env.mjs --apply    # escribe en AWS
 //
 // Opciones: --env-file <ruta>  (por defecto ../backend/.env)
+//           --qa-env-file <ruta> (por defecto ../backend/qa.env; si existe, sus DB_* tienen prioridad)
+//           --only <A,B,C>     (carga solo esos parámetros; p. ej. --only DB_URL,DB_USERNAME,DB_PASSWORD)
 //           --prefix <ruta>    (por defecto /aglacita-tf/qa)
 //           --force            (reescribe también los parámetros ya cargados)
 //
@@ -48,6 +50,8 @@ const option = (name, fallback) => (args.includes(name) ? args[args.indexOf(name
 const apply = flag('--apply')
 const force = flag('--force')
 const envFile = resolve(option('--env-file', join(ROOT, '..', 'backend', '.env')))
+const qaEnvFile = resolve(option('--qa-env-file', join(ROOT, '..', 'backend', 'qa.env')))
+const only = option('--only', '').split(',').filter(Boolean)
 const prefix = option('--prefix', '/aglacita-tf/qa')
 
 const unquote = (text) => text.trim().replace(/^(['"])(.*)\1$/, '$2')
@@ -140,13 +144,19 @@ function validate(key, value) {
 
 async function main() {
   const { values: env, qaValues } = parseEnv(envFile)
-  const keys = [...COPY_FROM_ENV, ...GENERATE, ...FROM_QA_BLOCK]
+  // Prioridad para DB_*: qa.env (variables activas) > bloque "qa" comentado del .env > pedir en terminal.
+  const qaFileValues = existsSync(qaEnvFile) ? parseEnv(qaEnvFile).values : {}
+  const allKeys = [...COPY_FROM_ENV, ...GENERATE, ...FROM_QA_BLOCK]
+  const unknown = only.filter((key) => !allKeys.includes(key))
+  if (unknown.length > 0) throw new Error(`--only: parámetros desconocidos: ${unknown.join(', ')}`)
+  const keys = only.length > 0 ? allKeys.filter((key) => only.includes(key)) : allKeys
   console.log(`${apply ? 'APLICANDO' : 'SIMULACRO'} sobre ${prefix}  (fuente: ${envFile})\n`)
 
   const describeSource = (key) => {
     if (COPY_FROM_ENV.includes(key)) return 'copiar del .env'
     if (GENERATE.includes(key)) return 'generar nuevo'
-    return qaValues[key] ? 'copiar del bloque "qa" del .env' : 'pedir en terminal (no está en el bloque "qa")'
+    if (qaFileValues[key]) return 'copiar de qa.env'
+    return qaValues[key] ? 'copiar del bloque "qa" del .env' : 'pedir en terminal (no está en qa.env ni en el bloque "qa")'
   }
 
   for (const key of keys) {
@@ -165,7 +175,7 @@ async function main() {
     let value
     if (COPY_FROM_ENV.includes(key)) value = env[key]
     else if (GENERATE.includes(key)) value = randomBytes(JWT_SECRET_BYTES).toString('base64')
-    else value = qaValues[key] ?? (await promptHidden(`  ${key} (QA)`))
+    else value = qaFileValues[key] ?? qaValues[key] ?? (await promptHidden(`  ${key} (QA)`))
 
     validate(key, value)
     putSecret(name, value)

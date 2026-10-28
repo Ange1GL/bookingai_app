@@ -141,6 +141,23 @@ menciona `qa` (`# Base de datos qa` seguido de `# DB_URL=...`). El script usa la
 de servicios externos y el bloque `qa` para la base de datos. Si una `DB_*` no está en ese bloque, te la
 pide en la terminal sin mostrarla. Rechaza un `DB_URL` que no sea `jdbc:` o que apunte a `localhost`.
 
+### Corregir la base de datos con `backend/qa.env`
+
+Si `DB_URL`, `DB_USERNAME` o `DB_PASSWORD` de QA estaban mal, crea `backend/qa.env` (ignorado por git) con las
+`DB_*` activas y recárgalas. Tienen prioridad sobre el bloque `qa` del `.env`, y `--only` evita regenerar el resto
+(`JWT_SECRET` incluido); `--force` reescribe aunque ya tengan valor real:
+
+```bash
+node scripts/load-ssm-from-env.mjs --apply --force --only DB_URL,DB_USERNAME,DB_PASSWORD
+```
+
+La tarea lee los parámetros **al arrancar**, así que una tarea ya en marcha no los ve: la siguiente reinicia sola
+si estaba cayéndose, o fuerza un despliegue con
+`aws ecs update-service --cluster aglacita-tf-qa-cluster --service aglacita-tf-qa-api --force-new-deployment`.
+
+Las variables `FLYWAY_*` **no** van a SSM: solo las lee el plugin de Maven cuando migras a mano desde tu equipo.
+La API ejecuta Flyway al arrancar con el mismo datasource (`DB_*`).
+
 El script nunca imprime un valor, escribe cada uno en un archivo temporal que borra al terminar (así no
 aparece en la lista de procesos) y omite los parámetros que ya tienen valor real, para no regenerar el
 `JWT_SECRET` por accidente (invalidaría las sesiones). `--force` los reescribe.
