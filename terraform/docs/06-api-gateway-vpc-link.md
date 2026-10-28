@@ -27,7 +27,7 @@ Esta lección usa servicios nuevos (API Gateway, CloudFront Functions, entrega d
 		{
 			"Sid": "ApiGateway",
 			"Effect": "Allow",
-			"Action": ["apigateway:GET", "apigateway:POST", "apigateway:PUT", "apigateway:PATCH", "apigateway:DELETE"],
+			"Action": ["apigateway:GET", "apigateway:POST", "apigateway:PUT", "apigateway:PATCH", "apigateway:DELETE", "apigateway:TagResource", "apigateway:UntagResource"],
 			"Resource": [
 				"arn:aws:apigateway:*::/apis",
 				"arn:aws:apigateway:*::/apis/*",
