@@ -9,6 +9,15 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
 
 ## Estructura
 - `envs/qa/`: root module que se ejecuta (`versions.tf`, `providers.tf`, `variables.tf`, `main.tf`, `outputs.tf`).
+  Cada bloque de la arquitectura vive en su propio archivo: `main.tf` (S3), `cloudfront.tf` (CloudFront + OAC),
+  `network.tf` (VPC default y subredes como `data`), `security_groups.tf` (`vpclink-sg`, `api-sg`),
+  `ssm.tf` (parámetros `/aglacita-tf/qa/*`), `ecr.tf` (repositorio de la imagen de la API),
+  `service_discovery.tf` (Cloud Map `aglacita-tf.local`), `ecs.tf` (logs, rol de ejecución, clúster, tarea, servicio),
+  `api_gateway.tf` (HTTP API, VPC Link, integración con Cloud Map, stage con throttling y logs; CloudFront enruta `/api/*` a ella).
+- `scripts/`: utilidades Node `.mjs`. `load-ssm-from-env.mjs` carga los secretos reales en SSM (simulacro por defecto, `--apply` escribe).
+- Fuera de `terraform/`, en la raíz del repo: `.aws/task-definition-backend.json` (espejo de `aws_ecs_task_definition.api` para el CI) y
+  `.github/workflows/{backend,frontend}.yaml` (despliegue; **comentados** hasta cerrar `docs/plan-ci-cd.md`). Apuntan a recursos `aglacita-tf-*`;
+  si cambias `ecs.tf` o `ssm.tf`, actualiza el JSON.
 - `modules/`: módulos reutilizables (se introducen en la lección 7).
 - `docs/`: una lección por archivo (concepto, código, comandos, qué observar).
 
@@ -19,6 +28,11 @@ Desde `envs/qa/`: `terraform fmt`, `init`, `validate`, `plan`, `apply`, `destroy
 - Prefijo de recursos `aglacita-tf-qa-*` (el QA manual usa `aglacita-qa-*`; no mezclar).
 - Nunca ejecutar `apply` o `destroy` sin confirmación explícita del usuario; leer el `plan` juntos.
 - Sin secretos en `.tf`; `*.tfstate` y `*.tfvars` fuera de git; `.terraform.lock.hcl` sí se versiona.
+- La VPC default es compartida con el QA manual: se lee con `data`, nunca se modifica el SG `default` salvo con `harden_default_sg`.
+- Las reglas de security group son recursos `aws_vpc_security_group_*_rule` (uno por regla), no bloques inline.
+- Los secretos reales NUNCA pasan por Terraform: los parámetros SecureString usan `value_wo` (relleno `CHANGE_ME`, no queda en el state) y el valor se carga con el script. Requiere Terraform >= 1.11.
+- El servicio ECS arranca con `api_desired_count = 0`: se sube a 1 solo tras subir la imagen a ECR y cargar los secretos reales. ECR es inmutable (una etiqueta nueva por despliegue, `api_image_tag`).
+- La tarea no tiene rol de tarea (la API no llama a AWS); el rol de ejecución lee solo los ARN de los parámetros de la API.
 - Los recursos S3 se declaran como recursos separados (patrón del provider v4+).
 - Scripts auxiliares en Node `.mjs`, no shell.
 - Comentarios de los `.tf` en español y explican el porqué, por ser material didáctico.

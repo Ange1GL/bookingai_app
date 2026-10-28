@@ -10,6 +10,10 @@ data "aws_caller_identity" "current" {}
 locals {
   name_prefix       = "${var.project}-${var.environment}"
   front_bucket_name = "${local.name_prefix}-front-${data.aws_caller_identity.current.account_id}"
+
+  # Valor de relleno de los secretos de SSM. El script de carga reconoce este texto
+  # y la lección 5 puede detectar parámetros que aún no se han cargado.
+  ssm_placeholder = "CHANGE_ME"
 }
 
 # `resource "<tipo>" "<nombre local>"`: el tipo viene del provider (aws_s3_bucket);

@@ -34,6 +34,7 @@ build/
 
 ### Secrets ###
 .env
+qa.env
 
 # Llaves privadas / certificados / keystores. Nunca commitear.
 *.pem
