@@ -67,7 +67,7 @@ por defecto vacío, así que la app arranca, pero las notificaciones push quedar
   etiqueta nueva. Más simple y sin conflicto, pero no es un despliegue continuo real. Después de la lección 7
   (state remoto) podría ejecutarse Terraform desde el CI.
 
-**B. ¿Creo los roles de despliegue con Terraform?** (nuevo `github_actions.tf`: 2 roles OIDC con confianza en
+**B (decidido: se reutilizan los roles existentes `aglacita-backend-deploy` y `aglacita-frontend-deploy`; hay que ampliar sus políticas en IAM a mano y los workflows usan esos nombres). Opción original: ¿creo los roles de despliegue con Terraform?** (nuevo `github_actions.tf`: 2 roles OIDC con confianza en
 tu repo, más políticas mínimas; el proveedor OIDC de GitHub ya existe en la cuenta, se referencia con `data`).
 Tu usuario `angel` tendría que poder crearlos: su política actual ya permite `iam:*Role*` sobre
 `aglacita-tf-*`, pero necesita además `iam:GetOpenIDConnectProvider` y `iam:CreatePolicy` o políticas inline.
