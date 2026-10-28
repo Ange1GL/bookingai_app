@@ -55,10 +55,12 @@ bucket → distribución → política.
 `depends_on = [aws_s3_bucket_public_access_block.front]` fuerza un orden que Terraform no puede deducir:
 S3 rechaza cambiar el bloqueo público y la política a la vez.
 
-### `path.module` y `filemd5`
+### `path.module` y `filemd5` (histórico)
 
-`aws_s3_object.index` sube `site/index.html`. `etag = filemd5(...)` hace que, si cambias el archivo, el
-siguiente `plan` muestre `~` y lo vuelva a subir.
+Esta lección subía una página de prueba con `aws_s3_object.index` (`etag = filemd5(...)` para detectar
+cambios). Se retiró después: el contenido del bucket lo sube el workflow del frontend, y si Terraform también
+lo hiciera, cada `apply` sobrescribiría el build de Angular. `filemd5` sigue siendo útil para archivos que sí
+gestione Terraform.
 
 ## Seguridad: qué hace cada pieza
 
@@ -150,9 +152,9 @@ tardar segundos. Aquí `Still creating...` es lo esperado.
 
 ## Qué observar
 
-1. Outputs: `front_url` y `front_distribution_id`. Abre `front_url`: ves la página de prueba por HTTPS.
+1. Outputs: `front_url` y `front_distribution_id`. Abre `front_url`: con el bucket vacío responde un error de S3 (403) hasta que el CI suba el build de Angular.
 2. Abre `http://<dominio>.cloudfront.net` (sin la `s`): redirige a HTTPS.
-3. Abre `https://<dominio>/cualquier-ruta`: devuelve `index.html` con 200 (la regla de SPA).
+3. Con el build de Angular subido, `https://<dominio>/cualquier-ruta` devuelve `index.html` con 200 (la regla de SPA).
 4. Intenta leer el bucket directo, por su URL de S3: **Access Denied**. Solo CloudFront puede.
 5. En las cabeceras de respuesta (`curl -I`), busca `strict-transport-security` y `x-content-type-options`.
 
@@ -166,9 +168,8 @@ CloudFront tarda varios minutos en borrarse (primero se deshabilita). Es normal.
 
 ## Ejercicios
 
-1. Cambia el texto de `site/index.html` y ejecuta `plan`: solo aparece `~ aws_s3_object.index`. Aplica y
-   recarga: puede que veas la versión vieja unos minutos. Eso es la **caché** y por eso en la lección de
-   despliegue invalidaremos `/index.html`.
+1. Sube un `index.html` de prueba al bucket con `aws s3 cp` y recarga: puede que veas la versión vieja unos
+   minutos. Eso es la **caché** y por eso el workflow del frontend invalida `/*` en cada despliegue.
 2. Cambia `price_class` a `PriceClass_All`: el `plan` muestra `~` in situ, sin recrear.
 3. Pregunta: ¿qué pasa si cambias el `name` del OAC? (Pista: `plan` muestra `-/+`, reemplazo.)
 

@@ -157,12 +157,5 @@ resource "aws_s3_bucket_policy" "front" {
   depends_on = [aws_s3_bucket_public_access_block.front]
 }
 
-# Página de prueba para ver todo funcionando sin desplegar Angular todavía.
-# `filemd5` hace que Terraform vuelva a subirla cuando el archivo cambie.
-resource "aws_s3_object" "index" {
-  bucket       = aws_s3_bucket.front.id
-  key          = "index.html"
-  source       = "${path.module}/site/index.html"
-  content_type = "text/html; charset=utf-8"
-  etag         = filemd5("${path.module}/site/index.html")
-}
+# El contenido del bucket (el build de Angular) NO lo gestiona Terraform: lo sube el workflow
+# .github/workflows/frontend.yaml. Si Terraform subiera un index.html, cada `apply` pisaría al del CI.
