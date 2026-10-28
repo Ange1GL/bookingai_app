@@ -1,6 +1,7 @@
 terraform {
   # Versión mínima de Terraform que entiende este código.
-  required_version = ">= 1.9"
+  # 1.11 es la primera que admite argumentos de solo escritura (`value_wo`).
+  required_version = ">= 1.11"
 
   required_providers {
     aws = {
