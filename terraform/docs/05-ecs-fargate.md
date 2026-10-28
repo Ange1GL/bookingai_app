@@ -295,8 +295,11 @@ docker push <ecr_repository_url>:<etiqueta>
 ```
 
 `<ecr_repository_url>` sale de `terraform output ecr_repository_url`, y `<etiqueta>` puede ser
-`git rev-parse --short HEAD`. `--platform linux/amd64` importa si construyes en un Mac con chip Apple: la
-tarea es `X86_64` y una imagen ARM no arrancaría.
+`git log -1 --format=%h -- .` (último commit que tocó `backend/`). `--platform linux/amd64` importa si
+construyes en un Mac con chip Apple: la tarea es `X86_64` y una imagen ARM no arrancaría.
+
+> `scripts/deploy-api.mjs` hace estos pasos por ti y se niega a continuar si `backend/` tiene cambios sin
+> commitear: la etiqueta es inmutable y debe corresponder exactamente al código del commit.
 
 ### Arrancar la tarea
 
