@@ -16,6 +16,9 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
   `api_gateway.tf` (HTTP API, VPC Link, integración con Cloud Map, stage con throttling y logs; CloudFront enruta `/api/*` a ella).
 - `scripts/`: utilidades Node `.mjs`. `load-ssm-from-env.mjs` carga los secretos reales en SSM (simulacro por defecto, `--apply` escribe).
 - `envs/qa/site/`: página de prueba que se sube al bucket (hasta que se despliegue el build de Angular).
+- Fuera de `terraform/`, en la raíz del repo: `.aws/task-definition-backend.json` (espejo de `aws_ecs_task_definition.api` para el CI) y
+  `.github/workflows/{backend,frontend}.yaml` (despliegue; **comentados** hasta cerrar `docs/plan-ci-cd.md`). Apuntan a recursos `aglacita-tf-*`;
+  si cambias `ecs.tf` o `ssm.tf`, actualiza el JSON.
 - `modules/`: módulos reutilizables (se introducen en la lección 7).
 - `docs/`: una lección por archivo (concepto, código, comandos, qué observar).
 

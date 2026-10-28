@@ -19,7 +19,7 @@
 
 # env:
 #   AWS_REGION: us-east-1
-#   S3_BUCKET: aglacita-qa-front
+#   S3_BUCKET: aglacita-tf-qa-front-707256068332
 #   NODE_VERSION: "22"
 #   BUILD_DIR: frontend/dist/diamond-ng/browser
 #   # Archivos con hash en el nombre (js, css, fuentes...): nunca cambian de contenido.
@@ -45,7 +45,7 @@
 #           DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
 #         run: |
 #           if [ -z "$DISTRIBUTION_ID" ]; then
-#             echo "::error::Define la variable de repositorio CLOUDFRONT_DISTRIBUTION_ID (Settings > Secrets and variables > Actions > Variables)"
+#             echo "::error::Define la variable de repositorio CLOUDFRONT_DISTRIBUTION_ID (Settings > Secrets and variables > Actions > Variables; valor: terraform output front_distribution_id)"
 #             exit 1
 #           fi
 
@@ -65,7 +65,7 @@
 #       - name: Configure AWS credentials
 #         uses: aws-actions/configure-aws-credentials@v6
 #         with:
-#           role-to-assume: arn:aws:iam::707256068332:role/aglacita-frontend-deploy
+#           role-to-assume: arn:aws:iam::707256068332:role/aglacita-tf-qa-frontend-deploy
 #           aws-region: ${{ env.AWS_REGION }}
 
 #       - name: Upload hashed assets to S3
