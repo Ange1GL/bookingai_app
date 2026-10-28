@@ -6,7 +6,7 @@ lectura. El código está en [`../envs/qa/cloudfront.tf`](../envs/qa/cloudfront.
 ```
 navegador ──HTTPS──► CloudFront ──(firma OAC)──► bucket S3 privado
                        │  headers de seguridad
-                       │  403/404 → index.html (SPA)
+                       │  403/404 → index.html (SPA; desde la lección 6 lo hace una CloudFront Function)
 ```
 
 ## Conceptos de Terraform
@@ -34,6 +34,9 @@ dynamic "custom_error_response" {
   content { error_code = custom_error_response.value ... }
 }
 ```
+
+> Esta lección usaba `custom_error_response`; la lección 6 lo sustituye por una CloudFront Function, porque ese
+> bloque es global y taparía los 403/404 de la API.
 
 Repite un bloque por cada elemento de una lista. Aquí genera dos bloques idénticos que solo cambian el
 código. Ojo: úsalo cuando la repetición sea real; para dos bloques distintos, escríbelos a mano.
@@ -65,7 +68,7 @@ siguiente `plan` muestre `~` y lo vuelva a subir.
 | Política del bucket con `AWS:SourceArn` | Solo **esta** distribución lee; ni otra distribución de tu cuenta |
 | `redirect-to-https` | El navegador siempre usa HTTPS |
 | `Managed-SecurityHeadersPolicy` | HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` |
-| `custom_error_response` 403/404 → `index.html` | Recargar `/dashboard` no devuelve un error de S3 |
+| `custom_error_response` 403/404 → `index.html` (lección 6: función) | Recargar `/dashboard` no devuelve un error de S3 |
 
 Mejoras de la sección 10 de tu documento aplicadas aquí: páginas de error de SPA y response headers.
 No incluye WAF ni dominio propio (siguen en "convenientes" y "producción").

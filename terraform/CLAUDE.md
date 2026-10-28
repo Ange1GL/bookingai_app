@@ -12,7 +12,8 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
   Cada bloque de la arquitectura vive en su propio archivo: `main.tf` (S3), `cloudfront.tf` (CloudFront + OAC),
   `network.tf` (VPC default y subredes como `data`), `security_groups.tf` (`vpclink-sg`, `api-sg`),
   `ssm.tf` (parámetros `/aglacita-tf/qa/*`), `ecr.tf` (repositorio de la imagen de la API),
-  `service_discovery.tf` (Cloud Map `aglacita-tf.local`), `ecs.tf` (logs, rol de ejecución, clúster, tarea, servicio).
+  `service_discovery.tf` (Cloud Map `aglacita-tf.local`), `ecs.tf` (logs, rol de ejecución, clúster, tarea, servicio),
+  `api_gateway.tf` (HTTP API, VPC Link, integración con Cloud Map, stage con throttling y logs; CloudFront enruta `/api/*` a ella).
 - `scripts/`: utilidades Node `.mjs`. `load-ssm-from-env.mjs` carga los secretos reales en SSM (simulacro por defecto, `--apply` escribe).
 - `envs/qa/site/`: página de prueba que se sube al bucket (hasta que se despliegue el build de Angular).
 - `modules/`: módulos reutilizables (se introducen en la lección 7).

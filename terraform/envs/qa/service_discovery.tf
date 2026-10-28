@@ -31,5 +31,10 @@ resource "aws_service_discovery_service" "api" {
   }
 
   # ECS informa a Cloud Map si la tarea está sana; Cloud Map no hace sondeos propios.
-  health_check_custom_config {}
+  # El bloque vacío `{}` NO se envía a AWS: el servicio nacía sin health check y cada
+  # `plan` proponía reemplazarlo. Con `failure_threshold` (obsoleto: AWS siempre usa 1)
+  # el bloque sí viaja y el state coincide con la realidad.
+  health_check_custom_config {
+    failure_threshold = 1
+  }
 }

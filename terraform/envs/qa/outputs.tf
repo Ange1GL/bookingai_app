@@ -74,3 +74,18 @@ output "front_url" {
   description = "URL pública del front."
   value       = "https://${aws_cloudfront_distribution.front.domain_name}"
 }
+
+output "api_gateway_id" {
+  description = "Id de la HTTP API (aglacita-tf-qa-api en la consola de API Gateway)."
+  value       = aws_apigatewayv2_api.api.id
+}
+
+output "api_gateway_endpoint" {
+  description = "URL directa de API Gateway. Para uso normal pasa por CloudFront: <front_url>/api/..."
+  value       = aws_apigatewayv2_api.api.api_endpoint
+}
+
+output "api_gateway_log_group" {
+  description = "Grupo de CloudWatch con los logs de acceso de API Gateway."
+  value       = aws_cloudwatch_log_group.api_gateway.name
+}

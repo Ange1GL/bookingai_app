@@ -34,7 +34,7 @@ terraform destroy
 | 3 | [Red y security groups](docs/03-red-security-groups.md) | Lista |
 | 4 | [Secretos en SSM](docs/04-secretos-ssm.md) | Lista |
 | 5 | [ECS Fargate + Cloud Map + logs](docs/05-ecs-fargate.md) | Lista |
-| 6 | API Gateway + VPC Link | Pendiente |
+| 6 | [API Gateway + VPC Link](docs/06-api-gateway-vpc-link.md) | Lista (sin aplicar) |
 | 7 | Módulos, remote state e import | Pendiente |
 
 ## Seguridad

@@ -145,3 +145,25 @@ variable "log_retention_days" {
     error_message = "log_retention_days: CloudWatch solo admite 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180 o 365."
   }
 }
+
+variable "api_throttle_rate_limit" {
+  description = "Peticiones por segundo que admite API Gateway en total; por encima responde 429."
+  type        = number
+  default     = 50
+
+  validation {
+    condition     = var.api_throttle_rate_limit >= 1
+    error_message = "api_throttle_rate_limit: debe ser al menos 1."
+  }
+}
+
+variable "api_throttle_burst_limit" {
+  description = "Pico de peticiones simultáneas que tolera API Gateway antes de aplicar el límite por segundo."
+  type        = number
+  default     = 100
+
+  validation {
+    condition     = var.api_throttle_burst_limit >= var.api_throttle_rate_limit
+    error_message = "api_throttle_burst_limit: no puede ser menor que api_throttle_rate_limit."
+  }
+}
