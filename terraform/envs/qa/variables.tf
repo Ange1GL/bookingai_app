@@ -167,3 +167,9 @@ variable "api_throttle_burst_limit" {
     error_message = "api_throttle_burst_limit: no puede ser menor que api_throttle_rate_limit."
   }
 }
+
+variable "vpc_link_unsupported_az_ids" {
+  description = "Ids de zona de disponibilidad (p. ej. use1-az3) donde API Gateway no ofrece VPC Links; sus subredes se excluyen."
+  type        = list(string)
+  default     = ["use1-az3"] # us-east-1e en esta cuenta: CreateVpcLink responde "service is not available"
+}

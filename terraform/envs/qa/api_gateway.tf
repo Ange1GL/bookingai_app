@@ -16,12 +16,28 @@ resource "aws_apigatewayv2_api" "api" {
   protocol_type = "HTTP"
 }
 
+# API Gateway no ofrece VPC Links en todas las zonas de disponibilidad. La VPC default
+# tiene una subred por zona, así que se leen una a una y se descartan las zonas no
+# soportadas (por id de zona, que es estable; el nombre "us-east-1e" varía por cuenta).
+data "aws_subnet" "default" {
+  for_each = toset(data.aws_subnets.default.ids)
+
+  id = each.value
+}
+
+locals {
+  vpc_link_subnet_ids = [
+    for subnet in data.aws_subnet.default : subnet.id
+    if !contains(var.vpc_link_unsupported_az_ids, subnet.availability_zone_id)
+  ]
+}
+
 # El túnel hacia la VPC. Crea interfaces de red en estas subredes, protegidas por
 # `vpclink-sg` (lección 3), que solo puede salir hacia `api-sg` por el puerto de la app.
 resource "aws_apigatewayv2_vpc_link" "api" {
   name               = "${local.name_prefix}-vpclink"
   security_group_ids = [aws_security_group.vpclink.id]
-  subnet_ids         = data.aws_subnets.default.ids
+  subnet_ids         = local.vpc_link_subnet_ids
 }
 
 # La integración dice A DÓNDE se envía la petición: el servicio de Cloud Map.

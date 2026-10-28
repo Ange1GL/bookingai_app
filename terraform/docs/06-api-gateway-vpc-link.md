@@ -146,6 +146,14 @@ health check y cada `plan` proponía reemplazarlo. Ahora lleva `failure_threshol
 siempre usa 1). **El primer `apply` reemplazará el servicio de Cloud Map** y, como el servicio de ECS lo
 referencia, también el de ECS. Con `desired_count = 0` no hay tareas que perder.
 
+## Zonas de disponibilidad no soportadas por el VPC Link
+
+API Gateway no ofrece VPC Links en todas las zonas. En esta cuenta `CreateVpcLink` falló con *"Subnet ... is in
+Availability Zone 'use1-az3' where service is not available"* (`use1-az3` es `us-east-1e`). Como la VPC default
+tiene una subred por zona, `api_gateway.tf` lee cada subred con `data "aws_subnet"` + `for_each` y descarta las
+zonas de `vpc_link_unsupported_az_ids` (por defecto `["use1-az3"]`). Se usa el **id** de zona y no el nombre,
+porque `us-east-1e` puede corresponder a otra zona física en otra cuenta.
+
 ## Seguridad: la URL directa de API Gateway sigue siendo pública
 
 Cualquiera que conozca la URL `execute-api` puede llamarla sin pasar por CloudFront. Para QA se acepta: los
