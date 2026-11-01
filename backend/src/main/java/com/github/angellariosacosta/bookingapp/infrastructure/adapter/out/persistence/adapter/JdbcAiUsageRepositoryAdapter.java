@@ -38,6 +38,7 @@ public class JdbcAiUsageRepositoryAdapter implements AiUsageRepositoryPort {
 
 	private final JdbcClient jdbcClient;
 
+
 	@Override
 	public long usedByUser(Long userId, LocalDate day) {
 		return jdbcClient.sql(USER_USED).param("userId", userId).param("day", day).query(Long.class).single();

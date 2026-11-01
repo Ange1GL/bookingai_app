@@ -133,6 +133,15 @@ public class BookingTools {
 				.toList();
 	}
 
+	@Tool(description = "Cuenta las citas activas (no canceladas) de hoy según la fecha del negocio. "
+			+ "Úsala cuando el usuario pregunte cuántas citas tiene hoy.")
+	public AppointmentCount countTodayAppointments() {
+		LocalDate today = LocalDate.now(clock);
+		int count = queryAppointments.findByDateRange(
+				currentUserPort.getCurrentUserId(), today.atStartOfDay(), today.plusDays(1).atStartOfDay()).size();
+		return new AppointmentCount(today.toString(), count);
+	}
+
 	private LocalDateTime parseDateTime(String isoDateTime) {
 		return LocalDateTime.parse(isoDateTime);
 	}
@@ -145,6 +154,9 @@ public class BookingTools {
 	}
 
 	public record BlacklistStatus(Long customerId, boolean blacklisted) {
+	}
+
+	public record AppointmentCount(String date, int count) {
 	}
 
 	public record PriceCatalogSummary(Integer id, String label, Long price) {

@@ -77,10 +77,10 @@ public class JwtTokenService implements TokenService {
             }
             throw new JwtAuthenticationException(JwtErrorCode.TOKEN_INVALID);
 
-        } catch (BadJwtException ex) {
+        } catch (BadJwtException _) {
             throw new JwtAuthenticationException(JwtErrorCode.TOKEN_MALFORMED);
 
-        } catch (JwtException ex) {
+        } catch (JwtException _) {
             throw new JwtAuthenticationException(JwtErrorCode.TOKEN_INVALID);
         }
     }
