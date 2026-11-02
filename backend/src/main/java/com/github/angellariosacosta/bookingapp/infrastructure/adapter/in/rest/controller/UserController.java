@@ -1,5 +1,6 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller;
 
+import com.github.angellariosacosta.bookingapp.application.port.in.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,14 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.github.angellariosacosta.bookingapp.application.port.in.AssignUserRolesUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.ChangeUserStatusUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.CreateUserUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.DeleteUserUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.GetUserUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.ListUsersUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.ResetUserPasswordUseCase;
-import com.github.angellariosacosta.bookingapp.application.port.in.UpdateUserUseCase;
 import com.github.angellariosacosta.bookingapp.application.query.ListUsersQuery;
 import com.github.angellariosacosta.bookingapp.application.query.SortDirection;
 import com.github.angellariosacosta.bookingapp.application.query.UserSortField;
@@ -42,10 +35,11 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping(UserController.PATH)
 @RequiredArgsConstructor
 public class UserController {
 
+	public static final String PATH = "/api/v1/users";
 	private static final String DEFAULT_PAGE = "0";
 	private static final String DEFAULT_PAGE_SIZE = "20";
 	private static final int MAX_PAGE_SIZE = 50;
@@ -60,6 +54,7 @@ public class UserController {
 	private final ChangeUserStatusUseCase changeUserStatus;
 	private final DeleteUserUseCase deleteUser;
 	private final UserRestMapper mapper;
+	private final RevokeSessionByUserIdUseCase revokeSessionByUserIdUseCase;
 
 	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; codeSent=false indica reintentar con reset-password.
 	@PostMapping
@@ -131,6 +126,17 @@ public class UserController {
 	@PreAuthorize(Authorities.CAN_DELETE_USERS)
 	public ResponseEntity<Void> delete(@PathVariable Long id, @CurrentUserId Long actorId) {
 		deleteUser.delete(actorId, id);
+		return ResponseEntity.noContent().build();
+	}
+
+
+
+	@DeleteMapping("/{id}/invalid-session")
+	@PreAuthorize(Authorities.CAN_INVALIDATE_SESSIONS)
+	public ResponseEntity<Void> invalidSession(
+			@PathVariable Long id, @CurrentUserId Long actorId
+	) {
+		revokeSessionByUserIdUseCase.revokeSessionByUserId(id);
 		return ResponseEntity.noContent().build();
 	}
 }
