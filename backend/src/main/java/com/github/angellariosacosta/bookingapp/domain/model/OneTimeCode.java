@@ -3,6 +3,7 @@ package com.github.angellariosacosta.bookingapp.domain.model;
 import java.time.Duration;
 import java.time.Instant;
 
+import lombok.Builder;
 import lombok.Getter;
 
 /**

@@ -1,4 +1,4 @@
-# BookingApp — Backend
+# Aglacita — Backend
 
 Sistema de **reservación de citas asistido por un LLM**. Este software esta dedicado para que un usuario pueda gestionar
 las citas de sus clientes mediantes lenguaje natural, permitiendo operaciones básicas como crear, cancelar o reagendar 

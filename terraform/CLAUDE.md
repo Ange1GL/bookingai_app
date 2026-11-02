@@ -19,6 +19,7 @@ Terraform >= 1.9, provider `hashicorp/aws ~> 6.0`, región `us-east-1`.
   `.github/workflows/{backend,frontend}.yaml` (despliegue; **comentados** hasta cerrar `docs/plan-ci-cd.md`). Apuntan a recursos `aglacita-tf-*`;
   si cambias `ecs.tf` o `ssm.tf`, actualiza el JSON.
 - `modules/`: módulos reutilizables (se introducen en la lección 7).
+- `docs/arquitectura-qa.drawio`: diagrama de infraestructura y CI/CD para draw.io (dos páginas); mantenerlo al día al añadir recursos.
 - `docs/`: una lección por archivo (concepto, código, comandos, qué observar).
 
 ## Comandos

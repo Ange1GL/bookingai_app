@@ -24,6 +24,12 @@ terraform apply
 terraform destroy
 ```
 
+## Diagrama
+
+[`docs/arquitectura-qa.drawio`](docs/arquitectura-qa.drawio): arquitectura del entorno QA y flujo de CI/CD. Ábrelo en
+[app.diagrams.net](https://app.diagrams.net) (Archivo → Abrir) o con la extensión de draw.io de VS Code. Tiene dos páginas:
+"Infraestructura QA" y "CI-CD y secretos". Si cambias los `.tf`, actualízalo a mano.
+
 ## Lecciones
 
 | # | Lección | Estado |

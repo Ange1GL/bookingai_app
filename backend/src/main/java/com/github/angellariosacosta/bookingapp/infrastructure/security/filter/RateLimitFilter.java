@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final ClientIpResolver clientIpResolver;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         // OPTIONS (preflight CORS) nunca debe contar contra el límite: el navegador lo dispara solo,
         // sin que el frontend lo pida, y bloquearlo rompería CORS para clientes cross-origin.
         return !rateLimitProperties.isEnabled() || HttpMethod.OPTIONS.matches(request.getMethod());
@@ -47,9 +48,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NotNull HttpServletRequest request,
+            @NotNull HttpServletResponse response,
+            @NotNull FilterChain filterChain
     ) throws ServletException, IOException {
 
         // Token bucket, un balde por IP: bucketCache.get busca el Bucket de esa IP o lo crea (newBucket)

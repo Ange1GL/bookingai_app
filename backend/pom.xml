@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.angellariosacosta</groupId>
-	<artifactId>bookingapp</artifactId>
+	<artifactId>aglacita</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
