@@ -102,6 +102,12 @@ public class GlobalExceptionHandler {
 		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
 	}
 
+	@ExceptionHandler(SessionNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleSessionNotFound(SessionNotFoundException ex) {
+		return errorBody(HttpStatus.NOT_FOUND, ex.getMessage());
+	}
+
 	@ExceptionHandler({DuplicatePhoneException.class, SelfModificationException.class,
 			LastAdminProtectedException.class})
 	@ResponseStatus(HttpStatus.CONFLICT)

@@ -9,6 +9,7 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,19 @@ public class JpaRefreshTokenRepositoryAdapter implements RefreshTokenRepositoryP
     @Override
     public Optional<RefreshToken> findByTokenHash(String tokenHash) {
         return jpaRepositoryRefreshToken.findByTokenHash(tokenHash).map(refreshTokenMapper::toDomain);
+    }
+
+    @Override
+    public List<RefreshToken> findActiveByUserId(Long userId, Instant now) {
+        return jpaRepositoryRefreshToken
+                .findAllByUserIdAndRevokedFalseAndExpiresAtAfterOrderByIssuedAtDesc(userId, now).stream()
+                .map(refreshTokenMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<RefreshToken> findByIdAndUserId(Long id, Long userId) {
+        return jpaRepositoryRefreshToken.findByIdAndUserId(id, userId).map(refreshTokenMapper::toDomain);
     }
 
     @Override

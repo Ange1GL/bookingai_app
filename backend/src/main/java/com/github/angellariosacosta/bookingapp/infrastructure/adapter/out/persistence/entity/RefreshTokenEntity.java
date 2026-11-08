@@ -7,6 +7,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,7 +22,8 @@ import java.time.Instant;
 @Entity
 @Table(
         name = "refresh_token",
-        uniqueConstraints = @UniqueConstraint(name = "uk_refresh_token_token_hash", columnNames = "token_hash")
+        uniqueConstraints = @UniqueConstraint(name = "uk_refresh_token_token_hash", columnNames = "token_hash"),
+        indexes = @Index(name = "idx_refresh_token_user_active", columnList = "user_id, revoked, expires_at")
 )
 @Getter
 @Setter
@@ -52,6 +54,9 @@ public class RefreshTokenEntity {
 
     @Column(name = "issued_at", nullable = false)
     private Instant issuedAt;
+
+    @Column(name = "session_started_at", nullable = false)
+    private Instant sessionStartedAt;
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;

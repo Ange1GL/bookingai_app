@@ -23,6 +23,9 @@ public class RefreshToken {
 
     private Instant issuedAt;
 
+    /** Cuándo se abrió la sesión; se hereda en cada rotación del refresh token (issuedAt sí se reinicia). */
+    private Instant sessionStartedAt;
+
     private Instant expiresAt;
 
     private boolean revoked;
@@ -35,5 +38,9 @@ public class RefreshToken {
 
     public boolean isExpired() {
         return expiresAt.isBefore(Instant.now());
+    }
+
+    public boolean isActive() {
+        return !revoked && !isExpired();
     }
 }

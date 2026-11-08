@@ -31,7 +31,13 @@ class AuthTokenIssuer {
     record IssuedTokens(AuthTokenResult
                         result, Long refreshTokenId) {}
 
+    /** Abre una sesión nueva: su inicio es ahora. */
     IssuedTokens issue(User user, String userAgent, String ipAddress) {
+        return issue(user, userAgent, ipAddress, Instant.now());
+    }
+
+    /** Emite tokens dentro de una sesión ya abierta (renovación): conserva el inicio original. */
+    IssuedTokens issue(User user, String userAgent, String ipAddress, Instant sessionStartedAt) {
         List<String> roles = user.getRoles().stream().map(Role::name).toList();
         List<String> permissions = user.getRoles().stream()
                 .flatMap(role -> role.permissions().stream())
@@ -47,6 +53,7 @@ class AuthTokenIssuer {
                 .userId(user.getId())
                 .tokenHash(refreshTokenGenerator.hash(rawRefreshToken))
                 .issuedAt(now)
+                .sessionStartedAt(sessionStartedAt)
                 .expiresAt(now.plus(refreshExpirationMinutes, ChronoUnit.MINUTES))
                 .revoked(false)
                 .userAgent(userAgent)

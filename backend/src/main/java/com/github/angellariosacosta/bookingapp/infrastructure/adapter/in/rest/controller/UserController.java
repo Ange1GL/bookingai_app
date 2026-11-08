@@ -1,5 +1,7 @@
 package com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.controller;
 
+import java.util.List;
+
 import com.github.angellariosacosta.bookingapp.application.port.in.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,9 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dt
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UpdateUserRequest;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserOneTimeCodeResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserResponse;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.dto.UserSessionResponse;
 import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.UserRestMapper;
+import com.github.angellariosacosta.bookingapp.infrastructure.adapter.in.rest.mapper.UserSessionRestMapper;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.Authorities;
 
 import jakarta.validation.Valid;
@@ -55,6 +59,9 @@ public class UserController {
 	private final DeleteUserUseCase deleteUser;
 	private final UserRestMapper mapper;
 	private final RevokeSessionByUserIdUseCase revokeSession;
+	private final ListUserSessionsUseCase listUserSessions;
+	private final RevokeUserSessionUseCase revokeUserSession;
+	private final UserSessionRestMapper sessionMapper;
 
 	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; codeSent=false indica reintentar con reset-password.
 	@PostMapping
@@ -130,6 +137,20 @@ public class UserController {
 	}
 
 
+
+	@GetMapping("/{id}/sessions")
+	@PreAuthorize(Authorities.CAN_INVALIDATE_SESSIONS)
+	public ResponseEntity<List<UserSessionResponse>> listSessions(@PathVariable Long id) {
+		return ResponseEntity.ok(sessionMapper.toResponses(listUserSessions.listActive(id)));
+	}
+
+	@DeleteMapping("/{id}/sessions/{sessionId}")
+	@PreAuthorize(Authorities.CAN_INVALIDATE_SESSIONS)
+	public ResponseEntity<Void> closeSession(
+			@PathVariable Long id, @PathVariable Long sessionId, @CurrentUserId Long actorId) {
+		revokeUserSession.revokeSession(actorId, id, sessionId);
+		return ResponseEntity.noContent().build();
+	}
 
 	@DeleteMapping("/{id}/invalid-session")
 	@PreAuthorize(Authorities.CAN_INVALIDATE_SESSIONS)

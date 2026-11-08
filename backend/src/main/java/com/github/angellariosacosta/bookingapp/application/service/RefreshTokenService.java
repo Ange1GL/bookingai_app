@@ -45,7 +45,8 @@ public class RefreshTokenService implements RefreshAccessTokenUseCase {
         User user = userRepository.findById(stored.getUserId())
                 .orElseThrow(() -> new AuthException(AuthError.REFRESH_TOKEN_INVALID));
 
-        AuthTokenIssuer.IssuedTokens issued = authTokenIssuer.issue(user, userAgent, ipAddress);
+        AuthTokenIssuer.IssuedTokens issued = authTokenIssuer.issue(
+                user, userAgent, ipAddress, stored.getSessionStartedAt());
 
         stored.setRevoked(true);
         stored.setReplacedBy(issued.refreshTokenId());

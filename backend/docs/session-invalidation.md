@@ -22,6 +22,8 @@ junto con su `exp`; el filtro rechaza cualquier token cuyo `jti` esté ahí. Nec
   `UserMapper.updateEntity` la ignora, para que un `save()` nunca pise la versión.
 
 ## Invalidar la sesión de un usuario
+Para ver las sesiones de un usuario o cerrar solo una, ver `user-sessions.md`.
+
 `DELETE /api/v1/users/{id}/invalid-session` (permiso `INVALID_SESSION_TOKEN`) → `RevokeSessionByUserIdService`, en una transacción:
 1. valida que el usuario exista,
 2. revoca todos sus refresh tokens (no puede renovar),
