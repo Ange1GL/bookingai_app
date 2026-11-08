@@ -13,24 +13,33 @@ public final class Authorities {
     public static final String ROLE_WRITE = "ROLE_WRITE";
     public static final String PERMISSION_READ = "PERMISSION_READ";
     public static final String PERMISSION_WRITE = "PERMISSION_WRITE";
+    public static final String INVALID_SESSION_TOKEN = "INVALID_SESSION_TOKEN";
 
     // Expresiones para @PreAuthorize (deben ser constantes de compilación): el permiso específico o ADMIN_ALL.
     public static final String CAN_READ_PERMISSIONS =
             "hasAnyAuthority('" + PERMISSION_READ + "', '" + ADMIN_ALL + "')";
+
+
     public static final String CAN_WRITE_PERMISSIONS =
             "hasAnyAuthority('" + PERMISSION_WRITE + "', '" + ADMIN_ALL + "')";
 
     public static final String CAN_READ_ROLES =
             "hasAnyAuthority('" + ROLE_READ + "', '" + ADMIN_ALL + "')";
+
     public static final String CAN_WRITE_ROLES =
             "hasAnyAuthority('" + ROLE_WRITE + "', '" + ADMIN_ALL + "')";
 
     public static final String CAN_READ_USERS =
             "hasAnyAuthority('" + USER_READ + "', '" + ADMIN_ALL + "')";
+
     public static final String CAN_WRITE_USERS =
             "hasAnyAuthority('" + USER_WRITE + "', '" + ADMIN_ALL + "')";
+
     public static final String CAN_DELETE_USERS =
             "hasAnyAuthority('" + USER_DELETE + "', '" + ADMIN_ALL + "')";
+
+    public static final String CAN_INVALIDATE_SESSIONS =
+            "hasAnyAuthority('" + INVALID_SESSION_TOKEN + "', '" + ADMIN_ALL + "')";
 
     private Authorities() {
     }

@@ -117,6 +117,11 @@ public class JpaUserRepositoryAdapter implements UserRepository {
         jpaRepositoryUser.save(entity);
     }
 
+    @Override
+    public void incrementTokenVersion(Long userId) {
+        jpaRepositoryUser.incrementTokenVersion(userId);
+    }
+
     // Alta con el mapeo del dominio; si ya existe se actualiza la fila (no se reemplaza) para conservar `deleted` y la auditoría.
     private UserEntity toManagedEntity(User user) {
         if (user.getId() == null) {

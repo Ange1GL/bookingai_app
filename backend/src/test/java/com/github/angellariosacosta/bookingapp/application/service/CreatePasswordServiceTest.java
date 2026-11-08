@@ -80,7 +80,7 @@ class CreatePasswordServiceTest {
 			token.setId(77L);
 			return token;
 		});
-		when(tokenService.generateToken(USER_ID, "maria")).thenReturn("new-access");
+		when(tokenService.generateToken(USER_ID, "maria", 0)).thenReturn("new-access");
 		when(hasher.hash(NEW_PASSWORD)).thenReturn("new-hash");
 		when(hasher.matches(CODE, "code-hash")).thenReturn(true);
 

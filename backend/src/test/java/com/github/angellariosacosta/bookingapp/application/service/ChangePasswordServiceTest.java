@@ -76,7 +76,7 @@ class ChangePasswordServiceTest {
 			token.setId(77L);
 			return token;
 		});
-		when(tokenService.generateToken(USER_ID, "maria")).thenReturn("new-access");
+		when(tokenService.generateToken(USER_ID, "maria", 0)).thenReturn("new-access");
 
 		AuthTokenIssuer issuer = new AuthTokenIssuer(tokenService, generator, refreshTokens);
 		service = new ChangePasswordService(userRepository, hasher, accountBlocked, new FailedLoginAttempts(accountBlocked),
@@ -100,7 +100,7 @@ class ChangePasswordServiceTest {
 
 	@Test
 	void changesPasswordClearsFlagAndOpensNewSession() {
-		when(tokenService.decode("old-access")).thenReturn(new DecodedToken("maria", "old-jti", NOW.plusSeconds(600)));
+		when(tokenService.decode("old-access")).thenReturn(new DecodedToken("maria", "old-jti", NOW.plusSeconds(600), 0));
 
 		AuthTokenResult result = service.changePassword(command(CURRENT, NEW_PASSWORD));
 

@@ -35,4 +35,7 @@ public interface UserRepository {
     void replaceRoles(Long userId, Set<Long> roleIds);
 
     void markDeleted(Long id);
+
+    /** Suma 1 a la versión de sesión de forma atómica: invalida todos los access tokens vivos del usuario. */
+    void incrementTokenVersion(Long userId);
 }

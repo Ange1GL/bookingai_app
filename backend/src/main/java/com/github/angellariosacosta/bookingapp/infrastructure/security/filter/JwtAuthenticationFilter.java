@@ -4,6 +4,7 @@ import com.github.angellariosacosta.bookingapp.application.port.out.AccessTokenR
 import com.github.angellariosacosta.bookingapp.application.result.DecodedToken;
 import com.github.angellariosacosta.bookingapp.application.port.out.TokenService;
 import com.github.angellariosacosta.bookingapp.infrastructure.config.CookieProperties;
+import com.github.angellariosacosta.bookingapp.infrastructure.config.CustomUserDetails;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.entrypoint.SecurityEntryPoint;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtAuthenticationException;
 import com.github.angellariosacosta.bookingapp.infrastructure.security.excepcion.JwtErrorCode;
@@ -65,6 +66,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Un usuario deshabilitado pierde acceso de inmediato, sin esperar a que expire su access token.
             if (!userDetails.isEnabled()) {
                 throw new JwtAuthenticationException(JwtErrorCode.USER_DISABLED);
+            }
+
+            // Invalidación masiva (RevokeSessionByUserIdService): el token es de una versión de sesión anterior.
+            if (userDetails instanceof CustomUserDetails customUser
+                    && customUser.tokenVersion() != decoded.tokenVersion()) {
+                throw new JwtAuthenticationException(JwtErrorCode.SESSION_REVOKED);
             }
 
             UsernamePasswordAuthenticationToken authentication =

@@ -50,6 +50,10 @@ public class UserEntity extends BaseEntity {
     @Column(name = "password_changed_at")
     private Instant passwordChangedAt;
 
+    // updatable = false: un save() con un User leído antes no debe pisar el valor; solo cambia con el incremento atómico.
+    @Column(name = "token_version", nullable = false, updatable = false)
+    private int tokenVersion;
+
     @Builder.Default
     @BatchSize(size = 50)
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)

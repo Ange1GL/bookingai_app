@@ -37,6 +37,10 @@ public class User implements Serializable {
 
     private Instant passwordChangedAt;
 
+    // Generación de sesión: cada access token lleva este número y deja de valer si el usuario ya está en otro.
+    // Solo se modifica con UserRepository#incrementTokenVersion (incremento atómico en BD), nunca con save().
+    private int tokenVersion;
+
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 }

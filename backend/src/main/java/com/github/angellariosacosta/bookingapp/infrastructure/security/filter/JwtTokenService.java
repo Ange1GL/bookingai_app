@@ -20,6 +20,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class JwtTokenService implements TokenService {
+    private static final int INITIAL_TOKEN_VERSION = 0;
+
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
@@ -33,7 +35,7 @@ public class JwtTokenService implements TokenService {
     private String audience;
 
     @Override
-    public String generateToken(Long subject, String username) {
+    public String generateToken(Long subject, String username, int tokenVersion) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
@@ -51,6 +53,8 @@ public class JwtTokenService implements TokenService {
                 // request (CustomUserDetails.getAuthorities()), así que un claim "roles" en el
                 // JWT nunca se lee y solo quedaría desactualizado si se revocan permisos.
                 .claim(JwtClaims.USERNAME, username)
+                // Versión de sesión: si el usuario sube su token_version, este token deja de valer (ver filtro JWT).
+                .claim(JwtClaims.TOKEN_VERSION, tokenVersion)
                 .issuedAt(now)
                 .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
                 .build();
@@ -67,7 +71,8 @@ public class JwtTokenService implements TokenService {
     public DecodedToken decode(String token) {
         try {
             Jwt jwt = jwtDecoder.decode(token);
-            return new DecodedToken(jwt.getClaimAsString(JwtClaims.USERNAME), jwt.getId(), jwt.getExpiresAt());
+            return new DecodedToken(
+                    jwt.getClaimAsString(JwtClaims.USERNAME), jwt.getId(), jwt.getExpiresAt(), readTokenVersion(jwt));
         } catch (JwtValidationException ex) {
             if (ex.getErrors().stream()
                     .anyMatch(error ->
@@ -83,6 +88,12 @@ public class JwtTokenService implements TokenService {
         } catch (JwtException _) {
             throw new JwtAuthenticationException(JwtErrorCode.TOKEN_INVALID);
         }
+    }
+
+    // Tokens emitidos antes de existir la versión no traen el claim: cuentan como versión inicial.
+    private int readTokenVersion(Jwt jwt) {
+        Object claim = jwt.getClaim(JwtClaims.TOKEN_VERSION);
+        return claim instanceof Number number ? number.intValue() : INITIAL_TOKEN_VERSION;
     }
 
 }

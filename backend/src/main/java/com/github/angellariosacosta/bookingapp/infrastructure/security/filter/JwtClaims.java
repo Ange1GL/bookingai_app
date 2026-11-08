@@ -12,6 +12,9 @@ final class JwtClaims {
 
     static final String USERNAME = "username";
 
+    // Versión de sesión del usuario al emitir el token; ver User#tokenVersion.
+    static final String TOKEN_VERSION = "ver";
+
     // Constructor privado: evita instanciar la clase (new JwtClaims()), ya que
     // solo existe para agrupar constantes estáticas, no para crear objetos.
     private JwtClaims() {

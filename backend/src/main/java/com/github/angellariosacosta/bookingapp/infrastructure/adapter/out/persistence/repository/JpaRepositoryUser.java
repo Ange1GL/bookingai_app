@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,6 +14,12 @@ import com.github.angellariosacosta.bookingapp.infrastructure.adapter.out.persis
 public interface JpaRepositoryUser extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByIdAndDeletedFalse(Long id);
+
+    // Incremento atómico en BD (sin leer-modificar-escribir). clearAutomatically: las entidades ya cargadas en esta
+    // transacción quedan desactualizadas, así que se descartan para que la siguiente lectura traiga la versión nueva.
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update UserEntity u set u.tokenVersion = u.tokenVersion + 1 where u.id = :userId")
+    void incrementTokenVersion(@Param("userId") Long userId);
 
     Optional<UserEntity> findByEmailAndDeletedFalse(String email);
 

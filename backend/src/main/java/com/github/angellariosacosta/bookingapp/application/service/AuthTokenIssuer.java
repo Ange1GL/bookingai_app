@@ -39,7 +39,7 @@ class AuthTokenIssuer {
                 .distinct()
                 .sorted()
                 .toList();
-        String accessToken = tokenService.generateToken(user.getId(), user.getUsername());
+        String accessToken = tokenService.generateToken(user.getId(), user.getUsername(), user.getTokenVersion());
 
         String rawRefreshToken = refreshTokenGenerator.generateRawToken();
         Instant now = Instant.now();

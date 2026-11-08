@@ -18,5 +18,6 @@ public interface UserMapper {
     // Copia los datos del dominio sobre la fila existente; los vínculos de rol se gestionan aparte en el adaptador.
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "userRoles", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
     void updateEntity(User user, @MappingTarget UserEntity entity);
 }
