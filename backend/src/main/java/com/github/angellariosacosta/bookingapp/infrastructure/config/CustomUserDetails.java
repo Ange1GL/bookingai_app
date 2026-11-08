@@ -23,6 +23,10 @@ public record CustomUserDetails(User user) implements UserDetails {
         return authorities;
     }
 
+    public int tokenVersion() {
+        return user.getTokenVersion();
+    }
+
     @Override
     public String getPassword() {
         return user.getPassword();

@@ -38,6 +38,7 @@ class JwtAuthenticationFilterTest {
 	private static final String USERNAME = "owner";
 	private static final String JTI = "jti-1";
 
+	private TokenService tokenService;
 	private UserDetailsService userDetailsService;
 	private SecurityEntryPoint entryPoint;
 	private JwtAuthenticationFilter filter;
@@ -47,7 +48,7 @@ class JwtAuthenticationFilterTest {
 
 	@BeforeEach
 	void setUp() {
-		TokenService tokenService = mock(TokenService.class);
+		tokenService = mock(TokenService.class);
 		userDetailsService = mock(UserDetailsService.class);
 		entryPoint = mock(SecurityEntryPoint.class);
 		AccessTokenRevocationRepositoryPort revocations = mock(AccessTokenRevocationRepositoryPort.class);
@@ -59,7 +60,7 @@ class JwtAuthenticationFilterTest {
 		response = new MockHttpServletResponse();
 		chain = new MockFilterChain();
 
-		when(tokenService.decode("token")).thenReturn(new DecodedToken(USERNAME, JTI, Instant.now().plusSeconds(60)));
+		stubDecodedToken(0);
 		when(revocations.existsByJti(JTI)).thenReturn(false);
 	}
 
@@ -92,8 +93,43 @@ class JwtAuthenticationFilterTest {
 		assertNotNull(chain.getRequest());
 	}
 
+	@Test
+	void rejectsTokenFromAnOlderSessionVersion() throws Exception {
+		stubUser(true, 1);
+		stubDecodedToken(0);
+
+		filter.doFilter(request, response, chain);
+
+		ArgumentCaptor<AuthenticationException> error = ArgumentCaptor.forClass(AuthenticationException.class);
+		verify(entryPoint).commence(any(), any(), error.capture());
+		assertEquals(JwtErrorCode.SESSION_REVOKED, ((JwtAuthenticationException) error.getValue()).getErrorCode());
+		assertNull(SecurityContextHolder.getContext().getAuthentication());
+		assertNull(chain.getRequest());
+	}
+
+	@Test
+	void authenticatesTokenWithCurrentSessionVersion() throws Exception {
+		stubUser(true, 3);
+		stubDecodedToken(3);
+
+		filter.doFilter(request, response, chain);
+
+		verify(entryPoint, never()).commence(any(), any(), any());
+		assertNotNull(chain.getRequest());
+	}
+
+	private void stubDecodedToken(int tokenVersion) {
+		when(tokenService.decode("token"))
+				.thenReturn(new DecodedToken(USERNAME, JTI, Instant.now().plusSeconds(60), tokenVersion));
+	}
+
 	private void stubUser(boolean active) {
-		User user = User.builder().id(1L).username(USERNAME).active(active).roles(Set.of()).build();
+		stubUser(active, 0);
+	}
+
+	private void stubUser(boolean active, int tokenVersion) {
+		User user = User.builder().id(1L).username(USERNAME).active(active).tokenVersion(tokenVersion)
+				.roles(Set.of()).build();
 		when(userDetailsService.loadUserByUsername(USERNAME)).thenReturn(new CustomUserDetails(user));
 	}
 }

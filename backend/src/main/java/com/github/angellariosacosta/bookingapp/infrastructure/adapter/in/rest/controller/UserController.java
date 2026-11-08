@@ -54,7 +54,7 @@ public class UserController {
 	private final ChangeUserStatusUseCase changeUserStatus;
 	private final DeleteUserUseCase deleteUser;
 	private final UserRestMapper mapper;
-	private final RevokeSessionByUserIdUseCase revokeSessionByUserIdUseCase;
+	private final RevokeSessionByUserIdUseCase revokeSession;
 
 	// 201 aunque el WhatsApp falle: el usuario sí quedó creado; codeSent=false indica reintentar con reset-password.
 	@PostMapping
@@ -136,7 +136,7 @@ public class UserController {
 	public ResponseEntity<Void> invalidSession(
 			@PathVariable Long id, @CurrentUserId Long actorId
 	) {
-		revokeSessionByUserIdUseCase.revokeSessionByUserId(id);
+		revokeSession.revokeSessionByUserId(actorId, id);
 		return ResponseEntity.noContent().build();
 	}
 }
