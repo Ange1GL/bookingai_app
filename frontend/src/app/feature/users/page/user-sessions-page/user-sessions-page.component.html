@@ -1,0 +1,88 @@
+<div class="mx-auto flex w-full max-w-3xl flex-col gap-4 md:gap-6">
+  <header class="flex items-center justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="m-0 text-2xl font-bold tracking-tight">Sesiones</h1>
+      <p class="m-0 truncate text-sm text-muted-color">{{ displayName() }}@if (displayName()) { · }{{ totalLabel() }}</p>
+    </div>
+    <a routerLink="/users" class="no-underline" aria-label="Volver a usuarios">
+      <p-button label="Usuarios" icon="pi pi-arrow-left" severity="secondary" [rounded]="true" tabindex="-1" />
+    </a>
+  </header>
+
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <p class="m-0 text-xs text-muted-color">
+      "Activa" significa sesión válida, no que el usuario esté conectado ahora. La actividad se actualiza cada ~15 min.
+    </p>
+    <div class="flex gap-2">
+      <p-button label="Actualizar" icon="pi pi-refresh" size="small" severity="secondary" [text]="true" [loading]="loading()" (onClick)="reload()" />
+      <p-button
+        label="Cerrar todas"
+        icon="pi pi-sign-out"
+        size="small"
+        severity="danger"
+        [outlined]="true"
+        [disabled]="sessions().length === 0 || busy()"
+        (onClick)="closeAllVisible.set(true)"
+      />
+    </div>
+  </div>
+
+  @if (failed()) {
+    <div
+      class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+      role="alert"
+    >
+      <span class="flex items-center gap-2"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>No se pudieron cargar las sesiones.</span>
+      <p-button label="Reintentar" size="small" severity="secondary" [text]="true" (onClick)="reload()" />
+    </div>
+  }
+
+  <section aria-label="Sesiones activas" [attr.aria-busy]="loading()">
+    @if (sessions().length === 0) {
+      @if (loading()) {
+        <div class="flex flex-col gap-2">
+          @for (row of skeletonRows; track row) {
+            <p-skeleton height="7rem" borderRadius="1.5rem" />
+          }
+        </div>
+      } @else if (!failed()) {
+        <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-surface px-4 py-10 text-center text-muted-color">
+          <span class="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary dark:bg-primary-500/10">
+            <i class="pi pi-desktop text-xl" aria-hidden="true"></i>
+          </span>
+          <p class="m-0 font-medium">Sin sesiones activas</p>
+        </div>
+      }
+    } @else {
+      <ul class="m-0 flex list-none flex-col gap-2 p-0 transition-opacity" [class.opacity-60]="loading()">
+        @for (session of sessions(); track session.id) {
+          <li>
+            <app-session-card [session]="session" [busy]="busy()" (closeRequested)="askCloseOne($event)" />
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+<app-confirm-dialog
+  [(visible)]="closeOneVisible"
+  header="Cerrar sesión"
+  [message]="closeOneMessage()"
+  confirmLabel="Cerrar sesión"
+  severity="danger"
+  icon="pi-sign-out"
+  [busy]="busy()"
+  (confirmed)="confirmCloseOne()"
+/>
+
+<app-confirm-dialog
+  [(visible)]="closeAllVisible"
+  header="Cerrar todas las sesiones"
+  [message]="closeAllMessage()"
+  confirmLabel="Cerrar todas"
+  severity="danger"
+  icon="pi-sign-out"
+  [busy]="busy()"
+  (confirmed)="confirmCloseAll()"
+/>

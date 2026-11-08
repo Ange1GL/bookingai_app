@@ -18,6 +18,12 @@ export const USERS_ROUTES: Routes = [
         loadComponent: () =>
           import('./page/recovery-requests-page/recovery-requests-page.component').then((m) => m.RecoveryRequestsPageComponent),
       },
+      {
+        path: ':id/sessions',
+        canActivate: [permissionGuard(PERMISSIONS.INVALID_SESSION_TOKEN)],
+        loadComponent: () =>
+          import('./page/user-sessions-page/user-sessions-page.component').then((m) => m.UserSessionsPageComponent),
+      },
     ],
   },
 ];

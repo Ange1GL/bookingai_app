@@ -4,6 +4,7 @@ export const PERMISSIONS = {
   USER_READ: 'USER_READ',
   USER_WRITE: 'USER_WRITE',
   ROLE_READ: 'ROLE_READ',
+  INVALID_SESSION_TOKEN: 'INVALID_SESSION_TOKEN',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

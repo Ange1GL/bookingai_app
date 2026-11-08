@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -39,6 +39,7 @@ const TOAST_LIFE_MS = 3000;
 })
 export class UsersPageComponent {
   private readonly usersService = inject(UsersService);
+  private readonly router = inject(Router);
   private readonly messages = inject(MessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly resetFlow = viewChild.required(ResetPasswordFlowComponent);
@@ -115,6 +116,10 @@ export class UsersPageComponent {
   protected showDetail(user: UserDto): void {
     this.detailUserId.set(user.id);
     this.detailVisible.set(true);
+  }
+
+  protected showSessions(user: UserDto): void {
+    void this.router.navigate(['/users', user.id, 'sessions']);
   }
 
   protected askReset(user: UserDto): void {

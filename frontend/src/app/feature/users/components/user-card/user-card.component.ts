@@ -17,8 +17,11 @@ export class UserCardComponent {
   readonly busy = input(false);
   readonly detailRequested = output<UserDto>();
   readonly resetRequested = output<UserDto>();
+  readonly sessionsRequested = output<UserDto>();
 
   protected readonly writePermissions = [PERMISSIONS.USER_WRITE];
+  protected readonly sessionPermissions = [PERMISSIONS.INVALID_SESSION_TOKEN];
+  protected readonly sessionsTooltip = computed(() => `Ver sesiones de ${this.displayName()}`);
   protected readonly displayName = computed(() => fullName(this.user()));
   protected readonly detailTooltip = computed(() => `Ver detalle de ${this.displayName()}`);
   protected readonly resetTooltip = computed(() => `Generar un nuevo código de acceso para ${this.displayName()}`);

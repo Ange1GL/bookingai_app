@@ -38,6 +38,10 @@
 
   <app-icon-button icon="pi-eye" [tooltip]="detailTooltip()" (clicked)="detailRequested.emit(user())" />
 
+  <ng-container *appHasPermission="sessionPermissions">
+    <app-icon-button icon="pi-desktop" [tooltip]="sessionsTooltip()" (clicked)="sessionsRequested.emit(user())" />
+  </ng-container>
+
   <ng-container *appHasPermission="writePermissions">
     <app-icon-button icon="pi-key" [tooltip]="resetTooltip()" [disabled]="busy()" (clicked)="resetRequested.emit(user())" />
   </ng-container>

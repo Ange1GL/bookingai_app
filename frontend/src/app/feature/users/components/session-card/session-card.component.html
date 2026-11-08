@@ -1,0 +1,35 @@
+<article
+  class="flex items-start gap-4 rounded-3xl border border-surface bg-surface-0 p-4 shadow-sm dark:bg-surface-900"
+  [class.opacity-60]="busy()"
+>
+  <span
+    class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary dark:bg-primary-500/10"
+    aria-hidden="true"
+  >
+    <i class="pi text-xl" [class]="icon()"></i>
+  </span>
+
+  <div class="flex min-w-0 flex-1 flex-col gap-1">
+    <p class="m-0 truncate text-base font-semibold leading-tight">{{ title() }}</p>
+    <p class="m-0 flex items-center gap-1.5 text-sm text-muted-color">
+      <i class="pi pi-globe text-xs" aria-hidden="true"></i>
+      <span class="truncate">{{ ipAddress() }}</span>
+    </p>
+    <dl class="m-0 mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs text-muted-color">
+      <dt>Inició</dt>
+      <dd class="m-0">{{ startedAt() }}</dd>
+      <dt>Actividad</dt>
+      <dd class="m-0">{{ lastActivity() }}</dd>
+      <dt>Vence</dt>
+      <dd class="m-0">{{ expiresAt() }}</dd>
+    </dl>
+  </div>
+
+  <app-icon-button
+    icon="pi-sign-out"
+    severity="danger"
+    [tooltip]="closeTooltip()"
+    [disabled]="busy()"
+    (clicked)="closeRequested.emit(session())"
+  />
+</article>
